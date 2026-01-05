@@ -57,7 +57,14 @@ npm run import-bible
 npm run dev
 ```
 - **Client**: `http://localhost:5173`
+- **Client**: `http://localhost:5173`
 - **Server**: `http://localhost:3001`
+
+### 4. 간편 실행 (Windows) ⚡
+매번 명령어를 입력할 필요 없이, 동봉된 배치 파일을 사용하세요.
+1. 프로젝트 루트의 `start-biblemate.bat` 파일을 우클릭합니다.
+2. **보내기** -> **바탕 화면에 바로 가기 만들기**를 클릭합니다.
+3. 생성된 바탕화면 아이콘을 더블 클릭하면 서버가 자동으로 실행됩니다.
 
 ## 📚 Documentation 
 
