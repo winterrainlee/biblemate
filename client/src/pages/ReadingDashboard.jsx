@@ -25,6 +25,21 @@ const ReadingDashboard = () => {
     // Loading State
     const [isLoading, setIsLoading] = useState(true);
 
+    // Dashboard Config (from Settings)
+    const [dashboardConfig, setDashboardConfig] = useState({ showReading: true, showNotes: true });
+
+    // Load dashboard config from localStorage
+    useEffect(() => {
+        const saved = localStorage.getItem('dashboardConfig');
+        if (saved) {
+            try {
+                setDashboardConfig(JSON.parse(saved));
+            } catch (e) {
+                console.error('Failed to parse dashboard config:', e);
+            }
+        }
+    }, []);
+
     const currentBookName = books.find(b => b.id === currentBook)?.name || currentBook;
     const dateStr = format(currentDate, 'yyyy-MM-dd');
     const todayStr = format(new Date(), 'yyyy-MM-dd');
@@ -205,28 +220,32 @@ const ReadingDashboard = () => {
 
             {/* Main Content */}
             <main className="dashboard-main">
-                <div className="bible-viewer-wrapper">
-                    <BibleViewer
-                        verses={verses}
-                        highlights={highlights}
-                        onHighlight={handleHighlight}
-                        onComplete={handleChapterComplete}
-                        isCompleted={isChapterCompleted}
-                        isToday={isToday}
-                        lastReadDate={lastReadDate}
-                        bookName={currentBookName}
-                        chapter={currentChapter}
-                    />
-                </div>
+                {dashboardConfig.showReading && (
+                    <div className="bible-viewer-wrapper">
+                        <BibleViewer
+                            verses={verses}
+                            highlights={highlights}
+                            onHighlight={handleHighlight}
+                            onComplete={handleChapterComplete}
+                            isCompleted={isChapterCompleted}
+                            isToday={isToday}
+                            lastReadDate={lastReadDate}
+                            bookName={currentBookName}
+                            chapter={currentChapter}
+                        />
+                    </div>
+                )}
 
-                <div className="note-editor-wrapper">
-                    <NoteEditor
-                        ref={noteEditorRef}
-                        date={dateStr}
-                        readingLogs={readingLogs.filter(l => l.date === dateStr)}
-                        books={books}
-                    />
-                </div>
+                {dashboardConfig.showNotes && (
+                    <div className="note-editor-wrapper">
+                        <NoteEditor
+                            ref={noteEditorRef}
+                            date={dateStr}
+                            readingLogs={readingLogs.filter(l => l.date === dateStr)}
+                            books={books}
+                        />
+                    </div>
+                )}
             </main>
         </div>
     );

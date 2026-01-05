@@ -38,5 +38,5 @@ coverage/
 *.tmp
 *.temp
 
-# Documentation (local only)
-docs/
+# Documentation (tracked now)
+# docs/

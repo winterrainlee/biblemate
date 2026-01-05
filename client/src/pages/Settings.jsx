@@ -1,9 +1,100 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
-import { Moon, Sun, Monitor, Type } from 'lucide-react';
+import { Moon, Sun, Monitor, Type, Download, Upload, Eye, EyeOff } from 'lucide-react';
+import { format } from 'date-fns';
+import { api } from '../services/api';
 
 const Settings = () => {
     const { theme, setTheme, fontSize, setFontSize } = useTheme();
+    const [dashboardConfig, setDashboardConfig] = useState({ showReading: true, showNotes: true });
+    const [statusMessage, setStatusMessage] = useState('');
+
+    // Load dashboard config from localStorage
+    useEffect(() => {
+        const saved = localStorage.getItem('dashboardConfig');
+        if (saved) {
+            try {
+                setDashboardConfig(JSON.parse(saved));
+            } catch (e) {
+                console.error('Failed to parse dashboard config:', e);
+            }
+        }
+    }, []);
+
+    // Handle backup export
+    const handleExport = async () => {
+        try {
+            const response = await fetch('http://localhost:3001/api/backup/export');
+            if (!response.ok) throw new Error('Export failed');
+
+            const data = await response.json();
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `biblemate_backup_${format(new Date(), 'yyyyMMdd')}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            setStatusMessage('✅ 파일이 저장되었습니다. 분실 방지를 위해 이메일이나 클라우드에 보관하는 것을 권장합니다.');
+            setTimeout(() => setStatusMessage(''), 5000);
+        } catch (error) {
+            console.error('Export error:', error);
+            setStatusMessage('❌ 백업 중 오류가 발생했습니다.');
+            setTimeout(() => setStatusMessage(''), 5000);
+        }
+    };
+
+    // Handle backup import
+    const handleImport = async (event) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        const confirmed = window.confirm(
+            '기존 데이터가 모두 삭제되고 새 데이터로 교체됩니다. 복구 전 현재 데이터를 백업하는 것을 권장합니다. 계속하시겠습니까?'
+        );
+        if (!confirmed) {
+            event.target.value = ''; // Reset file input
+            return;
+        }
+
+        try {
+            const text = await file.text();
+            const data = JSON.parse(text);
+
+            const response = await fetch('http://localhost:3001/api/backup/import', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            if (!response.ok) throw new Error('Import failed');
+
+            setStatusMessage('✅ 데이터가 복구되었습니다. 페이지를 새로고침합니다...');
+            setTimeout(() => window.location.reload(), 2000);
+        } catch (error) {
+            console.error('Import error:', error);
+            setStatusMessage('❌ 복구 중 오류가 발생했습니다. 파일 형식을 확인해주세요.');
+            setTimeout(() => setStatusMessage(''), 5000);
+        }
+        event.target.value = ''; // Reset file input
+    };
+
+    // Handle dashboard visibility toggle
+    const handleDashboardToggle = (key) => {
+        const newConfig = { ...dashboardConfig, [key]: !dashboardConfig[key] };
+
+        // Prevent both from being disabled
+        if (!newConfig.showReading && !newConfig.showNotes) {
+            alert('최소 하나의 영역은 켜져 있어야 합니다.');
+            return;
+        }
+
+        setDashboardConfig(newConfig);
+        localStorage.setItem('dashboardConfig', JSON.stringify(newConfig));
+    };
 
     return (
         <div className="page-settings container">
@@ -11,6 +102,20 @@ const Settings = () => {
                 <h2>설정</h2>
                 <p className="text-secondary">화면 스타일을 취향에 맞게 조정하세요.</p>
             </div>
+
+            {/* Status Message */}
+            {statusMessage && (
+                <div style={{
+                    marginBottom: '1.5rem',
+                    padding: '1rem',
+                    backgroundColor: statusMessage.startsWith('✅') ? '#d4edda' : '#f8d7da',
+                    color: statusMessage.startsWith('✅') ? '#155724' : '#721c24',
+                    border: `1px solid ${statusMessage.startsWith('✅') ? '#c3e6cb' : '#f5c6cb'}`,
+                    borderRadius: 'var(--pk-radius-md)'
+                }}>
+                    {statusMessage}
+                </div>
+            )}
 
             <div className="settings-section" style={{
                 marginBottom: '2rem',
@@ -57,6 +162,7 @@ const Settings = () => {
             </div>
 
             <div className="settings-section" style={{
+                marginBottom: '2rem',
                 padding: '1.5rem',
                 backgroundColor: 'var(--pk-color-bg)',
                 border: '1px solid var(--pk-color-border)',
@@ -97,6 +203,145 @@ const Settings = () => {
                 </div>
             </div>
 
+            {/* Data Backup/Restore Section */}
+            <div className="settings-section" style={{
+                marginBottom: '2rem',
+                padding: '1.5rem',
+                backgroundColor: 'var(--pk-color-bg)',
+                border: '1px solid var(--pk-color-border)',
+                borderRadius: 'var(--pk-radius-lg)'
+            }}>
+                <h3 style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <Download size={20} /> 데이터 백업 및 복구
+                </h3>
+                <p style={{ color: 'var(--pk-color-text-secondary)', marginBottom: '1rem', fontSize: '0.9rem' }}>
+                    노트, 하이라이트, 읽기 기록을 JSON 파일로 저장하거나 복구할 수 있습니다.
+                </p>
+
+                <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+                    <button
+                        onClick={handleExport}
+                        style={{
+                            flex: '1 1 200px',
+                            padding: '0.75rem 1.5rem',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '0.5rem',
+                            backgroundColor: 'var(--pk-color-primary)',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: 'var(--pk-radius-md)',
+                            cursor: 'pointer',
+                            fontWeight: '600'
+                        }}
+                    >
+                        <Download size={18} /> 데이터 내보내기
+                    </button>
+
+                    <label
+                        style={{
+                            flex: '1 1 200px',
+                            padding: '0.75rem 1.5rem',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '0.5rem',
+                            backgroundColor: 'var(--pk-color-bg-secondary)',
+                            color: 'var(--pk-color-text)',
+                            border: '2px solid var(--pk-color-border)',
+                            borderRadius: 'var(--pk-radius-md)',
+                            cursor: 'pointer',
+                            fontWeight: '600'
+                        }}
+                    >
+                        <Upload size={18} /> 데이터 가져오기
+                        <input
+                            type="file"
+                            accept=".json"
+                            onChange={handleImport}
+                            style={{ display: 'none' }}
+                        />
+                    </label>
+                </div>
+            </div>
+
+            {/* Dashboard Display Settings */}
+            <div className="settings-section" style={{
+                marginBottom: '2rem',
+                padding: '1.5rem',
+                backgroundColor: 'var(--pk-color-bg)',
+                border: '1px solid var(--pk-color-border)',
+                borderRadius: 'var(--pk-radius-lg)'
+            }}>
+                <h3 style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <Eye size={20} /> 화면 표시 설정
+                </h3>
+                <p style={{ color: 'var(--pk-color-text-secondary)', marginBottom: '1rem', fontSize: '0.9rem' }}>
+                    홈 화면에서 표시할 영역을 선택하세요. 읽기 또는 묵상 중 하나에만 집중할 수 있습니다.
+                </p>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    <div style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        padding: '1rem',
+                        backgroundColor: 'var(--pk-color-bg-secondary)',
+                        borderRadius: 'var(--pk-radius-md)',
+                        border: '1px solid var(--pk-color-border)'
+                    }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            {dashboardConfig.showReading ? <Eye size={18} /> : <EyeOff size={18} />}
+                            <span style={{ fontWeight: '500' }}>말씀 영역</span>
+                        </div>
+                        <button
+                            onClick={() => handleDashboardToggle('showReading')}
+                            style={{
+                                padding: '0.5rem 1rem',
+                                backgroundColor: dashboardConfig.showReading ? 'var(--pk-color-primary)' : 'var(--pk-color-bg)',
+                                color: dashboardConfig.showReading ? 'white' : 'var(--pk-color-text)',
+                                border: `2px solid ${dashboardConfig.showReading ? 'var(--pk-color-primary)' : 'var(--pk-color-border)'}`,
+                                borderRadius: 'var(--pk-radius-sm)',
+                                cursor: 'pointer',
+                                fontWeight: '600'
+                            }}
+                        >
+                            {dashboardConfig.showReading ? 'ON' : 'OFF'}
+                        </button>
+                    </div>
+
+                    <div style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        padding: '1rem',
+                        backgroundColor: 'var(--pk-color-bg-secondary)',
+                        borderRadius: 'var(--pk-radius-md)',
+                        border: '1px solid var(--pk-color-border)'
+                    }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            {dashboardConfig.showNotes ? <Eye size={18} /> : <EyeOff size={18} />}
+                            <span style={{ fontWeight: '500' }}>묵상 영역</span>
+                        </div>
+                        <button
+                            onClick={() => handleDashboardToggle('showNotes')}
+                            style={{
+                                padding: '0.5rem 1rem',
+                                backgroundColor: dashboardConfig.showNotes ? 'var(--pk-color-primary)' : 'var(--pk-color-bg)',
+                                color: dashboardConfig.showNotes ? 'white' : 'var(--pk-color-text)',
+                                border: `2px solid ${dashboardConfig.showNotes ? 'var(--pk-color-primary)' : 'var(--pk-color-border)'}`,
+                                borderRadius: 'var(--pk-radius-sm)',
+                                cursor: 'pointer',
+                                fontWeight: '600'
+                            }}
+                        >
+                            {dashboardConfig.showNotes ? 'ON' : 'OFF'}
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             <div className="settings-section" style={{
                 marginTop: '2rem',
                 padding: '1.5rem',
@@ -109,7 +354,7 @@ const Settings = () => {
                 </h3>
 
                 <div className="license-info" style={{ fontSize: '0.9rem', color: 'var(--pk-color-text-secondary)', lineHeight: '1.6' }}>
-                    <p style={{ marginBottom: '0.5rem' }}><strong>BibleMate v1.0</strong></p>
+                    <p style={{ marginBottom: '0.5rem' }}><strong>BibleMate v1.1</strong></p>
                     <p style={{ marginBottom: '1rem' }}>개인 묵상과 성경 읽기를 돕기 위해 만든 웹 애플리케이션입니다.</p>
 
                     <h4 style={{ fontSize: '0.95rem', color: 'var(--pk-color-text)', marginBottom: '0.5rem' }}>성경 데이터 저작권</h4>
