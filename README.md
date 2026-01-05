@@ -5,7 +5,7 @@
 ## 주요 기능 ✨
 
 ### 📖 말씀 읽기 (Reading)
-- **이중 역본 지원**: 개역한글(KRV) 및 영어(BBE)를 지원하며, 읽는 도중 즉시 전환해도 현재 구절 위치가 유지됩니다.
+- **이중 역본 지원**: 개역한글(KRV) 및 영어(BBE)를 지원하며, 읽는 도중 즉시 전환해도 현재 구절 위치가 유지됩니다. *(모두 저작권 자유 역본)*
 - **읽기 상태 시각화**: 본문 스크롤 시 상단에 현재 위치(장/절)와 '읽음' 배지가 표시되어 직관적인 파악이 가능합니다.
 - **최근 읽은 날짜**: 이전에 읽은 본문이라면, 언제 읽었는지 날짜 뱃지를 통해 확인할 수 있습니다.
 
@@ -62,29 +62,27 @@ npm run dev
 
 ### 4. 간편 실행 (Windows) ⚡
 
-복잡한 명령어 없이, 동봉된 배치 파일들을 사용하세요.
+터미널 명령어를 모르는 분들을 위한 초간단 가이드입니다.
 
-#### 🛠️ 초기 설정 (최초 1회)
-**`setup.bat`** 파일을 실행하면 필요한 패키지 설치와 데이터베이스 설정을 자동으로 진행합니다.
+#### 📥 Step 1: 다운로드
+1. [GitHub 저장소](https://github.com/winterrainlee/biblemate)에 접속합니다.
+2. 초록색 **`<> Code`** 버튼 클릭 → **`Download ZIP`** 클릭
+3. 다운받은 ZIP 파일을 원하는 위치에 압축 해제합니다.
 
-#### ▶️ 서버 실행
-**`start-biblemate.bat`** 파일을 실행하면 서버가 켜집니다.
+#### 🛠️ Step 2: 초기 설정 (최초 1회)
+압축 해제한 폴더에서 **`setup.bat`** 파일을 더블클릭하면 필요한 패키지 설치와 데이터베이스 설정이 자동으로 진행됩니다.
+> ⚠️ **사전 요구사항**: [Node.js](https://nodejs.org/) 18 이상이 설치되어 있어야 합니다.
+
+#### ▶️ Step 3: 서버 실행
+**`start-biblemate.bat`** 파일을 더블클릭하면 서버가 켜집니다.
 - 실행 창에 **내 컴퓨터의 IP 주소**와 접속 가능한 URL이 표시됩니다.
 - 표시된 주소(예: `http://192.168.0.X:5173`)를 스마트폰 브라우저에 입력하면 바로 접속할 수 있습니다.
 - **꿀팁**: 이 파일의 바로가기를 바탕화면에 만들어두면 편리합니다!
 
-## 📚 Documentation 
-
-프로젝트의 상세 문서입니다.
-
-- [**문서 홈 (Index)**](docs/docs-index.md)
-- [**프로젝트 명세서**](docs/specifications/spec-v1.0.md)
-- [**개발 로그**](docs/logs/dev-log-v1.0.md)
-
 ## 프로젝트 구조 📁
 
 ```
-bible-reading-mate/
+biblemate/
 ├── client/                 # React Frontend
 │   ├── src/
 │   │   ├── pages/          # ReadingDashboard, Settings etc.
@@ -92,11 +90,7 @@ bible-reading-mate/
 │   │   └── services/       # API Communications
 ├── server/                 # Express Backend
 │   ├── routes/             # API Endpoints (Bible, Notes, Logs)
-│   └── data/               # SQLite Database
-├── docs/                   # Documentation
-│   ├── specifications/     # Specs & Layouts
-│   ├── logs/               # Dev & Verification Logs
-│   └── planning/           # Future Roadmap
+│   └── data/               # SQLite Database (로컬 생성됨)
 └── scripts/                # Data Import Utilities
 ```
 
@@ -106,9 +100,21 @@ bible-reading-mate/
 개인 묵상과 성경 읽기를 돕기 위해 만든 웹 애플리케이션입니다.
 
 ### 성경 데이터 저작권
-- **한국어: 『성경전서 개역한글판』**
-  본 성경전서 개역한글판의 저작권은 재단법인 대한성서공회에 있으며, 본 앱은 해당 저작권을 준수하여 사용합니다. (본문 동일성 유지)
-- **English: Open English Bible (OEB)**
-  Public Domain (CC0), No copyright reserved.
+
+> ✅ **저작권 걱정 없이 사용 가능한 역본만 사용합니다.**
+
+| 역본 | 저작권 상태 | 비고 |
+|------|------------|------|
+| **개역한글 (KRV)** | ✅ 저작권 자유 | 대한성서공회 발행, 본문 동일성 유지 조건 준수 |
+| **BBE (영어)** | ✅ Public Domain | 저작권 만료 (1965), 자유롭게 사용 가능 |
 
 본 앱은 비영리 개인 학습/묵상용으로 제작되었습니다.
+
+---
+
+## 📬 문의
+
+버그 제보, 기능 제안, 기타 문의사항은 아래로 연락해 주세요.
+
+- **Email**: winterrain.lee@icloud.com
+- **GitHub Issues**: [winterrainlee/biblemate/issues](https://github.com/winterrainlee/biblemate/issues)

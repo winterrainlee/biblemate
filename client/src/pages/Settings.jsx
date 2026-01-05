@@ -127,6 +127,16 @@ const Settings = () => {
                     <p style={{ fontSize: '0.8rem', color: 'var(--pk-color-text-tertiary)' }}>
                         본 앱은 비영리 개인 학습/묵상용으로 제작되었습니다.
                     </p>
+
+                    <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--pk-color-border)' }}>
+                        <h4 style={{ fontSize: '0.95rem', color: 'var(--pk-color-text)', marginBottom: '0.5rem' }}>📬 문의</h4>
+                        <p style={{ fontSize: '0.85rem' }}>
+                            버그 제보, 기능 제안:{' '}
+                            <a href="mailto:winterrain.lee@icloud.com" style={{ color: 'var(--pk-color-primary)' }}>
+                                winterrain.lee@icloud.com
+                            </a>
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
