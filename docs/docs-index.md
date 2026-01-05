@@ -22,7 +22,7 @@
 ---
 
 ## 🚀 Planning (계획)
-- [Roadmap](planning/roadmap.md): 차기 버전 로드맵 및 작업 흐름도
+- [Roadmap](planning/roadmap.md): 차기 버전 로드맵 및 기능 목록
 - [Development Method](planning/dev-method.md): 개발 방법론 가이드
 
 ---
