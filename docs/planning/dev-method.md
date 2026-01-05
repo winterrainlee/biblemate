@@ -34,13 +34,13 @@ QA 시나리오를 데이터 흐름 단계(조회→하이라이트→노트→�
 1. 희망 아이템 및 Bug 발견 사항을 **Inbox**에 자유롭게 추가합니다.
 2. Inbox 아이템을 `[Major]`/`[Minor]`/`[Patch]` 라벨과 함께 **Categorized items**로 분류합니다.
 3. 우선순위 선별을 통해 차기 버전에 포함할 작업을 결정하고, **목표 버전**을 설정합니다.
-4. 버전 명세서를 작성합니다. (`spec-v버전명.md`)
-   - 복수의 AI 에이전트 검토를 거쳐 확정
-5. **개발용 브랜치 생성**: `feature/v버전명` 브랜치를 생성하고 체크아웃합니다.
+4. **개발용 브랜치 생성**: `feature/v버전명` 브랜치를 생성하고 체크아웃합니다.
    - **Tip**: 개발 중 문서(`docs/`) 수정도 자유롭게 커밋하세요. 나중에 Squash Merge로 깔끔하게 합쳐집니다.
    - (GitHub에는 검증된 릴리즈만 푸시)
-6. 명세서를 기반으로 개발을 진행합니다. (`logs/dev-log-v버전명.md`)
-7. 개발 완료 후 검증 및 수정을 진행합니다. (`logs/verification-v버전명.md`)
+5. 버전 명세서를 작성합니다. (`spec-v버전명.md`)
+   - 복수의 AI 에이전트 검토를 거쳐 확정
+6. 명세서를 기반으로 개발을 진행합니다. 진행 상황과 장애, 해결책, lessons learned 등을 로그에 기록합니다. (`logs/dev-log-v버전명.md`)
+7. 개발 완료 후 검증 및 수정을 진행합니다. 검증 상황과 오류, 해결책, lessons learned 등을 로그에 기록합니다. (`logs/verification-v버전명.md`)
 8. Release Notes를 작성하고 배포합니다. (`logs/release-notes-v버전명.md`)
 9. 배포 후, 완료된 작업을 **Completed** 섹션으로 이동합니다.
 10. 차기 버전 흐름으로 이어갑니다.
@@ -51,6 +51,26 @@ QA 시나리오를 데이터 흐름 단계(조회→하이라이트→노트→�
 2. 즉시 수정 및 테스트
 3. Release Notes 작성 후 배포 (`logs/release-notes-v버전명.md`)
 4. Completed 섹션으로 이동
+
+### 배포 절차 (Minor/Major)
+개발 완료 후 배포 프로세스입니다.
+1. **버전 표시 업데이트**
+   - `package.json`: version 업데이트
+   - `Settings.jsx`: 버전 표시 업데이트
+   - `README.md`: 버전 및 기능 설명 업데이트
+   - `roadmap.md`: 최신 배포 버전 업데이트
+2. **Git 작업**
+   - 변경사항 커밋
+   - main 브랜치로 squash merge
+   - 버전 태그 생성 (예: `v1.1`)
+   - 원격 저장소 푸시
+   - feature 브랜치 삭제
+3. **GitHub Release 생성**
+   - Release Notes 첨부
+4. **문서 정리**
+   - roadmap Completed 섹션 업데이트
+   - docs-index.md 링크 추가
+
 
 ## 7. 버전 관리 기준
 
