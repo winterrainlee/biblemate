@@ -15,12 +15,7 @@
 }
 
 /* Sidebar Adjustment for Desktop */
-@media (min-width: 1025px) {
-    .main-content-wrapper {
-        margin-left: 280px;
-        /* Width of sidebar */
-    }
-}
+
 
 .app-header {
     background-color: var(--pk-color-bg);

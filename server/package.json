@@ -1,5 +1,5 @@
 {
-    "name": "bible-reading-mate-server",
+    "name": "biblemate-server",
     "version": "1.0.0",
     "description": "BibleMate backend server",
     "main": "index.js",

@@ -1,7 +1,13 @@
 .note-editor-container {
+    /* Width Alignment with BibleViewer */
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+
     background: var(--pk-color-bg);
-    border-top: 1px solid var(--pk-color-border);
-    padding: 1rem;
+    /* border-top: 1px solid var(--pk-color-border); -> Moved to wrapper in Dashboard */
+    padding: 1rem 1.5rem;
+    /* Horizontal padding match BibleViewer */
     display: flex;
     flex-direction: column;
     height: 100%;

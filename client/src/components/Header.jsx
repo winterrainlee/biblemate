@@ -37,7 +37,7 @@ const Header = ({ onTrackerClick }) => {
                         style={{ cursor: 'pointer' }}
                         title="메인으로 이동"
                     >
-                        Bible Reading Mate
+                        BibleMate
                     </h1>
                 </div>
 
