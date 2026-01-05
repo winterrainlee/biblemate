@@ -1,0 +1,124 @@
+/* Sidebar.css */
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 280px;
+    background-color: var(--pk-color-bg);
+    border-right: 1px solid var(--pk-color-border);
+    display: flex;
+    flex-direction: column;
+    z-index: 50;
+    transition: transform 0.3s ease-in-out;
+}
+
+.sidebar-header {
+    height: 80px;
+    /* Match header height */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1.5rem;
+    border-bottom: 1px solid var(--pk-color-border);
+}
+
+.sidebar-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: var(--pk-color-primary);
+    text-decoration: none;
+}
+
+.logo-text {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--pk-color-text);
+}
+
+.close-btn {
+    display: none;
+    /* Desktop hidden */
+    background: none;
+    border: none;
+    color: var(--pk-color-text-secondary);
+    cursor: pointer;
+    padding: 0.25rem;
+}
+
+.sidebar-nav {
+    flex: 1;
+    padding: 1.5rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    overflow-y: auto;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.875rem 1rem;
+    border-radius: var(--pk-radius-md);
+    color: var(--pk-color-text-secondary);
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.nav-item:hover {
+    background-color: var(--pk-color-bg-secondary);
+    color: var(--pk-color-text);
+}
+
+.nav-item.active {
+    background-color: var(--pk-color-primary);
+    color: white;
+}
+
+.sidebar-footer {
+    padding: 1.5rem;
+    border-top: 1px solid var(--pk-color-border);
+    color: var(--pk-color-text-secondary);
+    font-size: 0.875rem;
+    text-align: center;
+}
+
+/* Mobile Overlay */
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 40;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+/* Mobile Responsive */
+@media (max-width: 1024px) {
+    .sidebar {
+        transform: translateX(-100%);
+    }
+
+    .sidebar.open {
+        transform: translateX(0);
+        box-shadow: 4px 0 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .close-btn {
+        display: block;
+    }
+
+    .sidebar-overlay {
+        display: block;
+        /* Mount but depend on opacity */
+        pointer-events: none;
+    }
+
+    .sidebar-overlay.open {
+        opacity: 1;
+        pointer-events: auto;
+    }
+}

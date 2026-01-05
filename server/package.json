@@ -1,0 +1,24 @@
+{
+    "name": "bible-reading-mate-server",
+    "version": "1.0.0",
+    "description": "BibleMate backend server",
+    "main": "index.js",
+    "type": "module",
+    "scripts": {
+        "dev": "node --watch index.js",
+        "start": "node index.js"
+    },
+    "keywords": [
+        "bible",
+        "reading",
+        "express",
+        "sqlite"
+    ],
+    "author": "",
+    "license": "MIT",
+    "dependencies": {
+        "express": "^4.21.0",
+        "cors": "^2.8.5",
+        "sql.js": "^1.10.0"
+    }
+}

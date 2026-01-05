@@ -1,0 +1,110 @@
+.note-preview-container {
+    background-color: var(--pk-color-bg);
+    border: 1px solid var(--pk-color-border);
+    border-radius: var(--pk-radius-md);
+    padding: 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    min-height: 120px;
+    /* 미리보기가 없어도 최소한의 가시성 확보 */
+}
+
+.note-preview-container:hover {
+    border-color: var(--pk-color-primary);
+    background-color: var(--pk-color-bg-alt);
+}
+
+.note-preview-header {
+    margin-bottom: 0.75rem;
+    flex-shrink: 0;
+}
+
+.preview-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--pk-color-text-secondary);
+}
+
+.note-preview-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    flex: 1;
+    overflow: hidden;
+    /* 영역 밖으로 나가지 않게 함 */
+}
+
+.reading-summary {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    flex: 1;
+    overflow-y: auto;
+}
+
+/* 성경 구절 영역 스크롤바 숨기기 (깔끔함을 위해) */
+.reading-summary::-webkit-scrollbar {
+    display: none;
+}
+
+.reading-range-item {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--pk-color-primary);
+    background-color: var(--pk-color-bg-secondary);
+    padding: 0.5rem 0.75rem;
+    border-radius: var(--pk-radius-sm);
+}
+
+.no-reading {
+    font-size: 0.85rem;
+    color: var(--pk-color-text-tertiary);
+    font-style: italic;
+}
+
+.meditation-preview {
+    border-top: 1px solid var(--pk-color-border);
+    padding-top: 0.75rem;
+    flex: 1;
+    /* 남은 공간 차지 */
+    overflow-y: auto;
+    /* 묵상 내용만 스크롤 활성화 */
+    padding-right: 4px;
+}
+
+/* 묵상 영역 스크롤바 스타일 커스터마이징 */
+.meditation-preview::-webkit-scrollbar {
+    width: 4px;
+}
+
+.meditation-preview::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.meditation-preview::-webkit-scrollbar-thumb {
+    background: var(--pk-color-border);
+    border-radius: 10px;
+}
+
+.meditation-preview::-webkit-scrollbar-thumb:hover {
+    background: var(--pk-color-text-tertiary);
+}
+
+.note-text {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--pk-color-text);
+    white-space: pre-wrap;
+}
+
+.note-placeholder {
+    font-size: 0.9rem;
+    color: var(--pk-color-text-tertiary);
+    text-align: left;
+    line-height: 1.5;
+}

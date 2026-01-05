@@ -1,0 +1,256 @@
+/* Calendar.css */
+
+.calendar-container {
+    background: var(--pk-color-bg);
+    border: 1px solid var(--pk-color-border);
+    border-radius: var(--pk-radius-lg);
+    padding: var(--pk-spacing-4);
+    box-shadow: 0 1px 3px var(--pk-color-shadow);
+}
+
+.calendar-container.compact {
+    padding: var(--pk-spacing-2);
+    border-radius: var(--pk-radius-md);
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: var(--pk-spacing-4);
+    position: relative;
+    /* 버튼 배치를 위한 기준점 */
+    min-height: 48px;
+    /* 버튼 높이 고려 */
+}
+
+.prev-btn {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.calendar-container.compact .calendar-header {
+    margin-bottom: var(--pk-spacing-2);
+}
+
+.calendar-title-selectors {
+    display: flex;
+    gap: 0.25rem;
+    align-items: center;
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+.calendar-title-selectors select {
+    background: none;
+    border: none;
+    font-size: inherit;
+    font-weight: inherit;
+    color: var(--pk-color-text);
+    padding: 2px 4px;
+    border-radius: var(--pk-radius-sm);
+    cursor: pointer;
+    appearance: none;
+    /* 기본 화살표 숨기기 (선택사항) */
+    outline: none;
+}
+
+.calendar-title-selectors select:hover {
+    background-color: var(--pk-color-bg-secondary);
+}
+
+.calendar-container.compact .calendar-title-selectors {
+    font-size: 1rem;
+}
+
+.calendar-nav {
+    display: flex;
+    gap: var(--pk-spacing-2);
+    align-items: center;
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.nav-btn {
+    background: none;
+    border: 1px solid var(--pk-color-border);
+    border-radius: var(--pk-radius-md);
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--pk-color-text-secondary);
+}
+
+.nav-btn:hover {
+    background: var(--pk-color-bg-secondary);
+    color: var(--pk-color-text);
+}
+
+.today-btn {
+    background: var(--pk-color-bg-secondary);
+    border: none;
+    padding: 4px 12px;
+    border-radius: var(--pk-radius-md);
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: #ef4444;
+    /* 오늘 버튼 빨간색 강조 */
+    cursor: pointer;
+}
+
+.calendar-container.compact .today-btn {
+    padding: 2px 8px;
+    font-size: 0.75rem;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1px;
+    background: var(--pk-color-border);
+    border: 1px solid var(--pk-color-border);
+}
+
+.calendar-weekday {
+    background: var(--pk-color-bg-secondary);
+    padding: var(--pk-spacing-2);
+    text-align: center;
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: var(--pk-color-text-secondary);
+}
+
+.calendar-container.compact .calendar-weekday {
+    padding: 2px;
+    font-size: 0.7rem;
+}
+
+.calendar-day {
+    background: var(--pk-color-bg);
+    min-height: 80px;
+    padding: var(--pk-spacing-1);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    position: relative;
+    cursor: pointer;
+}
+
+.calendar-container.compact .calendar-day {
+    min-height: 40px;
+    padding: 2px;
+}
+
+.calendar-day:hover {
+    background: var(--pk-color-bg-secondary);
+}
+
+.calendar-day.disabled {
+    background: var(--pk-color-disabled-bg);
+    color: var(--pk-color-disabled-text);
+}
+
+.calendar-day.today .day-number {
+    color: #ef4444;
+    /* 빨간색 텍스트 */
+    font-weight: 800;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #ef4444;
+    /* 빨간색 동그라미 테두리 */
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    margin: 2px;
+    background-color: transparent;
+    /* 원 내부 투명 */
+}
+
+.calendar-container.compact .calendar-day.today .day-number {
+    width: 22px;
+    height: 22px;
+    margin: 1px auto;
+    font-size: 0.75rem;
+}
+
+.calendar-day.selected {
+    background-color: var(--pk-color-primary);
+    border-color: var(--pk-color-primary);
+    z-index: 1;
+}
+
+.calendar-day.selected .day-number,
+.calendar-day.selected .calendar-weekday,
+.calendar-day.selected .log-more {
+    color: white !important;
+}
+
+.calendar-day.selected.today .day-number {
+    background-color: transparent !important;
+    /* 선택 시에도 오늘 날짜 원 안은 투명하게 */
+    border-color: #ef4444 !important;
+    color: white !important;
+    /* 배경이 파란색이므로 숫자는 흰색 유지 */
+}
+
+.calendar-day.selected .log-dot {
+    background-color: rgba(255, 255, 255, 0.8);
+    /* 선택 시 도트는 밝게 */
+}
+
+.day-number {
+    font-size: 0.875rem;
+    padding: 2px 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.calendar-container.compact .day-number {
+    font-size: 0.75rem;
+    text-align: center;
+    width: 100%;
+}
+
+.day-markers {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+    justify-content: center;
+}
+
+.log-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: var(--pk-color-primary);
+}
+
+.calendar-container.compact .log-dot {
+    width: 4px;
+    height: 4px;
+}
+
+.log-more {
+    font-size: 0.6rem;
+    color: var(--pk-color-text-secondary);
+}
+
+/* Dark mode adjustment */
+@media (prefers-color-scheme: dark) {
+    .calendar-day.disabled {
+        background: #1e293b;
+        color: #475569;
+    }
+
+    .calendar-day.today {
+        background: #1e3a8a;
+    }
+}

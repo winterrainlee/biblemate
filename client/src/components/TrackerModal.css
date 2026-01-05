@@ -1,0 +1,163 @@
+.tracker-content {
+    padding: 1rem;
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+.tracker-summary {
+    margin-bottom: 1.5rem;
+}
+
+.tracker-summary h4 {
+    margin-bottom: 0.75rem;
+    color: var(--pk-color-text);
+    font-size: 1.1rem;
+}
+
+.stat-row {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1.25rem 1.5rem;
+    background: var(--pk-color-bg-secondary);
+    border-radius: var(--pk-radius-lg);
+}
+
+.stat-main {
+    flex: 2;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.progress-area {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.stat-divider {
+    width: 1px;
+    height: 40px;
+    background: var(--pk-color-border);
+}
+
+.stat-details {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    min-width: 120px;
+}
+
+.detail-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.95rem;
+}
+
+.detail-label {
+    color: var(--pk-color-text-secondary);
+    font-weight: 500;
+}
+
+.detail-value {
+    color: var(--pk-color-text);
+    font-weight: 600;
+}
+
+.stat-box {
+    display: flex;
+    align-items: baseline;
+    gap: 0.25rem;
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--pk-color-primary);
+}
+
+.stat-label {
+    color: var(--pk-color-text-secondary);
+    font-size: 0.9rem;
+}
+
+.progress-bar {
+    flex: 1;
+    height: 8px;
+    background: var(--pk-color-border);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: var(--pk-color-primary);
+    transition: width 0.3s ease;
+}
+
+.progress-text {
+    font-weight: 600;
+    color: var(--pk-color-primary);
+    min-width: 40px;
+    text-align: right;
+}
+
+/* Bible Chart */
+.bible-chart {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    /* 간격 소폭 확대 */
+    font-size: 0.9rem;
+    /* 약 14.4px */
+}
+
+.book-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 2px 0;
+}
+
+.book-row.complete .book-name {
+    color: var(--pk-color-primary);
+}
+
+.book-name {
+    width: 75px;
+    /* 다섯 글자를 충분히 수용하도록 확장 */
+    font-size: 0.85rem;
+    text-align: right;
+    color: var(--pk-color-text-secondary);
+    flex-shrink: 0;
+    font-weight: 500;
+}
+
+.chapter-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1px;
+    flex: 1;
+}
+
+.chapter-cell {
+    width: 12px;
+    height: 12px;
+    background: var(--pk-color-border);
+    border-radius: 2px;
+}
+
+.chapter-cell.read {
+    background: var(--pk-color-primary);
+}
+
+.book-progress {
+    width: 35px;
+    font-size: 0.65rem;
+    color: var(--pk-color-text-tertiary);
+    text-align: left;
+    flex-shrink: 0;
+}

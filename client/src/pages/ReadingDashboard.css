@@ -1,0 +1,86 @@
+/* ReadingDashboard.css */
+
+/* Mobile First: Default to natural flow */
+.dashboard-container {
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100vh - 60px);
+    /* Allow growing beyond viewport */
+    background-color: var(--pk-color-bg-secondary);
+    /* Removed overflow:hidden to allow body scroll */
+}
+
+.dashboard-sidebar {
+    background-color: var(--pk-color-bg);
+    border-bottom: 1px solid var(--pk-color-border);
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    /* Removed overflow-y:auto to allow it to take full height */
+}
+
+.dashboard-main {
+    flex: 1;
+    /* Grow to fill remaining space */
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.bible-viewer-wrapper {
+    flex: 1;
+    padding: 1.5rem;
+    max-width: 1400px;
+    margin: 0 auto;
+    width: 100%;
+    /* Removed overflow-y:auto to allow body scroll */
+}
+
+.note-editor-wrapper {
+    background: var(--pk-color-bg);
+    border-top: 1px solid var(--pk-color-border);
+    height: 35vh;
+    /* 모바일에서 뷰포트 높이의 35% 차지 */
+    min-height: 250px;
+    max-height: 450px;
+    flex-shrink: 0;
+    z-index: 10;
+    box-shadow: 0 -2px 10px var(--pk-color-shadow);
+}
+
+.sidebar-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+/* Tablet/Desktop Layout (Landscape / Larger Screens) */
+@media (min-width: 768px) {
+    .dashboard-container {
+        flex-direction: row;
+        height: calc(100vh - 60px);
+        /* Fixed height only on desktop */
+        overflow: hidden;
+        /* Hide body scroll */
+    }
+
+    .dashboard-sidebar {
+        width: 340px;
+        flex-shrink: 0;
+        border-right: 1px solid var(--pk-color-border);
+        border-bottom: none;
+        height: 100%;
+        overflow-y: auto;
+        /* Internal scroll */
+    }
+
+    .dashboard-main {
+        overflow: hidden;
+    }
+
+    .bible-viewer-wrapper {
+        overflow-y: auto;
+        /* Internal scroll */
+    }
+}

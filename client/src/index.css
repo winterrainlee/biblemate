@@ -1,0 +1,116 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
+
+:root {
+  /* Colors */
+  --pk-color-primary: #2563eb;
+  --pk-color-primary-hover: #1d4ed8;
+  --pk-color-bg: #ffffff;
+  --pk-color-bg-secondary: #f8fafc;
+  --pk-color-text: #0f172a;
+  --pk-color-text-secondary: #64748b;
+  --pk-color-border: #e2e8f0;
+
+  /* Highlights */
+  --pk-highlight-yellow: #fef08a;
+  --pk-highlight-green: #bbf7d0;
+  --pk-highlight-blue: #bfdbfe;
+  --pk-highlight-red: #fecaca;
+
+  /* Typography */
+  --pk-font-sans: 'Inter', 'Noto Sans KR', sans-serif;
+
+  /* Spacing */
+  --pk-spacing-1: 0.25rem;
+  /* 4px */
+  --pk-spacing-2: 0.5rem;
+  /* 8px */
+  --pk-spacing-4: 1rem;
+  /* 16px */
+  --pk-spacing-6: 1.5rem;
+  /* 24px */
+  --pk-spacing-8: 2rem;
+  /* 32px */
+
+  /* Radius */
+  --pk-radius-sm: 0.25rem;
+  --pk-radius-md: 0.375rem;
+  --pk-radius-lg: 0.5rem;
+
+  /* Dynamic Font Size Base (Controlled by JS) */
+  --pk-font-size-base: 16px;
+
+  /* Semantic Colors - Light (Default) */
+  --pk-color-text-tertiary: #94a3b8;
+  --pk-color-shadow: rgba(0, 0, 0, 0.1);
+  --pk-color-overlay: rgba(0, 0, 0, 0.5);
+  --pk-color-disabled-bg: #f3f4f6;
+  --pk-color-disabled-text: #cbd5e1;
+  --pk-color-danger-hover: #fee2e2;
+}
+
+html {
+  font-size: var(--pk-font-size-base);
+}
+
+/* Dark Mode Support (Basic) - Media Query OR .dark class */
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Default system dark preference */
+    /* Only apply if not overridden by JS class for 'light' theme handling (advanced), 
+       but for simple toggle, we usually use .dark class strategy mainly. 
+       Let's keep media query as fallback defaults but .dark class overrides. */
+    --pk-color-bg: #0f172a;
+    --pk-color-bg-secondary: #1e293b;
+    --pk-color-text: #f1f5f9;
+    --pk-color-text-secondary: #94a3b8;
+    --pk-color-border: #334155;
+  }
+}
+
+/* Force Dark Mode Class */
+:root.dark {
+  --pk-color-bg: #0f172a;
+  --pk-color-bg-secondary: #1e293b;
+  --pk-color-text: #f1f5f9;
+  --pk-color-text-secondary: #94a3b8;
+  --pk-color-text-tertiary: #64748b;
+  --pk-color-border: #334155;
+
+  /* Semantic Colors - Dark */
+  --pk-color-shadow: rgba(0, 0, 0, 0.5);
+  --pk-color-overlay: rgba(0, 0, 0, 0.7);
+  --pk-color-disabled-bg: #1e293b;
+  --pk-color-disabled-text: #475569;
+  --pk-color-danger-hover: rgba(239, 68, 68, 0.2);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--pk-font-sans);
+  background-color: var(--pk-color-bg);
+  color: var(--pk-color-text);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Utilities */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--pk-spacing-4);
+}
