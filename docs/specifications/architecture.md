@@ -78,6 +78,61 @@ biblemate/
 
 ---
 
-## 4. 데이터 지속성 전략
+## 4. 데이터 구조 (Data Structure)
+
+### 1) Database ERD (SQLite)
+
+```mermaid
+erDiagram
+    bible_verses {
+        int id PK
+        string book "OSIS Code"
+        int chapter
+        int verse
+        string version "krv, oeb"
+        string text
+    }
+    highlights {
+        int id PK
+        string book
+        int chapter
+        int verse
+        string style "yellow, red, etc."
+        datetime created_at
+    }
+    notes {
+        int id PK
+        string date "YYYY-MM-DD"
+        string content
+        datetime created_at
+    }
+    reading_logs {
+        int id PK
+        string date "YYYY-MM-DD"
+        string book
+        int chapter_from
+        int chapter_to
+        datetime created_at
+    }
+```
+
+### 2) Backup JSON Schema
+내보내기/가져오기에 사용되는 JSON의 기본 구조입니다.
+
+```json
+{
+  "version": "1.1",
+  "exported_at": "2026-01-06T...",
+  "data": {
+    "reading_logs": [...],
+    "notes": [...],
+    "highlights": [...]
+  }
+}
+```
+
+---
+
+## 5. 데이터 지속성 전략
 - SQLite는 WASM 기반의 `sql.js`를 사용하며, 서버 종료 시점에 메모리 데이터를 파일로 쓰기(Write-back)함.
 - Fly.io 배포 시 `biblemate_data` 볼륨을 `/app/server/db-data`에 마운트하여 기기 재시작 시에도 데이터를 유지함.
