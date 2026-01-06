@@ -4,7 +4,7 @@ import { createRequire } from 'module';
 
 const router = express.Router();
 const require = createRequire(import.meta.url);
-const osisMapping = require('../data/osis-mapping.json');
+const osisMapping = require('../config/osis-mapping.json');
 
 // Route removed: Get all books with metadata (duplicate/conflicting)
 

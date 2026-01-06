@@ -1,0 +1,9 @@
+node_modules
+*.log
+.git
+.gitignore
+docs
+scripts
+*.bat
+*.md
+.prettierrc
