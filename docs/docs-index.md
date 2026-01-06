@@ -6,6 +6,7 @@
 
 ## 📋 Specifications (명세서)
 - [Project Spec v1.0](specifications/spec-v1.0.md): 프로젝트 명세서 (기능, DB, API 등)
+- [System Architecture](specifications/architecture.md): 시스템 구조 및 설계 철학
 - [Layout Plan v1.0](specifications/layout-v1.0.md): UI/UX 레이아웃 설계
 
 ---
