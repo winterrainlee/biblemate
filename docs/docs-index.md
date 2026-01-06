@@ -29,3 +29,8 @@
 
 ## 🗄️ Archive (보관소)
 - [Archived Specs](specifications/archive/): 이전 버전의 명세서 및 임시 문서들
+
+---
+
+## ☁️ Deployment (배포)
+- [Fly.io 배포 가이드](deploy-flyio.md): 외부 서버에 배포하여 24시간 접속 가능하게 만들기

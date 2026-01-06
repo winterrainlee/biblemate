@@ -6,27 +6,44 @@ RUN npm ci
 COPY client/ ./
 RUN npm run build
 
+# Build stage - Generate Bible DB
+FROM node:20-alpine AS db-builder
+WORKDIR /app
+
+# Copy server for DB initialization
+COPY server/package*.json ./server/
+RUN cd server && npm ci
+
+# Copy server code and scripts
+COPY server/ ./server/
+COPY scripts/ ./scripts/
+COPY package.json ./
+
+# Generate Bible DB
+RUN node scripts/import-bible.js
+
 # Production stage - Server
 FROM node:20-alpine
 WORKDIR /app
 
-# Install server dependencies
+# Install server dependencies (production only)
 COPY server/package*.json ./server/
 RUN cd server && npm ci --production
 
 # Copy server code
 COPY server/ ./server/
 
-# Copy client build from previous stage
+# Copy client build from client-builder
 COPY --from=client-builder /app/client/dist ./client/dist
 
-# Copy seed DB to separate location (will be copied to volume if empty)
-COPY server/db-data/bible.db ./server/db-seed/bible.db
+# Copy generated DB to seed location
+COPY --from=db-builder /app/server/db-data/bible.db ./server/db-seed/bible.db
 
 # Create entrypoint script
 RUN echo '#!/bin/sh' > /entrypoint.sh && \
     echo 'if [ ! -f /app/server/db-data/bible.db ]; then' >> /entrypoint.sh && \
     echo '  echo "Initializing database from seed..."' >> /entrypoint.sh && \
+    echo '  mkdir -p /app/server/db-data' >> /entrypoint.sh && \
     echo '  cp /app/server/db-seed/bible.db /app/server/db-data/bible.db' >> /entrypoint.sh && \
     echo 'fi' >> /entrypoint.sh && \
     echo 'exec node server/index.js' >> /entrypoint.sh && \

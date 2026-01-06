@@ -84,7 +84,14 @@ npm run dev
 **`start-biblemate.bat`** 파일을 더블클릭하면 서버가 켜집니다.
 - 실행 창에 **내 컴퓨터의 IP 주소**와 접속 가능한 URL이 표시됩니다.
 - 표시된 주소(예: `http://192.168.0.X:5173`)를 스마트폰 브라우저에 입력하면 바로 접속할 수 있습니다.
-- **꿀팁**: 이 파일의 바로가기를 바탕화면에 만들어두면 편리합니다!
+- **꽁팁**: 이 파일의 바로가기를 바탕화면에 만들어두면 편리합니다!
+
+### 5. ☁️ 외부 서버 배포 (Optional)
+
+PC를 끄지 않고도 24시간 접속 가능한 서버를 원한다면, Fly.io 같은 클라우드 플랫폼에 배포할 수 있습니다.
+
+프로젝트에 포함된 배포 가이드를 참고하세요:
+- 한글: [docs/deploy-flyio.md](docs/deploy-flyio.md)
 
 ## 프로젝트 구조 📁
 
@@ -97,7 +104,8 @@ biblemate/
 │   │   └── services/       # API Communications
 ├── server/                 # Express Backend
 │   ├── routes/             # API Endpoints (Bible, Notes, Logs)
-│   └── data/               # SQLite Database (로컬 생성됨)
+│   ├── config/             # 설정 파일 (osis-mapping.json)
+│   └── db-data/            # SQLite Database (로컬 생성됨)
 └── scripts/                # Data Import Utilities
 ```
 

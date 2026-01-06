@@ -93,20 +93,24 @@ primary_region = "nrt"
 
 ### Dockerfile 핵심 포인트
 
-1. **멀티스테이지 빌드**: 클라이언트 빌드 → 서버에 복사
-2. **시드 DB**: `db-seed/bible.db`에 초기 데이터 보관
+1. **3단계 멀티스테이지 빌드**:
+   - `client-builder`: React 클라이언트 빌드
+   - `db-builder`: `import-bible.js` 실행하여 성경 DB 생성
+   - `production`: 최종 서버 이미지
+2. **시드 DB**: 빌드 시 생성된 DB를 `db-seed/`에 보관
 3. **Entrypoint 스크립트**: 볼륨이 비어있으면 시드 DB 자동 복사
 
 ```dockerfile
-# 시드 DB 복사
-COPY server/db-data/bible.db ./server/db-seed/bible.db
+# Build stage - Generate Bible DB
+FROM node:20-alpine AS db-builder
+# ... import-bible.js 실행으로 DB 생성
+
+# Production stage
+COPY --from=db-builder /app/server/db-data/bible.db ./server/db-seed/bible.db
 
 # Entrypoint: 볼륨 비어있으면 시드에서 복사
-RUN echo '#!/bin/sh' > /entrypoint.sh && \
-    echo 'if [ ! -f /app/server/db-data/bible.db ]; then' >> /entrypoint.sh && \
-    echo '  cp /app/server/db-seed/bible.db /app/server/db-data/bible.db' >> /entrypoint.sh && \
-    echo 'fi' >> /entrypoint.sh && \
-    echo 'exec node server/index.js' >> /entrypoint.sh
+RUN echo 'if [ ! -f /app/server/db-data/bible.db ]; then' >> /entrypoint.sh && \
+    echo '  cp /app/server/db-seed/bible.db /app/server/db-data/bible.db' >> /entrypoint.sh
 ```
 
 ---

@@ -7,7 +7,7 @@ import { initDB, saveDB, closeDB } from '../server/db/init.js';
 import https from 'https';
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
-const osisMapping = require('../server/data/osis-mapping.json');
+const osisMapping = require('../server/config/osis-mapping.json');
 
 // Data sources
 const KRV_URL = 'https://raw.githubusercontent.com/thiagobodruk/bible/master/json/ko_ko.json';
