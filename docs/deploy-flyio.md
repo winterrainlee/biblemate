@@ -49,6 +49,10 @@ $env:PATH += ";$env:USERPROFILE\.fly\bin"
 & "$env:USERPROFILE\.fly\bin\flyctl.exe" launch --no-deploy  # 새 앱 생성 (필요시)
 ```
 
+> [!TIP]
+> **보안 팁**: 앱 이름이 곧 접속 주소가 됩니다 (예: `my-app.fly.dev`).
+> 누구나 추측하기 쉬운 이름보다는 나만이 알 수 있는 복잡한 이름(예: `biblemate-x7z2p`)을 사용하는 것이 보안상 유리합니다.
+
 ### 2. 볼륨 생성 (SQLite 데이터 영구 저장)
 
 ```powershell
@@ -112,6 +116,20 @@ COPY --from=db-builder /app/server/db-data/bible.db ./server/db-seed/bible.db
 RUN echo 'if [ ! -f /app/server/db-data/bible.db ]; then' >> /entrypoint.sh && \
     echo '  cp /app/server/db-seed/bible.db /app/server/db-data/bible.db' >> /entrypoint.sh
 ```
+
+---
+
+## 암호 보호 설정 (선택사항)
+
+외부에서 접근을 제한하려면 `ACCESS_PASSWORD` 환경변수를 설정하세요:
+
+```powershell
+& "$env:USERPROFILE\.fly\bin\flyctl.exe" secrets set ACCESS_PASSWORD="your-secret-password"
+```
+
+설정 후 앱에 접속하면 암호 입력 화면이 표시됩니다.
+
+> 환경변수가 없으면 암호 없이 바로 접속 가능 (로컬 개발 환경)
 
 ---
 

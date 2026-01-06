@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
-import { Moon, Sun, Monitor, Type, Download, Upload, Eye, EyeOff } from 'lucide-react';
+import { Moon, Sun, Monitor, Type, Download, Upload, Eye, EyeOff, LogOut } from 'lucide-react';
 import { format } from 'date-fns';
 import { api } from '../services/api';
 
@@ -8,6 +8,7 @@ const Settings = () => {
     const { theme, setTheme, fontSize, setFontSize } = useTheme();
     const [dashboardConfig, setDashboardConfig] = useState({ showReading: true, showNotes: true });
     const [statusMessage, setStatusMessage] = useState('');
+    const [authInfo, setAuthInfo] = useState({ authRequired: false });
 
     // Load dashboard config from localStorage
     useEffect(() => {
@@ -19,7 +20,26 @@ const Settings = () => {
                 console.error('Failed to parse dashboard config:', e);
             }
         }
+
+        // Check auth status
+        fetch('/api/auth/status', { credentials: 'include' })
+            .then(res => res.json())
+            .then(data => setAuthInfo({ authRequired: data.authRequired }))
+            .catch(() => { });
     }, []);
+
+    // Handle logout
+    const handleLogout = async () => {
+        try {
+            await fetch('/api/auth/logout', {
+                method: 'POST',
+                credentials: 'include'
+            });
+            window.location.reload();
+        } catch (error) {
+            console.error('Logout error:', error);
+        }
+    };
 
     // Handle backup export
     const handleExport = async () => {
@@ -384,6 +404,41 @@ const Settings = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Logout Section - Only show when auth is enabled */}
+            {authInfo.authRequired && (
+                <div className="settings-section" style={{
+                    marginTop: '2rem',
+                    padding: '1.5rem',
+                    backgroundColor: 'var(--pk-color-bg)',
+                    border: '1px solid var(--pk-color-border)',
+                    borderRadius: 'var(--pk-radius-lg)'
+                }}>
+                    <h3 style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <LogOut size={20} /> 로그아웃
+                    </h3>
+                    <p style={{ color: 'var(--pk-color-text-secondary)', marginBottom: '1rem', fontSize: '0.9rem' }}>
+                        다른 사람이 이 기기를 사용할 수 있다면 로그아웃하는 것이 안전합니다.
+                    </p>
+                    <button
+                        onClick={handleLogout}
+                        style={{
+                            padding: '0.75rem 1.5rem',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.5rem',
+                            backgroundColor: '#ef4444',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: 'var(--pk-radius-md)',
+                            cursor: 'pointer',
+                            fontWeight: '600'
+                        }}
+                    >
+                        <LogOut size={18} /> 로그아웃
+                    </button>
+                </div>
+            )}
         </div>
     );
 };

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout';
 // import Home from './pages/Home';
@@ -7,9 +7,72 @@ import ReadingDashboard from './pages/ReadingDashboard';
 import Notes from './pages/Notes';
 import Search from './pages/Search';
 import Settings from './pages/Settings';
+import LoginPage from './pages/LoginPage';
 import { ThemeProvider } from './contexts/ThemeContext';
 
 function App() {
+  const [authState, setAuthState] = useState({
+    loading: true,
+    authRequired: false,
+    authenticated: false
+  });
+
+  useEffect(() => {
+    checkAuthStatus();
+  }, []);
+
+  const checkAuthStatus = async () => {
+    try {
+      const response = await fetch('/api/auth/status', {
+        credentials: 'include'
+      });
+      const data = await response.json();
+      setAuthState({
+        loading: false,
+        authRequired: data.authRequired,
+        authenticated: data.authenticated
+      });
+    } catch (err) {
+      // If auth check fails, assume no auth required (dev mode)
+      setAuthState({
+        loading: false,
+        authRequired: false,
+        authenticated: true
+      });
+    }
+  };
+
+  const handleLogin = () => {
+    setAuthState(prev => ({ ...prev, authenticated: true }));
+  };
+
+  // Show loading state
+  if (authState.loading) {
+    return (
+      <ThemeProvider>
+        <div style={{
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: 'var(--bg-primary)',
+          color: 'var(--text-primary)'
+        }}>
+          로딩 중...
+        </div>
+      </ThemeProvider>
+    );
+  }
+
+  // Show login page if auth required and not authenticated
+  if (authState.authRequired && !authState.authenticated) {
+    return (
+      <ThemeProvider>
+        <LoginPage onLogin={handleLogin} />
+      </ThemeProvider>
+    );
+  }
+
   return (
     <ThemeProvider>
       <Router>
