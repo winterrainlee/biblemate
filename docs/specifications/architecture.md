@@ -1,5 +1,7 @@
 # 🏗️ System Architecture (v1.1)
 
+> **Last Updated: 2026-01-06**
+
 BibleMate의 현재 시스템 구조와 설계 철학을 정리한 문서입니다.
 
 ---
