@@ -11,7 +11,7 @@ import './ReadingDashboard.css';
 const ReadingDashboard = () => {
     // Global State
     const [currentDate, setCurrentDate] = useState(new Date());
-    const [currentBook, setCurrentBook] = useState('Mal');
+    const [currentBook, setCurrentBook] = useState('Gen');
     const [currentChapter, setCurrentChapter] = useState(1);
     const [currentVersion, setCurrentVersion] = useState('krv');
 
@@ -74,8 +74,11 @@ const ReadingDashboard = () => {
 
     // Initial Load
     useEffect(() => {
-        loadBooks();
-        loadReadingLogs(true);
+        const init = async () => {
+            const booksData = await loadBooks();
+            await loadReadingLogs(true, booksData);
+        };
+        init();
     }, []);
 
     // Load Note and Logs when Date Changes
@@ -96,26 +99,64 @@ const ReadingDashboard = () => {
         try {
             const data = await api.getBooks();
             setBooks(data);
-        } catch (e) { console.error(e); }
+            return data;
+        } catch (e) {
+            console.error(e);
+            return [];
+        }
     };
 
     const [hasInitialMoved, setHasInitialMoved] = useState(false);
 
-    const loadReadingLogs = async (shouldMove = false) => {
+    const loadReadingLogs = async (shouldMove = false, booksData = null) => {
         try {
             const logs = await api.getReadingLogs();
             setReadingLogs(logs);
 
-            // [건의사항 1번] 초기 로드 시에만 오늘 읽은 기록이 있으면 해당 위치로 이동
             if (shouldMove && !hasInitialMoved) {
+                const targetBooks = booksData || books;
+                if (!targetBooks || targetBooks.length === 0) return;
+
                 const todayStr = format(new Date(), 'yyyy-MM-dd');
                 const todayLogs = logs.filter(l => l.date === todayStr);
+
                 if (todayLogs.length > 0) {
+                    // 오늘 읽은 기록이 있으면 첫 번째 기록으로
                     const firstLog = todayLogs[0];
                     setCurrentBook(firstLog.book);
                     setCurrentChapter(firstLog.chapter_from || firstLog.chapter || 1);
-                    setHasInitialMoved(true);
+                } else if (logs.length > 0) {
+                    // 오늘 기록은 없지만 과거 기록이 있으면 '가장 최신 기록의 다음 장' 계산
+                    // logs는 보통 최신순으로 오겠지만, 안전하게 정렬 (date DESC, id DESC)
+                    const sortedLogs = [...logs].sort((a, b) => {
+                        if (b.date !== a.date) return b.date.localeCompare(a.date);
+                        return b.id - a.id;
+                    });
+                    const lastLog = sortedLogs[0];
+                    const bookMeta = targetBooks.find(b => b.id === lastLog.book);
+
+                    if (bookMeta && lastLog.chapter < bookMeta.chapters) {
+                        // 같은 책의 다음 장
+                        setCurrentBook(lastLog.book);
+                        setCurrentChapter(lastLog.chapter + 1);
+                    } else {
+                        // 다음 책의 1장
+                        const bookIndex = targetBooks.findIndex(b => b.id === lastLog.book);
+                        if (bookIndex !== -1 && bookIndex < targetBooks.length - 1) {
+                            setCurrentBook(targetBooks[bookIndex + 1].id);
+                            setCurrentChapter(1);
+                        } else {
+                            // 성경의 끝이면 창세기 1장으로 순환
+                            setCurrentBook(targetBooks[0].id);
+                            setCurrentChapter(1);
+                        }
+                    }
+                } else {
+                    // 기록이 하나도 없는 신규 사용자
+                    setCurrentBook('Gen');
+                    setCurrentChapter(1);
                 }
+                setHasInitialMoved(true);
             }
         } catch (e) { console.error(e); }
     };

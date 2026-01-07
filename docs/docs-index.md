@@ -1,6 +1,6 @@
 # 📚 Documentation Index
 
-> BibleMate 프로젝트 문서 목차입니다. (Last Updated: 2026-01-06)
+> BibleMate 프로젝트 문서 목차입니다. (최초 생성일: 2026-01-05 | 최신 수정일: 2026-01-08)
 
 ---
 
@@ -28,7 +28,8 @@
 
 ## 🚀 Planning (계획)
 - [Roadmap](planning/roadmap.md): 차기 버전 로드맵 및 기능 목록
-- [Development Method](planning/dev-method.md): 개발 방법론 및 배포 주의사항 (Lessons Learned)
+- [Development Method](dev-method.md): 개발 방법론 및 배포 주의사항 (Lessons Learned)
+- [Project Spec v1.2](spec-v1.2.md): 현재 개발 중인 v1.2 명세서
 
 ---
 

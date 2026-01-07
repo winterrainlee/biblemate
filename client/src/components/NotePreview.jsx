@@ -9,7 +9,9 @@ import './NotePreview.css';
 const NotePreview = ({ date, note, readingLogs, books, onClick }) => {
     // 읽은 말씀 요약 생성 (유틸리티 사용)
     const getReadingSummaryElements = () => {
-        const summaries = getReadingSummary(readingLogs, books);
+        // 읽은 순서(ID순)대로 정렬하여 표시
+        const sortedLogs = [...readingLogs].sort((a, b) => a.id - b.id);
+        const summaries = getReadingSummary(sortedLogs, books);
         if (summaries.length === 0) return null;
 
         return summaries.map((text, index) => (

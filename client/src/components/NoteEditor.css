@@ -56,6 +56,22 @@
     border-color: #fecaca;
 }
 
+.action-btn.primary {
+    background: var(--pk-color-primary);
+    color: white;
+    border-color: var(--pk-color-primary);
+}
+
+.action-btn.primary:hover {
+    opacity: 0.9;
+    background: var(--pk-color-primary);
+}
+
+.action-btn.icon-only {
+    padding: 0.35rem;
+    justify-content: center;
+}
+
 .note-textarea {
     flex: 1;
     width: 100%;

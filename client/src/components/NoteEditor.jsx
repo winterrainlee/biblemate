@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Save, Copy, Loader, Trash2 } from 'lucide-react';
+import { Save, Copy, Loader, Trash2, FileText } from 'lucide-react';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { api } from '../services/api';
@@ -85,21 +85,38 @@ const NoteEditor = ({ date, readingLogs, books }) => {
         }
     };
 
+    const handleApplyForm = () => {
+        const form = `[발견한 하나님]
+- 본문 구절에 근거해서 '~~한 하나님 (장:절)'으로 작성
+
+[의문점과 대답]
+- 읽으며 궁금했던 점과 답을 찾은 내용
+
+[오늘의 기도 한 줄]
+- 
+
+`;
+        setContent(prev => form + prev);
+    };
+
     return (
         <div className="note-editor-container">
             <div className="editor-header">
                 <h3>{date ? format(new Date(date), 'yyyy년 M월 d일 EEEE 묵상기록', { locale: ko }) : '묵상기록'}</h3>
                 <div className="editor-actions">
+                    <button onClick={handleApplyForm} className="action-btn primary" title="양식 적용">
+                        <FileText size={18} />
+                        <span className="btn-label">양식</span>
+                    </button>
+                    <button onClick={() => handleSave()} className="action-btn icon-only" title="저장" disabled={isSaving}>
+                        {isSaving ? <Loader size={18} className="spin" /> : <Save size={18} />}
+                    </button>
+                    <button onClick={handleDelete} className="action-btn icon-only delete" title="삭제">
+                        <Trash2 size={18} />
+                    </button>
                     <button onClick={handleCopy} className="action-btn" title="복사">
                         <Copy size={18} />
                         <span className="btn-label">복사</span>
-                    </button>
-                    <button onClick={() => handleSave()} className="action-btn" title="저장" disabled={isSaving}>
-                        {isSaving ? <Loader size={18} className="spin" /> : <Save size={18} />}
-                        <span className="btn-label">저장</span>
-                    </button>
-                    <button onClick={handleDelete} className="action-btn delete" title="삭제">
-                        <Trash2 size={18} />
                     </button>
                 </div>
             </div>
@@ -117,7 +134,7 @@ const NoteEditor = ({ date, readingLogs, books }) => {
 
             <div className="editor-footer">
                 {lastSaved ? (
-                    <span className="save-status">마지막 저장: {new Date(lastSaved).toLocaleTimeString()}</span>
+                    <span className="save-status">마지막 저장: {format(new Date(lastSaved), 'yyyy-MM-dd HH:mm:ss')}</span>
                 ) : (
                     <span className="save-status">저장되지 않음</span>
                 )}
