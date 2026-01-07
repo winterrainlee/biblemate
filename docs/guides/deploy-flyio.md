@@ -86,7 +86,7 @@ primary_region = "nrt"
 
 [mounts]
   source = "biblemate_data"
-  destination = "/app/server/db-data"  # 볼륨 마운트 경로
+  destination = "/app/server/data"  # 볼륨 마운트 경로
 
 [checks]
   [checks.health]
@@ -110,11 +110,11 @@ FROM node:20-alpine AS db-builder
 # ... import-bible.js 실행으로 DB 생성
 
 # Production stage
-COPY --from=db-builder /app/server/db-data/bible.db ./server/db-seed/bible.db
+COPY --from=db-builder /app/server/data/bible.db ./server/db-seed/bible.db
 
 # Entrypoint: 볼륨 비어있으면 시드에서 복사
-RUN echo 'if [ ! -f /app/server/db-data/bible.db ]; then' >> /entrypoint.sh && \
-    echo '  cp /app/server/db-seed/bible.db /app/server/db-data/bible.db' >> /entrypoint.sh
+RUN echo 'if [ ! -f /app/server/data/bible.db ]; then' >> /entrypoint.sh && \
+    echo '  cp /app/server/db-seed/bible.db /app/server/data/bible.db' >> /entrypoint.sh
 ```
 
 ---
