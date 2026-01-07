@@ -115,8 +115,9 @@ graph TD
 ## 6. 배포 절차 (Release Process)
 1. **버전 업데이트**: `package.json`, `Settings.jsx`, `README.md`, `roadmap.md`의 버전 정보 갱신
 2. **최종 병합**: 통합 브랜치(`feature/v1.x`)를 `master`로 병합 (Squash Merge 권장)
-3. **태그 및 릴리즈**: Git 태그 생성 (`v1.2` 등) 및 GitHub Release 생성
-4. **문서 정리**: Roadmap의 Completed 섹션 및 `docs-index.md` 링크 업데이트
+3. **태그 및 릴리즈**: Git 태그 생성 (`v1.2.0` 등)
+4. **릴리즈 노트 작성**: `docs/logs/release-notes-vX.Y.md` 파일을 생성하여 사용자 중심의 변경 사항 요약
+5. **문서 정리**: Roadmap의 Completed 섹션 및 `docs-index.md` 링크 업데이트
 
 ---
 

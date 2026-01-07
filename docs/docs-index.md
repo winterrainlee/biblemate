@@ -16,6 +16,7 @@
 ## 📝 Logs (개발 로그)
 
 ### Release Notes
+- [v1.2](logs/release-notes-v1.2.md): UX 개선 및 자정 세션 만료 (2026-01-08)
 - [v1.1](logs/release-notes-v1.1.md): 암호 보호 및 클라우드 배포 (2026-01-06)
 - [v1.0](logs/release-notes-v1.0.md): 초기 릴리즈 (2026-01-05)
 
