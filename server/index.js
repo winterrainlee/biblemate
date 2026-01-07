@@ -3,6 +3,16 @@ import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import cookieParser from 'cookie-parser';
+import fs from 'fs';
+
+// Try to load .env file if it exists (Node 21.7+)
+if (process.loadEnvFile) {
+  try {
+    process.loadEnvFile();
+  } catch (e) {
+    // Fallback or ignore if .env doesn't exist
+  }
+}
 import { initDB } from './db/init.js';
 
 import bibleRoutes from './routes/bible.js';

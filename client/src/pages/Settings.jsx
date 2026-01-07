@@ -123,17 +123,44 @@ const Settings = () => {
                 <p className="text-secondary">화면 스타일을 취향에 맞게 조정하세요.</p>
             </div>
 
-            {/* Status Message */}
-            {statusMessage && (
-                <div style={{
-                    marginBottom: '1.5rem',
-                    padding: '1rem',
-                    backgroundColor: statusMessage.startsWith('✅') ? '#d4edda' : '#f8d7da',
-                    color: statusMessage.startsWith('✅') ? '#155724' : '#721c24',
-                    border: `1px solid ${statusMessage.startsWith('✅') ? '#c3e6cb' : '#f5c6cb'}`,
-                    borderRadius: 'var(--pk-radius-md)'
+            {/* Logout Section - Only show when auth is enabled */}
+            {authInfo.authRequired && (
+                <div className="settings-section" style={{
+                    marginBottom: '2rem',
+                    padding: '1.5rem',
+                    backgroundColor: 'var(--pk-color-bg)',
+                    border: '1px solid var(--pk-color-border)',
+                    borderRadius: 'var(--pk-radius-lg)',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center'
                 }}>
-                    {statusMessage}
+                    <div>
+                        <h3 style={{ marginBottom: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1.1rem' }}>
+                            <LogOut size={18} /> 세션 관리
+                        </h3>
+                        <p style={{ color: 'var(--pk-color-text-secondary)', fontSize: '0.85rem' }}>
+                            로그아웃하여 현재 세션을 즉시 종료합니다.
+                        </p>
+                    </div>
+                    <button
+                        onClick={handleLogout}
+                        style={{
+                            padding: '0.6rem 1.2rem',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.5rem',
+                            backgroundColor: '#ef4444',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: 'var(--pk-radius-md)',
+                            cursor: 'pointer',
+                            fontWeight: '600',
+                            fontSize: '0.9rem'
+                        }}
+                    >
+                        <LogOut size={16} /> 로그아웃
+                    </button>
                 </div>
             )}
 
@@ -405,40 +432,6 @@ const Settings = () => {
                 </div>
             </div>
 
-            {/* Logout Section - Only show when auth is enabled */}
-            {authInfo.authRequired && (
-                <div className="settings-section" style={{
-                    marginTop: '2rem',
-                    padding: '1.5rem',
-                    backgroundColor: 'var(--pk-color-bg)',
-                    border: '1px solid var(--pk-color-border)',
-                    borderRadius: 'var(--pk-radius-lg)'
-                }}>
-                    <h3 style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <LogOut size={20} /> 로그아웃
-                    </h3>
-                    <p style={{ color: 'var(--pk-color-text-secondary)', marginBottom: '1rem', fontSize: '0.9rem' }}>
-                        다른 사람이 이 기기를 사용할 수 있다면 로그아웃하는 것이 안전합니다.
-                    </p>
-                    <button
-                        onClick={handleLogout}
-                        style={{
-                            padding: '0.75rem 1.5rem',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.5rem',
-                            backgroundColor: '#ef4444',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: 'var(--pk-radius-md)',
-                            cursor: 'pointer',
-                            fontWeight: '600'
-                        }}
-                    >
-                        <LogOut size={18} /> 로그아웃
-                    </button>
-                </div>
-            )}
         </div>
     );
 };

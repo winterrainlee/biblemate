@@ -11,8 +11,15 @@ const router = express.Router();
 // Simple session storage (in-memory, resets on server restart)
 const sessions = new Map();
 
-// Session duration: 7 days
-const SESSION_DURATION = 7 * 24 * 60 * 60 * 1000;
+/**
+ * Calculate milliseconds remaining until the next midnight
+ */
+function getMsUntilMidnight() {
+    const now = new Date();
+    const nextMidnight = new Date(now);
+    nextMidnight.setHours(24, 0, 0, 0); // 00:00:00 of the next day
+    return nextMidnight.getTime() - now.getTime();
+}
 
 /**
  * Generate a random session token
@@ -109,9 +116,12 @@ router.post('/login', express.json(), (req, res) => {
 
     // Create session
     const token = generateSessionToken();
+    const duration = getMsUntilMidnight();
+    const expiresAt = Date.now() + duration;
+
     sessions.set(token, {
         createdAt: Date.now(),
-        expiresAt: Date.now() + SESSION_DURATION
+        expiresAt: expiresAt
     });
 
     // Set cookie
@@ -119,7 +129,7 @@ router.post('/login', express.json(), (req, res) => {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',
-        maxAge: SESSION_DURATION
+        maxAge: duration
     });
 
     res.json({ ok: true, message: 'Logged in successfully' });
