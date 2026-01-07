@@ -37,14 +37,14 @@ COPY server/ ./server/
 COPY --from=client-builder /app/client/dist ./client/dist
 
 # Copy generated DB to seed location
-COPY --from=db-builder /app/server/db-data/bible.db ./server/db-seed/bible.db
+COPY --from=db-builder /app/server/data/bible.db ./server/db-seed/bible.db
 
 # Create entrypoint script
 RUN echo '#!/bin/sh' > /entrypoint.sh && \
-    echo 'if [ ! -f /app/server/db-data/bible.db ]; then' >> /entrypoint.sh && \
+    echo 'if [ ! -f /app/server/data/bible.db ]; then' >> /entrypoint.sh && \
     echo '  echo "Initializing database from seed..."' >> /entrypoint.sh && \
-    echo '  mkdir -p /app/server/db-data' >> /entrypoint.sh && \
-    echo '  cp /app/server/db-seed/bible.db /app/server/db-data/bible.db' >> /entrypoint.sh && \
+    echo '  mkdir -p /app/server/data' >> /entrypoint.sh && \
+    echo '  cp /app/server/db-seed/bible.db /app/server/data/bible.db' >> /entrypoint.sh && \
     echo 'fi' >> /entrypoint.sh && \
     echo 'exec node server/index.js' >> /entrypoint.sh && \
     chmod +x /entrypoint.sh

@@ -16,7 +16,7 @@ primary_region = "nrt"
 
 [mounts]
   source = "biblemate_data"
-  destination = "/app/server/db-data"
+  destination = "/app/server/data"
 
 [checks]
   [checks.health]
