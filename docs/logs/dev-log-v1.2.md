@@ -40,6 +40,18 @@
   - "당연한 기본값은 없다." -> 사용자의 이전 기록이 항상 최고의 기본값이 된다.
   - 기능 구현 후 실제 사용 흐름을 한 번 더 짚어보는 것이 사이드바 정렬 같은 세밀한 개선점을 찾는 데 큰 도움이 됨.
 
+### 2026-01-08 (Task 4 완료)
+- **내용**: [SECURITY] 자정 세션 만료 로직 및 설정 UI 개선
+- **Retrospective**: 
+  - 세션 만료를 단순히 기간(Duration)으로 보지 않고 특정 시점(Point in time)으로 관리함으로써 보안과 사용자 루틴(매일 접속)을 동시에 잡을 수 있었음.
+  - 설정 페이지 상단에 로그아웃을 배치하여 '세션 관리'라는 목적을 더 명확히 함.
+- **Troubleshooting**: 
+  - Windows PowerShell로 생성한 `.env` 파일에 BOM(Byte Order Mark)이 포함되어 Node.js가 환경 변수를 읽지 못하는 이슈 발생. `Set-Content` 대신 BOM을 제외한 `[System.IO.File]::WriteAllText` 방식을 사용하여 해결.
+  - `--env-file` 플래그가 불안정할 때를 대비해 `process.loadEnvFile()`을 서버 코드에 명시적으로 추가하여 안정성 확보.
+- **Lessons Learned**: 
+  - 인코딩은 늘 환경 간 마찰을 일으키는 지점이다. 표준 UTF-8(BOM 없음) 준수가 필수적임.
+  - Node.js의 최신 기능(v21.7+)인 기본 환경 변수 로더를 활용하여 외부 의존성(dotenv) 없이 기능을 구현함.
+
 ---
 
 ## 이슈 및 해결
