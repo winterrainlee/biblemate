@@ -148,11 +148,6 @@ const ReadingDashboard = () => {
         } catch (e) { console.error(e); }
     };
 
-    // --- Handlers ---
-    const handleDateSelect = (_, date) => {
-        if (date) setCurrentDate(date);
-    };
-
     const handleHighlight = async (verseNum) => {
         const existing = highlights.find(h => h.verse === verseNum);
         if (existing) {
@@ -172,6 +167,11 @@ const ReadingDashboard = () => {
         // On mobile, we might also want to scroll to editor
         const editorElement = document.querySelector('.note-editor-wrapper');
         editorElement?.scrollIntoView({ behavior: 'smooth' });
+    };
+
+    const handleBookChange = (bookId) => {
+        setCurrentBook(bookId);
+        setCurrentChapter(1);
     };
 
     return (
@@ -211,7 +211,7 @@ const ReadingDashboard = () => {
                         currentBook={currentBook}
                         currentChapter={currentChapter}
                         currentVersion={currentVersion}
-                        onBookChange={setCurrentBook}
+                        onBookChange={handleBookChange}
                         onChapterChange={setCurrentChapter}
                         onVersionChange={setCurrentVersion}
                     />
