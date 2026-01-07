@@ -1,0 +1,27 @@
+.verse-popup {
+    animation: popupAppear 0.2s ease-out;
+}
+
+@keyframes popupAppear {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -95%);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate(-50%, -100%);
+    }
+}
+
+.popup-btn:hover {
+    background-color: var(--pk-color-bg-secondary) !important;
+}
+
+.verse-item:hover {
+    background-color: rgba(0, 0, 0, 0.03);
+}
+
+[data-theme='dark'] .verse-item:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}

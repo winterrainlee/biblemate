@@ -26,6 +26,11 @@ function App() {
       const response = await fetch('/api/auth/status', {
         credentials: 'include'
       });
+
+      if (!response.ok) {
+        throw new Error('Auth check failed');
+      }
+
       const data = await response.json();
       setAuthState({
         loading: false,
@@ -33,11 +38,11 @@ function App() {
         authenticated: data.authenticated
       });
     } catch (err) {
-      // If auth check fails, assume no auth required (dev mode)
+      // If auth check fails, assume auth is required to be safe
       setAuthState({
         loading: false,
-        authRequired: false,
-        authenticated: true
+        authRequired: true,
+        authenticated: false
       });
     }
   };

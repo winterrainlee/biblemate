@@ -190,14 +190,33 @@ const ReadingDashboard = () => {
     };
 
     const handleHighlight = async (verseNum) => {
-        const existing = highlights.find(h => h.verse === verseNum);
+        const existing = highlights.find(h => h.book === currentBook && h.verse === verseNum);
         if (existing) {
             await api.removeHighlight(existing.id);
-            setHighlights(prev => prev.filter(h => h.verse !== verseNum));
+            setHighlights(prev => prev.filter(h => h.id !== existing.id));
         } else {
             const newHl = { book: currentBook, chapter: currentChapter, verse: verseNum, style: '#fef08a' };
             await api.addHighlight(newHl);
             loadHighlights();
+        }
+    };
+
+    const handleCopyCitation = (verseNum, verseText) => {
+        const citation = `[${currentBookName} ${currentChapter}:${verseNum}] ${verseText}`;
+        navigator.clipboard.writeText(citation).then(() => {
+            // alert('구절이 복사되었습니다.'); // Optionally silient
+        });
+    };
+
+    const handleAddNote = (verseNum, memo) => {
+        const citationPrefix = `[${currentBookName} ${currentChapter}:${verseNum}] `;
+        const fullText = `${citationPrefix}${memo}\n`;
+
+        if (noteEditorRef.current) {
+            noteEditorRef.current.insertCitation(fullText);
+            // Scroll to editor if needed
+            const editorElement = document.querySelector('.note-editor-wrapper');
+            editorElement?.scrollIntoView({ behavior: 'smooth' });
         }
     };
 
@@ -267,6 +286,8 @@ const ReadingDashboard = () => {
                             verses={verses}
                             highlights={highlights}
                             onHighlight={handleHighlight}
+                            onAddNote={handleAddNote}
+                            onCopyCitation={handleCopyCitation}
                             onComplete={handleChapterComplete}
                             isCompleted={isChapterCompleted}
                             isToday={isToday}

@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { Check, Bookmark, Highlighter } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Check, Highlighter, MessageSquare, Copy, X, Send } from 'lucide-react';
+import './BibleViewer.css';
 
 const BibleViewer = ({
     item, // Optional object including book/chapter
@@ -11,9 +12,43 @@ const BibleViewer = ({
     isToday,
     lastReadDate,
     bookName = '',
-    chapter = 1
+    chapter = 1,
+    onAddNote,
+    onCopyCitation
 }) => {
     const [selectedVerseIds, setSelectedVerseIds] = useState([]);
+    const [popup, setPopup] = useState({
+        visible: false,
+        x: 0,
+        y: 0,
+        verseNum: null,
+        verseText: '',
+        mode: 'menu',
+        memoInput: ''
+    });
+    const popupRef = useRef(null);
+
+    // Close popup on escape
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (e.key === 'Escape') setPopup(prev => ({ ...prev, visible: false }));
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, []);
+
+    // Close popup when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (e) => {
+            if (popupRef.current && !popupRef.current.contains(e.target)) {
+                setPopup(prev => ({ ...prev, visible: false }));
+            }
+        };
+        if (popup.visible) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [popup.visible]);
 
     // Check if a verse has a highlight
     const getHighlightStyle = (verseNum) => {
@@ -22,8 +57,33 @@ const BibleViewer = ({
         return hl ? hl.style : null; // style is color hex code
     };
 
-    const handleVerseClick = (verseNum) => {
-        onHighlight(verseNum);
+    const handleVerseClick = (e, verse) => {
+        const rect = e.currentTarget.getBoundingClientRect();
+        setPopup({
+            visible: true,
+            x: e.clientX,
+            y: e.clientY - 10, // Slightly above the click
+            verseNum: verse.verse,
+            verseText: verse.text,
+            mode: 'menu',
+            memoInput: ''
+        });
+    };
+
+    const handleHighlightClick = () => {
+        onHighlight(popup.verseNum);
+        setPopup(prev => ({ ...prev, visible: false }));
+    };
+
+    const handleCopyClick = () => {
+        onCopyCitation(popup.verseNum, popup.verseText);
+        setPopup(prev => ({ ...prev, visible: false }));
+    };
+
+    const handleMemoSubmit = () => {
+        if (!popup.memoInput.trim()) return;
+        onAddNote(popup.verseNum, popup.memoInput);
+        setPopup(prev => ({ ...prev, visible: false }));
     };
 
     return (
@@ -88,7 +148,7 @@ const BibleViewer = ({
                             <div
                                 key={verse.verse}
                                 className="verse-item"
-                                onClick={() => handleVerseClick(verse.verse)}
+                                onClick={(e) => handleVerseClick(e, verse)}
                                 style={{
                                     marginBottom: '0.5rem',
                                     position: 'relative',
@@ -164,6 +224,157 @@ const BibleViewer = ({
                     </div>
                 </button>
             </div>
+
+            {/* Popup Tooltip */}
+            {popup.visible && (
+                <div
+                    ref={popupRef}
+                    className="verse-popup"
+                    style={{
+                        position: 'fixed',
+                        left: `${popup.x}px`,
+                        top: `${popup.y}px`,
+                        transform: 'translate(-50%, -100%)',
+                        backgroundColor: 'var(--pk-color-bg)',
+                        border: '1px solid var(--pk-color-border)',
+                        borderRadius: 'var(--pk-radius-lg)',
+                        boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+                        zIndex: 1000,
+                        padding: '8px',
+                        minWidth: '180px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '4px'
+                    }}
+                >
+                    {popup.mode === 'menu' ? (
+                        <div style={{ display: 'flex', gap: '4px' }}>
+                            <button
+                                onClick={handleHighlightClick}
+                                style={{
+                                    flex: 1,
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'center',
+                                    gap: '4px',
+                                    padding: '8px',
+                                    border: 'none',
+                                    borderRadius: 'var(--pk-radius-md)',
+                                    backgroundColor: 'transparent',
+                                    cursor: 'pointer',
+                                    transition: 'background-color 0.2s',
+                                    fontSize: '0.75rem',
+                                    color: 'var(--pk-color-text)'
+                                }}
+                                className="popup-btn"
+                            >
+                                <Highlighter size={18} color={getHighlightStyle(popup.verseNum) ? "#64748b" : "#eab308"} />
+                                <span>{getHighlightStyle(popup.verseNum) ? '취소' : '형광펜'}</span>
+                            </button>
+                            <button
+                                onClick={() => setPopup(prev => ({ ...prev, mode: 'memo' }))}
+                                style={{
+                                    flex: 1,
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'center',
+                                    gap: '4px',
+                                    padding: '8px',
+                                    border: 'none',
+                                    borderRadius: 'var(--pk-radius-md)',
+                                    backgroundColor: 'transparent',
+                                    cursor: 'pointer',
+                                    transition: 'background-color 0.2s',
+                                    fontSize: '0.75rem',
+                                    color: 'var(--pk-color-text)'
+                                }}
+                                className="popup-btn"
+                            >
+                                <MessageSquare size={18} color="var(--pk-color-primary)" />
+                                <span>메모</span>
+                            </button>
+                            <button
+                                onClick={handleCopyClick}
+                                style={{
+                                    flex: 1,
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'center',
+                                    gap: '4px',
+                                    padding: '8px',
+                                    border: 'none',
+                                    borderRadius: 'var(--pk-radius-md)',
+                                    backgroundColor: 'transparent',
+                                    cursor: 'pointer',
+                                    transition: 'background-color 0.2s',
+                                    fontSize: '0.75rem',
+                                    color: 'var(--pk-color-text)'
+                                }}
+                                className="popup-btn"
+                            >
+                                <Copy size={18} color="#6366f1" />
+                                <span>복사</span>
+                            </button>
+                        </div>
+                    ) : (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '4px' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <span style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--pk-color-text-secondary)' }}>
+                                    {popup.verseNum}절 메모
+                                </span>
+                                <button
+                                    onClick={() => setPopup(prev => ({ ...prev, mode: 'menu' }))}
+                                    style={{ border: 'none', background: 'none', cursor: 'pointer', padding: '2px', color: 'var(--pk-color-text-secondary)' }}
+                                >
+                                    <X size={14} />
+                                </button>
+                            </div>
+                            <textarea
+                                autoFocus
+                                value={popup.memoInput}
+                                onChange={(e) => setPopup(prev => ({ ...prev, memoInput: e.target.value }))}
+                                placeholder="묵상을 적어보세요..."
+                                style={{
+                                    width: '100%',
+                                    minHeight: '80px',
+                                    padding: '8px',
+                                    borderRadius: 'var(--pk-radius-md)',
+                                    border: '1px solid var(--pk-color-border)',
+                                    fontSize: '0.9rem',
+                                    backgroundColor: 'var(--pk-color-bg)',
+                                    color: 'var(--pk-color-text)',
+                                    resize: 'none'
+                                }}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+                                        handleMemoSubmit();
+                                    }
+                                }}
+                            />
+                            <button
+                                onClick={handleMemoSubmit}
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '6px',
+                                    padding: '6px',
+                                    backgroundColor: 'var(--pk-color-primary)',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: 'var(--pk-radius-md)',
+                                    cursor: 'pointer',
+                                    fontSize: '0.85rem',
+                                    fontWeight: '600'
+                                }}
+                            >
+                                <Send size={14} />
+                                추가하기
+                            </button>
+                        </div>
+                    )}
+                </div>
+            )}
         </div>
     );
 };

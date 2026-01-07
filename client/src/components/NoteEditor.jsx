@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useImperativeHandle, forwardRef, useRef } from 'react';
 import { Save, Copy, Loader, Trash2, FileText } from 'lucide-react';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
@@ -7,11 +7,36 @@ import { api } from '../services/api';
 import { getReadingSummary } from '../utils/bibleUtils';
 import './NoteEditor.css';
 
-const NoteEditor = ({ date, readingLogs, books }) => {
+const NoteEditor = forwardRef(({ date, readingLogs, books }, ref) => {
     const [content, setContent] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [lastSaved, setLastSaved] = useState(null);
+    const textareaRef = useRef(null);
+
+    // Expose method to parent via ref
+    useImperativeHandle(ref, () => ({
+        insertCitation: (citationText) => {
+            const textarea = textareaRef.current;
+            if (!textarea) return;
+
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const newContent = content.substring(0, start) + citationText + content.substring(end);
+
+            setContent(newContent);
+
+            // Focus and set cursor position after insertion (optional but better UX)
+            setTimeout(() => {
+                textarea.focus();
+                const newPos = start + citationText.length;
+                textarea.setSelectionRange(newPos, newPos);
+            }, 0);
+        },
+        focus: () => {
+            textareaRef.current?.focus();
+        }
+    }));
 
     // Load note when date changes
     useEffect(() => {
@@ -125,6 +150,7 @@ const NoteEditor = ({ date, readingLogs, books }) => {
                 <div className="loading-state">노트 불러오는 중...</div>
             ) : (
                 <textarea
+                    ref={textareaRef}
                     className="note-textarea"
                     value={content}
                     onChange={(e) => setContent(e.target.value)}
@@ -141,6 +167,6 @@ const NoteEditor = ({ date, readingLogs, books }) => {
             </div>
         </div>
     );
-};
+});
 
 export default NoteEditor;

@@ -48,12 +48,27 @@
 - **Troubleshooting**: 
   - Windows PowerShell로 생성한 `.env` 파일에 BOM(Byte Order Mark)이 포함되어 Node.js가 환경 변수를 읽지 못하는 이슈 발생. `Set-Content` 대신 BOM을 제외한 `[System.IO.File]::WriteAllText` 방식을 사용하여 해결.
   - `--env-file` 플래그가 불안정할 때를 대비해 `process.loadEnvFile()`을 서버 코드에 명시적으로 추가하여 안정성 확보.
-- **Lessons Learned**: 
+- Lessons Learned: 
   - 인코딩은 늘 환경 간 마찰을 일으키는 지점이다. 표준 UTF-8(BOM 없음) 준수가 필수적임.
   - Node.js의 최신 기능(v21.7+)인 기본 환경 변수 로더를 활용하여 외부 의존성(dotenv) 없이 기능을 구현함.
+
+### 2026-01-08 (Task 2 완료 및 데이터 가시성 복구)
+- **내용**: [UX] 구절 클릭 시 다중 옵션 팝업 구현 및 DB 경로 표준화
+- **Retrospective**: 
+  - 구절 클릭이라는 단일 동작에 여러 맥락(하이라이트, 메모, 복사)을 담는 과정에서 팝업이라는 UI 패턴이 매우 효과적임을 확인.
+  - 사용자의 제안으로 추가한 '하이라이트 취소' 동적 UI는 팝업의 상태 관리를 한 단계 더 세밀하게 만드는 계기가 됨.
+- **Troubleshooting**: 
+  - **데이터 증발 이슈**: 서버 재시작 후 데이터가 보이지 않는 현상 발생. 
+    1. 원인: 서버 설정 로직이 `server/db-data/`를 바라보고 있었으나, 실제 데이터는 `.gitignore` 표준인 `server/data/bible.db`에 있었음.
+    2. 해결: `init.js`의 `DB_PATH`를 `server/data/bible.db`로 표준화하여 가시성 복구.
+  - **인증 루프**: 세션 만료 시 빈 화면이 뜨는 버그. `App.jsx`의 인증 오류 핸들링을 강화하여 세션 만료 시 로그인 창으로 안전하게 유도하도록 수정.
+- **Lessons Learned**: 
+  - 코드가 명시하는 경로와 실제 데이터가 저장되는 실제 환경 사이의 일치(Environment Parity)는 운영의 핵심임.
+  - `forwardRef`와 `useImperativeHandle`을 활용한 컴포넌트 간 통신(BibleViewer -> NoteEditor)은 상태 끌어올리기(Lifting State Up)의 훌륭한 대안이 될 수 있음.
 
 ---
 
 ## 이슈 및 해결
 - **[이슈 #1] 책 변경 시 장 번호 유지**: `ReadingDashboard.jsx`에서 `onBookChange` 시 장 번호를 1로 리셋하지 않아 발생. (Task 1에서 해결)
-- **[이슈 #2] 에디터 버튼 배치 혼선**: 작업 흐름에 맞지 않는 버튼 배치. (Task 3 계획 단계에서 사용자 피드백으로 교정)
+- **[이슈 #2] 에디터 버튼 배치 혼선**: 작업 흐름에 맞지 않는 버튼 배치. (Task 3 완료 시 교정)
+- **[이슈 #3] DB 경로 불일치**: `db-data`와 `data` 폴더 혼선으로 데이터 미표시 이슈 발생. (Task 2 병합 시 `data`로 경로 표준화 및 아키텍처/방법론 문서에 공식 명시 완료)
