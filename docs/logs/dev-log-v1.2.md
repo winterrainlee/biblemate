@@ -66,9 +66,28 @@
   - 코드가 명시하는 경로와 실제 데이터가 저장되는 실제 환경 사이의 일치(Environment Parity)는 운영의 핵심임.
   - `forwardRef`와 `useImperativeHandle`을 활용한 컴포넌트 간 통신(BibleViewer -> NoteEditor)은 상태 끌어올리기(Lifting State Up)의 훌륭한 대안이 될 수 있음.
 
+### 2026-01-08 (v1.2.1 Hotfix)
+- **내용**: [BUG] 백업(데이터 내보내기/가져오기) 기능 오류 수정
+- **Retrospective**: 
+  - v1.2.0 배포 후 사용자가 백업 기능이 작동하지 않는다는 제보를 받음.
+  - GPT Codex의 분석을 검증한 결과, 지적된 모든 문제가 정확했음을 확인.
+  - 핫픽스는 feature 브랜치 없이 master에서 직접 작업하는 것이 효율적임을 경험.
+- **Troubleshooting**: 
+  - **localhost 하드코딩**: `Settings.jsx`에서 `http://localhost:3001/api/backup/*`로 직접 호출하고 있어 배포 환경(Fly.io)에서 요청 실패.
+    - 해결: 상대 경로 `/api/backup/*`로 변경하여 Vite 프록시 및 프로덕션 환경 모두 호환.
+  - **인증 쿠키 미전송**: `credentials: 'include'` 옵션 누락으로 authMiddleware가 401 반환.
+    - 해결: fetch 요청에 `credentials: 'include'` 추가.
+  - **데이터 영속성 미보장**: `backup.js`의 import 라우터에서 트랜잭션 커밋 후 `saveDB()` 호출이 없어 서버 재시작 시 데이터 유실 위험.
+    - 해결: `saveDB()` import 및 호출 추가.
+- **Lessons Learned**: 
+  - API 호출 시 환경별 URL 차이를 고려해야 함. 상대 경로 사용이 가장 안전한 패턴.
+  - 인증이 필요한 API는 반드시 `credentials: 'include'`를 명시해야 함.
+  - 데이터 변경 작업 후 `saveDB()` 호출을 잊지 않도록 체크리스트화 필요.
+
 ---
 
 ## 이슈 및 해결
 - **[이슈 #1] 책 변경 시 장 번호 유지**: `ReadingDashboard.jsx`에서 `onBookChange` 시 장 번호를 1로 리셋하지 않아 발생. (Task 1에서 해결)
 - **[이슈 #2] 에디터 버튼 배치 혼선**: 작업 흐름에 맞지 않는 버튼 배치. (Task 3 완료 시 교정)
 - **[이슈 #3] DB 경로 불일치**: `db-data`와 `data` 폴더 혼선으로 데이터 미표시 및 Fly.io 배포 오류 발생. (Task 2 병합 시 `data`로 경로 표준화, Dockerfile/fly.toml 수정 및 아키텍처/방법론 문서에 공식 명시 완료)
+- **[이슈 #4] 백업 기능 오류 (v1.2.1 Hotfix)**: localhost 하드코딩 + credentials 누락 + saveDB() 미호출로 배포 환경에서 백업/복구 실패. (상대 경로 변경, credentials 추가, saveDB() 호출로 해결)
