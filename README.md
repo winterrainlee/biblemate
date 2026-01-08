@@ -1,6 +1,6 @@
 # BibleMate 📖
 
-> **Current Version: v1.2.1** (Hotfix - Backup Feature)
+> **Current Version: v1.3.0** (Backup Stability & UX Improvements)
 
 매일 성경을 읽고 묵상을 기록하며 영적 성장을 돕습니다. 웹에서 작동하는 웹앱입니다.
 Fly.io를 통해 24시간 어디서나 접속할 수 있으며, 암호 보호 기능을 통해 나만의 묵상을 안전하게 관리할 수 있습니다.
