@@ -30,7 +30,7 @@ const PORT = process.env.PORT || 3001;
 
 // Middleware
 app.use(cors({ credentials: true, origin: true }));
-app.use(express.json());
+app.use(express.json({ limit: '5mb' }));
 app.use(cookieParser());
 
 // Auth routes (before auth middleware)

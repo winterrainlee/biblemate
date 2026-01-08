@@ -1,13 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
-import { Moon, Sun, Monitor, Type, Download, Upload, Eye, EyeOff, LogOut } from 'lucide-react';
+import { Moon, Sun, Monitor, Type, Download, Upload, Eye, EyeOff, LogOut, CheckCircle, AlertCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { api } from '../services/api';
+import Modal from '../components/Modal';
 
 const Settings = () => {
     const { theme, setTheme, fontSize, setFontSize } = useTheme();
     const [dashboardConfig, setDashboardConfig] = useState({ showReading: true, showNotes: true });
     const [statusMessage, setStatusMessage] = useState('');
+    const [resultModal, setResultModal] = useState({
+        isOpen: false,
+        type: 'success', // 'success' | 'error'
+        title: '',
+        message: '',
+        onConfirm: null // Optional callback for confirm button
+    });
     const [authInfo, setAuthInfo] = useState({ authRequired: false });
 
     // Load dashboard config from localStorage
@@ -60,12 +68,20 @@ const Settings = () => {
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
 
-            setStatusMessage('✅ 파일이 저장되었습니다. 분실 방지를 위해 이메일이나 클라우드에 보관하는 것을 권장합니다.');
-            setTimeout(() => setStatusMessage(''), 5000);
+            setResultModal({
+                isOpen: true,
+                type: 'success',
+                title: '백업 완료',
+                message: '파일이 저장되었습니다.\n분실 방지를 위해 이메일이나 클라우드에 보관하는 것을 권장합니다.'
+            });
         } catch (error) {
             console.error('Export error:', error);
-            setStatusMessage('❌ 백업 중 오류가 발생했습니다. 로그인이 필요할 수 있습니다.');
-            setTimeout(() => setStatusMessage(''), 5000);
+            setResultModal({
+                isOpen: true,
+                type: 'error',
+                title: '백업 실패',
+                message: '백업 중 오류가 발생했습니다. 로그인이 필요할 수 있습니다.'
+            });
         }
     };
 
@@ -88,8 +104,12 @@ const Settings = () => {
             try {
                 data = JSON.parse(text);
             } catch (parseError) {
-                setStatusMessage('❌ 파일을 읽을 수 없습니다. 올바른 JSON 파일인지 확인해주세요.');
-                setTimeout(() => setStatusMessage(''), 5000);
+                setResultModal({
+                    isOpen: true,
+                    type: 'error',
+                    title: '파일 읽기 오류',
+                    message: 'JSON 형식이 올바르지 않습니다.\n올바른 백업 파일인지 확인해주세요.'
+                });
                 event.target.value = '';
                 return;
             }
@@ -106,24 +126,38 @@ const Settings = () => {
             if (!response.ok || !result.ok) {
                 // Handle specific error codes
                 const errorMessages = {
-                    'INVALID_FORMAT': '❌ 백업 파일 형식이 올바르지 않습니다.',
-                    'UNSUPPORTED_SCHEMA': '❌ 이 백업 파일은 최신 버전의 앱에서 생성되었습니다. 앱을 업데이트해주세요.',
-                    'INVALID_SCHEMA': `❌ 백업 데이터에 문제가 있습니다: ${result.message || ''}`,
-                    'IMPORT_FAILED': '❌ 데이터베이스 오류가 발생했습니다. 다시 시도해주세요.'
+                    'INVALID_FORMAT': '백업 파일 형식이 올바르지 않습니다.',
+                    'UNSUPPORTED_SCHEMA': '이 백업 파일은 최신 버전의 앱에서 생성되었습니다. 앱을 업데이트해주세요.',
+                    'INVALID_SCHEMA': `백업 데이터에 문제가 있습니다:\n${result.message || ''}`,
+                    'IMPORT_FAILED': '데이터베이스 오류가 발생했습니다. 다시 시도해주세요.'
                 };
-                const msg = errorMessages[result.error_code] || `❌ 복구 실패: ${result.message || '알 수 없는 오류'}`;
-                setStatusMessage(msg);
-                setTimeout(() => setStatusMessage(''), 7000);
+                const msg = errorMessages[result.error_code] || `복구 실패: ${result.message || '알 수 없는 오류'}`;
+
+                setResultModal({
+                    isOpen: true,
+                    type: 'error',
+                    title: '복구 실패',
+                    message: msg
+                });
                 event.target.value = '';
                 return;
             }
 
-            setStatusMessage('✅ 데이터가 복구되었습니다. 페이지를 새로고침합니다...');
-            setTimeout(() => window.location.reload(), 2000);
+            setResultModal({
+                isOpen: true,
+                type: 'success',
+                title: '복구 완료',
+                message: '데이터가 성공적으로 복구되었습니다.\n확인을 누르면 페이지가 새로고침됩니다.',
+                onConfirm: () => window.location.reload()
+            });
         } catch (error) {
             console.error('Import error:', error);
-            setStatusMessage('❌ 복구 중 오류가 발생했습니다. 로그인이 필요할 수 있습니다.');
-            setTimeout(() => setStatusMessage(''), 5000);
+            setResultModal({
+                isOpen: true,
+                type: 'error',
+                title: '오류 발생',
+                message: '복구 중 오류가 발생했습니다. 로그인이 필요할 수 있습니다.'
+            });
         }
         event.target.value = ''; // Reset file input
     };
@@ -458,6 +492,74 @@ const Settings = () => {
                 </div>
             </div>
 
+            {/* Only used for non-backup related messages now */}
+            {statusMessage && (
+                <div style={{
+                    position: 'fixed',
+                    bottom: '2rem',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    color: 'white',
+                    padding: '1rem 2rem',
+                    borderRadius: 'var(--pk-radius-full)',
+                    zIndex: 1000,
+                    animation: 'fadeIn 0.3s ease-out'
+                }}>
+                    {statusMessage}
+                </div>
+            )}
+
+            <Modal
+                isOpen={resultModal.isOpen}
+                onClose={() => setResultModal(prev => ({ ...prev, isOpen: false }))}
+                title={resultModal.title}
+            >
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem', padding: '1rem 0' }}>
+                    <div style={{
+                        width: '64px',
+                        height: '64px',
+                        borderRadius: '50%',
+                        backgroundColor: resultModal.type === 'success' ? '#dcfce7' : '#fee2e2',
+                        color: resultModal.type === 'success' ? '#16a34a' : '#dc2626',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                    }}>
+                        {resultModal.type === 'success' ? <CheckCircle size={32} /> : <AlertCircle size={32} />}
+                    </div>
+
+                    <p style={{
+                        textAlign: 'center',
+                        fontSize: '1.1rem',
+                        color: 'var(--pk-color-text)',
+                        whiteSpace: 'pre-line',
+                        lineHeight: '1.6'
+                    }}>
+                        {resultModal.message}
+                    </p>
+
+                    <button
+                        onClick={() => {
+                            setResultModal(prev => ({ ...prev, isOpen: false }));
+                            if (resultModal.onConfirm) resultModal.onConfirm();
+                        }}
+                        style={{
+                            padding: '0.75rem 2rem',
+                            backgroundColor: 'var(--pk-color-primary)',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: 'var(--pk-radius-md)',
+                            fontSize: '1rem',
+                            fontWeight: '600',
+                            cursor: 'pointer',
+                            minWidth: '120px'
+                        }}
+                    >
+                        확인
+                    </button>
+                </div>
+            </Modal>
         </div>
     );
 };

@@ -299,7 +299,7 @@ const ReadingDashboard = () => {
                 )}
 
                 {dashboardConfig.showNotes && (
-                    <div className="note-editor-wrapper">
+                    <div className={`note-editor-wrapper ${!dashboardConfig.showReading ? 'full-height' : ''}`}>
                         <NoteEditor
                             ref={noteEditorRef}
                             date={dateStr}

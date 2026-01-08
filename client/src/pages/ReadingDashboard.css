@@ -84,3 +84,11 @@
         /* Internal scroll */
     }
 }
+
+/* 묵상 집중 모드: 노트 에디터가 전체 높이 차지 */
+.note-editor-wrapper.full-height {
+    flex: 1;
+    height: auto;
+    max-height: none;
+    min-height: 0;
+}

@@ -16,7 +16,7 @@ const REQUIRED_FIELDS = {
 };
 
 /**
- * Validate required fields for an entity
+ * Validate required fields and types for an entity
  * @returns {string|null} Error message or null if valid
  */
 function validateEntity(entityName, records) {
@@ -26,8 +26,24 @@ function validateEntity(entityName, records) {
     for (let i = 0; i < records.length; i++) {
         const record = records[i];
         for (const field of requiredFields) {
-            if (record[field] === undefined || record[field] === null) {
+            const value = record[field];
+
+            // 1. Check existence
+            if (value === undefined || value === null) {
                 return `${entityName}[${i}].${field} is required`;
+            }
+
+            // 2. Check types
+            if (field.includes('date') && typeof value !== 'string') {
+                return `${entityName}[${i}].${field} must be a string (date)`;
+            }
+            if ((field.includes('chapter') || field.includes('verse') || field === 'id') && typeof value !== 'number') {
+                // Allow null for id (auto-generated) but if present must be number
+                if (field === 'id' && value === null) continue;
+                return `${entityName}[${i}].${field} must be a number`;
+            }
+            if ((field === 'book' || field === 'content' || field === 'style') && typeof value !== 'string') {
+                return `${entityName}[${i}].${field} must be a string`;
             }
         }
     }
@@ -187,7 +203,7 @@ router.post('/import', (req, res) => {
                 );
                 for (const record of reading_logs) {
                     readingStmt.bind([
-                        record.id,
+                        record.id ?? null,
                         record.date,
                         record.book,
                         record.chapter_from,
@@ -208,7 +224,7 @@ router.post('/import', (req, res) => {
                 );
                 for (const note of notes) {
                     notesStmt.bind([
-                        note.id,
+                        note.id ?? null,
                         note.date,
                         note.content,
                         note.created_at || now,
@@ -227,7 +243,7 @@ router.post('/import', (req, res) => {
                 );
                 for (const highlight of highlights) {
                     highlightsStmt.bind([
-                        highlight.id,
+                        highlight.id ?? null,
                         highlight.book,
                         highlight.chapter,
                         highlight.verse,

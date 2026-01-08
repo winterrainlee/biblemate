@@ -5,8 +5,23 @@
 
 ## 개요
 - 버전: v1.3.0
-- 목표: **"백업 안정성 강화 및 데이터 무결성 보장"**
+- 목표: **"백업 안정성 강화 및 UX 개선"**
 - 상태: **개발 중**
+
+## v1.3 최종 범위
+
+| 우선순위 | 기능 | 상태 |
+|----------|------|------|
+| ✅ 완료 | 백업 포맷 개선 (app_version + schema_version) | 완료 |
+| ✅ 완료 | Import 필수 필드 검증 | 완료 |
+| ✅ 완료 | 에러 응답 표준화 (error_code) | 완료 |
+| ✅ 완료 | 하위 호환성 처리 | 완료 |
+| ✅ 완료 | UI 에러 메시지 개선 | 완료 |
+| 🟢 예정 | Import 용량 제한 (5mb) | - |
+| 🟢 예정 | 데이터 무결성 검사 (논리적 검증) | - |
+| 🟢 예정 | **화면 분할 비율 조정** | - |
+
+---
 
 ## 주요 구현 기능
 
@@ -92,14 +107,39 @@
 
 ---
 
+### 5. 화면 분할 비율 조정
+
+#### 문제
+- "묵상 집중" 모드(말씀 영역 OFF)에서 노트 에디터가 고정 높이(35vh)로 유지됨
+- 말씀 영역이 없어도 노트 영역이 화면 하단에 작게 표시됨
+
+#### 해결
+| 모드 | 말씀 | 묵상 | 노트 영역 높이 |
+|------|------|------|----------------|
+| 기본 | ✅ | ✅ | 35vh (현재 유지) |
+| 말씀 집중 | ✅ | ❌ | 0 (숨김) |
+| 묵상 집중 | ❌ | ✅ | **100% (전체 화면)** |
+
+#### 구현
+- `ReadingDashboard.jsx`: 조건부 클래스 `full-height` 추가
+- `ReadingDashboard.css`: `.note-editor-wrapper.full-height` 스타일 추가
+
+---
+
 ## 마일스톤
 
-- [ ] Task 1: 백업 Export 포맷 변경 (app_version + schema_version)
-- [ ] Task 2: Import 검증 로직 구현
-- [ ] Task 3: 에러 응답 표준화
-- [ ] Task 4: 하위 호환성 처리
-- [ ] Task 5: UI 에러 메시지 개선
-- [ ] Task 6: 테스트 및 검증
+### 백업 안정성 (완료)
+- [x] Task 1: 백업 Export 포맷 변경 (app_version + schema_version)
+- [x] Task 2: Import 검증 로직 구현
+- [x] Task 3: 에러 응답 표준화
+- [x] Task 4: 하위 호환성 처리
+- [x] Task 5: UI 에러 메시지 개선
+
+### 추가 기능 (예정)
+- [ ] Task 6: Import 용량 제한 (5mb)
+- [ ] Task 7: 데이터 무결성 검사 (논리적 검증)
+- [ ] Task 8: 화면 분할 비율 조정
 
 ## 참고 문서
-- [implementation_plan.md (Antigravity)](file:///C:/Users/winte/.gemini/antigravity/brain/2e970794-4970-48f3-a3d6-cc89e0d1cade/implementation_plan.md)
+- [codex-proposal-v1.3.md (v1.3 추가 우선순위)](../logs/codex-proposal-v1.3.md)
+
