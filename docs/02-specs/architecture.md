@@ -1,4 +1,4 @@
-# 🏗️ System Architecture (v1.2)
+# 🏗️ System Architecture (v1.3)
 
 > **Last Updated: 2026-01-08**
 
@@ -119,13 +119,16 @@ erDiagram
     }
 ```
 
-### 2) Backup JSON Schema
+### 2) Backup JSON Schema (v1.3)
 내보내기/가져오기에 사용되는 JSON의 기본 구조입니다.
+메타데이터(`app_version`, `schema_version`)를 통해 호환성을 관리합니다.
 
 ```json
 {
-  "version": "1.1",
-  "exported_at": "2026-01-06T...",
+  "version": "1.3",
+  "app_version": "1.3.0",
+  "schema_version": 2,
+  "exported_at": "2026-01-08T...",
   "data": {
     "reading_logs": [...],
     "notes": [...],
@@ -133,6 +136,7 @@ erDiagram
   }
 }
 ```
+* **제약 사항**: Import 시 파일 크기는 **5MB**로 제한되며, 무결성 검증을 거칩니다.
 
 ---
 

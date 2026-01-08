@@ -1,5 +1,7 @@
 # Release Notes v1.3.0
 
+> **Date: 2026-01-08**
+
 ## 🚀 주요 변경 사항 (Highlights)
 ### 1. 백업 시스템 안정성 강화 (Backup Stability)
 - **백업 파일 포맷 개선**: 버전 관리 및 스키마 검증을 위한 메타데이터(`app_version`, `schema_version`) 추가
