@@ -27,3 +27,28 @@
 
 ## 📬 피드백 및 기여
 - 사용 중 불편한 점이나 제안 사항은 `winterrain.lee@icloud.com`으로 보내주세요.
+
+---
+
+# Release Notes - v1.2.1 (Hotfix)
+
+> **배포일**: 2026-01-08  
+> **테마**: "백업 기능 긴급 패치"
+
+## 🐛 버그 수정
+
+### 백업(데이터 내보내기/가져오기) 기능 오류 해결
+v1.2.0에서 발생한 백업 기능 오류를 수정했습니다.
+
+**원인 분석:**
+1. **localhost 하드코딩** - 배포 환경(Fly.io)에서 요청 실패
+2. **인증 쿠키 미전송** - 401 Unauthorized 에러 발생
+3. **saveDB() 미호출** - 데이터 import 후 영속성 미보장
+
+**수정 내용:**
+- `Settings.jsx`: localhost URL → 상대 경로(`/api/backup/*`) 변경
+- `Settings.jsx`: `credentials: 'include'` 추가로 인증 쿠키 전송
+- `backup.js`: import 후 `saveDB()` 호출 추가
+
+## 📬 피드백 및 기여
+- 사용 중 불편한 점이나 제안 사항은 `winterrain.lee@icloud.com`으로 보내주세요.

@@ -44,7 +44,9 @@ const Settings = () => {
     // Handle backup export
     const handleExport = async () => {
         try {
-            const response = await fetch('http://localhost:3001/api/backup/export');
+            const response = await fetch('/api/backup/export', {
+                credentials: 'include'
+            });
             if (!response.ok) throw new Error('Export failed');
 
             const data = await response.json();
@@ -62,7 +64,7 @@ const Settings = () => {
             setTimeout(() => setStatusMessage(''), 5000);
         } catch (error) {
             console.error('Export error:', error);
-            setStatusMessage('❌ 백업 중 오류가 발생했습니다.');
+            setStatusMessage('❌ 백업 중 오류가 발생했습니다. 로그인이 필요할 수 있습니다.');
             setTimeout(() => setStatusMessage(''), 5000);
         }
     };
@@ -84,10 +86,11 @@ const Settings = () => {
             const text = await file.text();
             const data = JSON.parse(text);
 
-            const response = await fetch('http://localhost:3001/api/backup/import', {
+            const response = await fetch('/api/backup/import', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
+                body: JSON.stringify(data),
+                credentials: 'include'
             });
 
             if (!response.ok) throw new Error('Import failed');
@@ -401,7 +404,7 @@ const Settings = () => {
                 </h3>
 
                 <div className="license-info" style={{ fontSize: '0.9rem', color: 'var(--pk-color-text-secondary)', lineHeight: '1.6' }}>
-                    <p style={{ marginBottom: '0.5rem' }}><strong>BibleMate v1.2.0</strong></p>
+                    <p style={{ marginBottom: '0.5rem' }}><strong>BibleMate v1.2.1</strong></p>
                     <p style={{ marginBottom: '1rem' }}>개인 묵상과 성경 읽기를 돕기 위해 만든 웹 애플리케이션입니다.</p>
 
                     <h4 style={{ fontSize: '0.95rem', color: 'var(--pk-color-text)', marginBottom: '0.5rem' }}>성경 데이터 저작권</h4>

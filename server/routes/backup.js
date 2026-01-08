@@ -1,5 +1,5 @@
 import express from 'express';
-import { getDB } from '../db/init.js';
+import { getDB, saveDB } from '../db/init.js';
 
 const router = express.Router();
 
@@ -140,6 +140,9 @@ router.post('/import', (req, res) => {
 
             // Commit transaction
             db.run('COMMIT');
+
+            // Persist changes to file
+            saveDB();
 
             res.json({
                 ok: true,
