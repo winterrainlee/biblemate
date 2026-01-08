@@ -84,7 +84,15 @@ const Settings = () => {
 
         try {
             const text = await file.text();
-            const data = JSON.parse(text);
+            let data;
+            try {
+                data = JSON.parse(text);
+            } catch (parseError) {
+                setStatusMessage('❌ 파일을 읽을 수 없습니다. 올바른 JSON 파일인지 확인해주세요.');
+                setTimeout(() => setStatusMessage(''), 5000);
+                event.target.value = '';
+                return;
+            }
 
             const response = await fetch('/api/backup/import', {
                 method: 'POST',
@@ -93,13 +101,28 @@ const Settings = () => {
                 credentials: 'include'
             });
 
-            if (!response.ok) throw new Error('Import failed');
+            const result = await response.json();
+
+            if (!response.ok || !result.ok) {
+                // Handle specific error codes
+                const errorMessages = {
+                    'INVALID_FORMAT': '❌ 백업 파일 형식이 올바르지 않습니다.',
+                    'UNSUPPORTED_SCHEMA': '❌ 이 백업 파일은 최신 버전의 앱에서 생성되었습니다. 앱을 업데이트해주세요.',
+                    'INVALID_SCHEMA': `❌ 백업 데이터에 문제가 있습니다: ${result.message || ''}`,
+                    'IMPORT_FAILED': '❌ 데이터베이스 오류가 발생했습니다. 다시 시도해주세요.'
+                };
+                const msg = errorMessages[result.error_code] || `❌ 복구 실패: ${result.message || '알 수 없는 오류'}`;
+                setStatusMessage(msg);
+                setTimeout(() => setStatusMessage(''), 7000);
+                event.target.value = '';
+                return;
+            }
 
             setStatusMessage('✅ 데이터가 복구되었습니다. 페이지를 새로고침합니다...');
             setTimeout(() => window.location.reload(), 2000);
         } catch (error) {
             console.error('Import error:', error);
-            setStatusMessage('❌ 복구 중 오류가 발생했습니다. 파일 형식을 확인해주세요.');
+            setStatusMessage('❌ 복구 중 오류가 발생했습니다. 로그인이 필요할 수 있습니다.');
             setTimeout(() => setStatusMessage(''), 5000);
         }
         event.target.value = ''; // Reset file input
