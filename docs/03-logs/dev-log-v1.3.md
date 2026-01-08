@@ -46,6 +46,14 @@
     - **대안**: `curl` 및 API 직접 호출 테스트로 검증 수행.
     - **교훈**: E2E 실패 대비용 Integration Test Script 준비 필요.
 
+### 2026-01-09 (UX 개선: Favicon & PWA)
+#### 개발 내용
+- **브랜딩 강화**:
+  - `logo.png` (Blue Book Icon) 생성 및 적용.
+  - `manifest.json` 추가로 모바일 홈 화면 추가 및 PWA 지원.
+- **웹 표준 준수**:
+  - `index.html` 내 favicon, apple-touch-icon, manifest 링크 최적화.
+
 ---
 
 ## 이슈 및 해결
