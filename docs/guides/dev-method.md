@@ -130,6 +130,7 @@ graph TD
 3. **태그 및 릴리즈**: Git 태그 생성 (`v1.2.0` 등)
 4. **릴리즈 노트 작성**: `docs/04-releases/release-notes-vX.Y.md` 생성
 5. **문서 정리**: Roadmap 완료 처리(Inbox 및 Categorized item의 구현 항목 삭제, Completed 섹션에 구현 항목 추가) 및 `docs-index.md` 업데이트
+6. **브랜치 정리**: 작업이 완료된 기능/통합 브랜치 삭제 (Local & Remote)
 
 ---
 
