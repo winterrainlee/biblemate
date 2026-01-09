@@ -37,8 +37,10 @@ coverage/
 # Temporary files
 *.tmp
 *.temp
+temp/
 
 # Documentation (tracked now)
 # docs/
 # Test Data
 docs/assets/test-data/
+docs/temp/

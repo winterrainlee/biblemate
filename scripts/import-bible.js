@@ -37,10 +37,12 @@ const ABBREV_TO_OSIS = {
 function fetchJSON(url) {
     return new Promise((resolve, reject) => {
         https.get(url, (res) => {
-            let data = '';
-            res.on('data', chunk => data += chunk);
+            const chunks = [];
+            res.on('data', chunk => chunks.push(chunk));
             res.on('end', () => {
                 try {
+                    const buffer = Buffer.concat(chunks);
+                    let data = buffer.toString('utf8');
                     // Remove BOM if present
                     if (data.charCodeAt(0) === 0xFEFF) {
                         data = data.slice(1);
@@ -52,6 +54,19 @@ function fetchJSON(url) {
             });
         }).on('error', reject);
     });
+}
+
+/**
+ * Decode HTML entities in text
+ */
+function decodeHtmlEntities(text) {
+    return text
+        .replace(/&#x27;/g, "'")
+        .replace(/&#39;/g, "'")
+        .replace(/&quot;/g, '"')
+        .replace(/&amp;/g, '&')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>');
 }
 
 /**
@@ -77,7 +92,8 @@ async function importKRV(db) {
 
         book.chapters.forEach((chapter, chapterIndex) => {
             chapter.forEach((verseText, verseIndex) => {
-                stmt.run([osisCode, chapterIndex + 1, verseIndex + 1, verseText.trim()]);
+                const cleanText = decodeHtmlEntities(verseText.trim());
+                stmt.run([osisCode, chapterIndex + 1, verseIndex + 1, cleanText]);
                 totalVerses++;
             });
         });
@@ -129,6 +145,58 @@ async function importBBE(db) {
 }
 
 /**
+ * Apply corrections from bible-corrections.json
+ */
+async function applyCorrections(db) {
+    const fs = await import('fs');
+    const path = await import('path');
+    const { fileURLToPath } = await import('url');
+
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = path.dirname(__filename);
+    const correctionsPath = path.join(__dirname, '..', 'server', 'data', 'bible-corrections.json');
+
+    if (!fs.existsSync(correctionsPath)) {
+        console.log('\n⏭️ No corrections file found, skipping...');
+        return 0;
+    }
+
+    const data = JSON.parse(fs.readFileSync(correctionsPath, 'utf8'));
+
+    if (!data.corrections || data.corrections.length === 0) {
+        console.log('\n⏭️ No corrections to apply');
+        return 0;
+    }
+
+    console.log(`\n🔧 Applying ${data.corrections.length} corrections (v${data.version})...`);
+
+    const stmt = db.prepare(`
+        INSERT OR REPLACE INTO bible_verses (text, book, chapter, verse, version)
+        VALUES (?, ?, ?, ?, ?)
+    `);
+
+    let applied = 0;
+    let failed = 0;
+    for (const c of data.corrections) {
+        stmt.run([c.corrected, c.book, c.chapter, c.verse, c.version || 'krv']);
+        if (db.getRowsModified() > 0) {
+            applied++;
+        } else {
+            failed++;
+        }
+        process.stdout.write(`\r  Applied: ${applied}/${data.corrections.length} (Failed: ${failed})`);
+    }
+    stmt.free();
+
+    if (failed > 0) {
+        console.warn(`\n⚠️ ${failed} corrections were NOT applied because the target verses were not found.`);
+    }
+
+    console.log(`\n✅ Corrections applied: ${applied}`);
+    return applied;
+}
+
+/**
  * Main import function
  */
 async function main() {
@@ -143,6 +211,9 @@ async function main() {
         // Import English Bible
         const bbeCount = await importBBE(db);
 
+        // Apply corrections
+        const correctionCount = await applyCorrections(db);
+
         // Save and close
         saveDB();
         closeDB();
@@ -150,6 +221,7 @@ async function main() {
         console.log('\n=== Import Summary ===');
         console.log(`Korean Bible (개역한글): ${krvCount} verses`);
         console.log(`English Bible (BBE): ${bbeCount} verses`);
+        console.log(`Corrections applied: ${correctionCount}`);
         console.log('✅ All imports completed successfully!');
 
     } catch (error) {
@@ -159,3 +231,4 @@ async function main() {
 }
 
 main();
+

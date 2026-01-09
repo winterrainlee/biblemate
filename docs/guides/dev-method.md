@@ -88,7 +88,7 @@ graph TD
 
 ### 1단계: 기능 브랜치 생성
 - `/branch` 명령어로 기능 브랜치를 생성합니다.
-- Hot fix의 경우 브랜치를 생성하지 않고 `master` 브랜치에서 바로 작업합니다.
+- Hot fix의 경우 난이도가 간단할 경우, 사용자의 승인 하에 브랜치를 생성하지 않고 `master` 브랜치에서 바로 작업할 수 있습니다.
 
 ### 2단계: 구현 계획 작성 (Implementation Planning)
 - 수정 전, `implementation_plan.md`를 **아티팩트**로 작성하여 제출합니다.
@@ -114,6 +114,7 @@ graph TD
 ### 5단계: 개발 로그 업데이트 (Retrospective)
 - PR 승인 후, `docs/03-logs/dev-log-v버전명.md`에 개발 과정을 기록합니다.
   - **Retrospective**: 문제점 및 해결 과정, 교훈(Lessons Learned)
+- 개발 과정의 핵심 lessons learned를 `docs/lessons.md`에 기록합니다.
 
 ### 6단계: 최종 병합 (Merge)
 - 기능을 통합 브랜치로 병합하고 기능 브랜치를 삭제합니다.
