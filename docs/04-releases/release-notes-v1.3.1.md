@@ -28,5 +28,6 @@
 - Fixed intermittent text corruption (Replacement Character `\uFFFD`) in Genesis, Job, and Revelation.
 - Fixed verse shifting issue where fixing one verse would break adjacent ones.
 
-## 📝 Known Issues
-- None. (All known text corruptions have been resolved)
+## � Report Issues
+본 릴리즈는 전수 조사를 통해 무결성을 검증했으나, 혹시라도 텍스트 오류나 버그가 발견되면 언제든 제보해 주세요.
+확인 후 신속하게 수정하겠습니다. (winterrain.lee@icloud.com)
