@@ -35,8 +35,6 @@
 ## Categorized items
 
 ### 📖 읽기 (Reading)
-- `[Patch]` `🟢 Easy` **성경 본문 문자 깨짐 수정**: 대한성서공회 공식 버전 참고하여 책별로 수정 필요
-  - 참고: https://www.bskorea.or.kr/bible/korbibReadpage.php
 - `[Minor]` `🟡 Medium` **역본 대조 보기 (Parallel View)**: 한글/영어를 나란히 비교하며 읽기
 - `[Minor]` `🟡 Medium` `⚠️ 리스크` **추가 역본 지원**: 개역개정, 새번역 ESV, NIV (라이선스 확보 필요)
 - `[Minor]` `🟡 Medium` **절(Verse) 단위 체크**: 장 전체가 아닌 절 단위 읽기 표시

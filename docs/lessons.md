@@ -16,6 +16,14 @@ Bible Reading Mate 프로젝트를 진행하며 각 버전(v1.0 ~ v1.3.1)에서 
 - **검증의 자동화 (Direct Inspection)** `v1.3.1`
   - UI 레벨 검증은 한계가 있습니다. SQL(`LIKE '%\uFFFD%'`)을 직접 실행하는 검증 스크립트(`scan-corrupted-db.js`)로 숨겨진 결함을 찾아야 합니다.
 
+### 🕵️ 검증 전략 (The Proxy Trap)
+- **Proxy Trap 회피** `v1.3.1`
+  - "파일로 Export해서 라인 별로 검사하자"는 접근은 위험합니다. Text File은 DB의 **Proxy(대리자)**일 뿐입니다.
+  - Export 과정에서 개행 문자 등이 섞이면 라인 번호가 밀려(Shifting), DB는 멀쩡한데 데이터가 꼬인 것처럼 보이는 착시를 일으킵니다.
+  - **Lesson**: 검증은 중간 단계를 거치지 말고, `scan-corrupted-db.js`처럼 **DB에 직접 쿼리**하여 상태를 확인해야 합니다.
+- **Dirty Data에 대한 가정** `v1.3.1`
+  - "JSON 텍스트 필드에 설마 엔터가 있겠어?"라는 안일한 가정이 디버깅 시간을 낭비하게 만듭니다. 외부 데이터는 항상 정규화(Normalization, 예: 개행 제거) 후 처리해야 합니다.
+
 ### 💾 백업 및 복구 전략
 - **복구 시 `INSERT OR REPLACE` 사용** `v1.3.1`
   - 누락된 데이터를 복구할 때 `UPDATE` 문은 무용지물입니다. 없는 데이터는 생성하고 있는 데이터는 덮어쓰는 `INSERT OR REPLACE` 전략을 사용하세요.
