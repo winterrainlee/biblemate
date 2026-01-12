@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
-import { Moon, Sun, Monitor, Type, Download, Upload, Eye, EyeOff, LogOut, CheckCircle, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Type, Download, Upload, Eye, EyeOff, LogOut, CheckCircle, AlertCircle, CalendarOff } from 'lucide-react';
 import { format } from 'date-fns';
 import { api } from '../services/api';
 import Modal from '../components/Modal';
 
 const Settings = () => {
-    const { theme, setTheme, fontSize, setFontSize } = useTheme();
-    const [dashboardConfig, setDashboardConfig] = useState({ showReading: true, showNotes: true });
+    const navigate = useNavigate();
+    const { fontSize, setFontSize } = useTheme();
+    const [dashboardConfig, setDashboardConfig] = useState({ showReading: true, showNotes: true, hideCalendarOnMobile: false });
     const [statusMessage, setStatusMessage] = useState('');
     const [resultModal, setResultModal] = useState({
         isOpen: false,
@@ -178,9 +180,31 @@ const Settings = () => {
 
     return (
         <div className="page-settings container">
-            <div className="settings-header" style={{ marginBottom: '2rem' }}>
-                <h2>설정</h2>
-                <p className="text-secondary">화면 스타일을 취향에 맞게 조정하세요.</p>
+            {/* v1.4.1: BibleChartPage 스타일 헤더 */}
+            <div className="settings-header" style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '1rem',
+                marginBottom: '2rem',
+                paddingBottom: '1rem',
+                borderBottom: '1px solid var(--pk-color-border)'
+            }}>
+                <button
+                    onClick={() => navigate(-1)}
+                    style={{
+                        background: 'none',
+                        border: 'none',
+                        cursor: 'pointer',
+                        padding: '0.5rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        color: 'var(--pk-color-text)'
+                    }}
+                    title="뒤로가기"
+                >
+                    <ArrowLeft size={24} />
+                </button>
+                <h2 style={{ margin: 0 }}>설정</h2>
             </div>
 
             {/* Logout Section - Only show when auth is enabled */}
@@ -223,7 +247,7 @@ const Settings = () => {
                     </button>
                 </div>
             )}
-
+            {/* v1.4.1: 화면 표시 설정 - 맨 위로 이동 */}
             <div className="settings-section" style={{
                 marginBottom: '2rem',
                 padding: '1.5rem',
@@ -232,39 +256,105 @@ const Settings = () => {
                 borderRadius: 'var(--pk-radius-lg)'
             }}>
                 <h3 style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <Sun size={20} /> 테마 설정
+                    <Eye size={20} /> 화면 표시 설정
                 </h3>
+                <p style={{ color: 'var(--pk-color-text-secondary)', marginBottom: '1rem', fontSize: '0.9rem' }}>
+                    홈 화면에서 표시할 영역을 선택하세요.
+                </p>
 
-                <div className="theme-options" style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-                    {[
-                        { value: 'light', label: '라이트', icon: <Sun size={18} /> },
-                        { value: 'dark', label: '다크', icon: <Moon size={18} /> },
-                        { value: 'system', label: '시스템 설정', icon: <Monitor size={18} /> }
-                    ].map(option => (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    <div style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        padding: '1rem',
+                        backgroundColor: 'var(--pk-color-bg-secondary)',
+                        borderRadius: 'var(--pk-radius-md)',
+                        border: '1px solid var(--pk-color-border)'
+                    }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            {dashboardConfig.showReading ? <Eye size={18} /> : <EyeOff size={18} />}
+                            <span style={{ fontWeight: '500' }}>말씀 영역</span>
+                        </div>
                         <button
-                            key={option.value}
-                            onClick={() => setTheme(option.value)}
-                            className={`theme-btn ${theme === option.value ? 'active' : ''}`}
+                            onClick={() => handleDashboardToggle('showReading')}
                             style={{
-                                flex: 1,
-                                minWidth: '100px',
-                                padding: '1rem',
-                                display: 'flex',
-                                flexDirection: 'column',
-                                alignItems: 'center',
-                                gap: '0.5rem',
-                                border: `2px solid ${theme === option.value ? 'var(--pk-color-primary)' : 'var(--pk-color-border)'}`,
-                                borderRadius: 'var(--pk-radius-md)',
-                                backgroundColor: theme === option.value ? 'var(--pk-color-bg-secondary)' : 'transparent',
-                                color: theme === option.value ? 'var(--pk-color-primary)' : 'var(--pk-color-text)',
+                                padding: '0.5rem 1rem',
+                                backgroundColor: dashboardConfig.showReading ? 'var(--pk-color-primary)' : 'var(--pk-color-bg)',
+                                color: dashboardConfig.showReading ? 'white' : 'var(--pk-color-text)',
+                                border: `2px solid ${dashboardConfig.showReading ? 'var(--pk-color-primary)' : 'var(--pk-color-border)'}`,
+                                borderRadius: 'var(--pk-radius-sm)',
                                 cursor: 'pointer',
-                                fontWeight: theme === option.value ? '600' : '400'
+                                fontWeight: '600'
                             }}
                         >
-                            {option.icon}
-                            {option.label}
+                            {dashboardConfig.showReading ? 'ON' : 'OFF'}
                         </button>
-                    ))}
+                    </div>
+
+                    <div style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        padding: '1rem',
+                        backgroundColor: 'var(--pk-color-bg-secondary)',
+                        borderRadius: 'var(--pk-radius-md)',
+                        border: '1px solid var(--pk-color-border)'
+                    }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            {dashboardConfig.showNotes ? <Eye size={18} /> : <EyeOff size={18} />}
+                            <span style={{ fontWeight: '500' }}>묵상 영역</span>
+                        </div>
+                        <button
+                            onClick={() => handleDashboardToggle('showNotes')}
+                            style={{
+                                padding: '0.5rem 1rem',
+                                backgroundColor: dashboardConfig.showNotes ? 'var(--pk-color-primary)' : 'var(--pk-color-bg)',
+                                color: dashboardConfig.showNotes ? 'white' : 'var(--pk-color-text)',
+                                border: `2px solid ${dashboardConfig.showNotes ? 'var(--pk-color-primary)' : 'var(--pk-color-border)'}`,
+                                borderRadius: 'var(--pk-radius-sm)',
+                                cursor: 'pointer',
+                                fontWeight: '600'
+                            }}
+                        >
+                            {dashboardConfig.showNotes ? 'ON' : 'OFF'}
+                        </button>
+                    </div>
+
+                    {/* 모바일 달력 숨김 옵션 */}
+                    <div style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        padding: '1rem',
+                        backgroundColor: 'var(--pk-color-bg-secondary)',
+                        borderRadius: 'var(--pk-radius-md)',
+                        border: '1px solid var(--pk-color-border)'
+                    }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <CalendarOff size={18} />
+                            <div>
+                                <span style={{ fontWeight: '500' }}>모바일 달력 숨김</span>
+                                <p style={{ fontSize: '0.75rem', color: 'var(--pk-color-text-secondary)', margin: 0 }}>
+                                    오늘 말씀에 집중할 수 있어요
+                                </p>
+                            </div>
+                        </div>
+                        <button
+                            onClick={() => handleDashboardToggle('hideCalendarOnMobile')}
+                            style={{
+                                padding: '0.5rem 1rem',
+                                backgroundColor: dashboardConfig.hideCalendarOnMobile ? 'var(--pk-color-primary)' : 'var(--pk-color-bg)',
+                                color: dashboardConfig.hideCalendarOnMobile ? 'white' : 'var(--pk-color-text)',
+                                border: `2px solid ${dashboardConfig.hideCalendarOnMobile ? 'var(--pk-color-primary)' : 'var(--pk-color-border)'}`,
+                                borderRadius: 'var(--pk-radius-sm)',
+                                cursor: 'pointer',
+                                fontWeight: '600'
+                            }}
+                        >
+                            {dashboardConfig.hideCalendarOnMobile ? 'ON' : 'OFF'}
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -373,82 +463,6 @@ const Settings = () => {
                 </div>
             </div>
 
-            {/* Dashboard Display Settings */}
-            <div className="settings-section" style={{
-                marginBottom: '2rem',
-                padding: '1.5rem',
-                backgroundColor: 'var(--pk-color-bg)',
-                border: '1px solid var(--pk-color-border)',
-                borderRadius: 'var(--pk-radius-lg)'
-            }}>
-                <h3 style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <Eye size={20} /> 화면 표시 설정
-                </h3>
-                <p style={{ color: 'var(--pk-color-text-secondary)', marginBottom: '1rem', fontSize: '0.9rem' }}>
-                    홈 화면에서 표시할 영역을 선택하세요. 읽기 또는 묵상 중 하나에만 집중할 수 있습니다.
-                </p>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                    <div style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        padding: '1rem',
-                        backgroundColor: 'var(--pk-color-bg-secondary)',
-                        borderRadius: 'var(--pk-radius-md)',
-                        border: '1px solid var(--pk-color-border)'
-                    }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            {dashboardConfig.showReading ? <Eye size={18} /> : <EyeOff size={18} />}
-                            <span style={{ fontWeight: '500' }}>말씀 영역</span>
-                        </div>
-                        <button
-                            onClick={() => handleDashboardToggle('showReading')}
-                            style={{
-                                padding: '0.5rem 1rem',
-                                backgroundColor: dashboardConfig.showReading ? 'var(--pk-color-primary)' : 'var(--pk-color-bg)',
-                                color: dashboardConfig.showReading ? 'white' : 'var(--pk-color-text)',
-                                border: `2px solid ${dashboardConfig.showReading ? 'var(--pk-color-primary)' : 'var(--pk-color-border)'}`,
-                                borderRadius: 'var(--pk-radius-sm)',
-                                cursor: 'pointer',
-                                fontWeight: '600'
-                            }}
-                        >
-                            {dashboardConfig.showReading ? 'ON' : 'OFF'}
-                        </button>
-                    </div>
-
-                    <div style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        padding: '1rem',
-                        backgroundColor: 'var(--pk-color-bg-secondary)',
-                        borderRadius: 'var(--pk-radius-md)',
-                        border: '1px solid var(--pk-color-border)'
-                    }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            {dashboardConfig.showNotes ? <Eye size={18} /> : <EyeOff size={18} />}
-                            <span style={{ fontWeight: '500' }}>묵상 영역</span>
-                        </div>
-                        <button
-                            onClick={() => handleDashboardToggle('showNotes')}
-                            style={{
-                                padding: '0.5rem 1rem',
-                                backgroundColor: dashboardConfig.showNotes ? 'var(--pk-color-primary)' : 'var(--pk-color-bg)',
-                                color: dashboardConfig.showNotes ? 'white' : 'var(--pk-color-text)',
-                                border: `2px solid ${dashboardConfig.showNotes ? 'var(--pk-color-primary)' : 'var(--pk-color-border)'}`,
-                                borderRadius: 'var(--pk-radius-sm)',
-                                cursor: 'pointer',
-                                fontWeight: '600'
-                            }}
-                        >
-                            {dashboardConfig.showNotes ? 'ON' : 'OFF'}
-                        </button>
-                    </div>
-                </div>
-            </div>
-
             <div className="settings-section" style={{
                 marginTop: '2rem',
                 padding: '1.5rem',
@@ -461,7 +475,7 @@ const Settings = () => {
                 </h3>
 
                 <div className="license-info" style={{ fontSize: '0.9rem', color: 'var(--pk-color-text-secondary)', lineHeight: '1.6' }}>
-                    <p style={{ marginBottom: '0.5rem' }}><strong>BibleMate v1.4.0</strong></p>
+                    <p style={{ marginBottom: '0.5rem' }}><strong>BibleMate v1.4.1</strong></p>
                     <p style={{ marginBottom: '1rem' }}>개인 묵상과 성경 읽기를 돕기 위해 만든 웹 애플리케이션입니다.</p>
 
                     <h4 style={{ fontSize: '0.95rem', color: 'var(--pk-color-text)', marginBottom: '0.5rem' }}>성경 데이터 저작권</h4>

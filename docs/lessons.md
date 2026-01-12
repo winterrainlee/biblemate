@@ -79,3 +79,15 @@ Bible Reading Mate 프로젝트를 진행하며 각 버전(v1.0 ~ v1.3.1)에서 
 - **터미널 호환성** `v1.0`
   - `npx` 권한 문제나 명령어(`mkdir`) 차이로 스크립트가 실패할 수 있습니다. `cmd /c` 래퍼를 사용하거나 Node.js 스크립트로 툴링을 대체하는 것이 이식성에 좋습니다.
 
+---
+
+## 5. Mobile Layout Debugging (모바일 레이아웃) `v1.4.1`
+
+### 📱 모바일 공백 버그 추적
+- **Inline Style 추적의 중요성** `v1.4.1`
+  - CSS 파일 외에 JSX 내 inline `style` 속성도 공백의 원인이 될 수 있습니다. `marginTop`, `bottom` 같은 spacing 속성을 전체 검색해야 합니다.
+- **Responsive 간격 분리** `v1.4.1`
+  - 데스크톱(2rem)과 모바일(0.5rem~1rem)에서 적절한 간격이 다릅니다. 미디어 쿼리로 분리하거나, 처음부터 작은 값으로 통일하는 것이 안전합니다.
+- **Sticky Position과 Bottom 값** `v1.4.1`
+  - `position: sticky; bottom: 2rem;`은 데스크톱에서 보기 좋지만 모바일에서는 불필요한 공백을 유발합니다. 모바일 우선 설계 시 `bottom: 0.5rem` 정도가 적절합니다.
+

@@ -181,12 +181,14 @@ const BibleViewer = ({
 
             {/* Action Bar (Floating or Fixed at bottom) */}
             <div className="viewer-actions" style={{
-                marginTop: '2rem',
+                marginTop: '1rem',
+                /* v1.4.1: 2rem -> 1rem 모바일 공백 줄임 */
                 display: 'flex',
                 justifyContent: 'flex-end',
                 gap: '1rem',
                 position: 'sticky',
-                bottom: '2rem'
+                bottom: '0.5rem'
+                /* v1.4.1: 2rem -> 0.5rem 모바일 간격 줄임 */
             }}>
                 {/* Highlight Palette could go here */}
 

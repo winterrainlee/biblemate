@@ -319,7 +319,8 @@ const ReadingDashboard = () => {
         <div className="dashboard-container">
             {/* Left Sidebar */}
             <aside className="dashboard-sidebar">
-                <div className="sidebar-section">
+                {/* v1.4.1: hideCalendarOnMobile 적용 - CSS media query로 숨김 처리 */}
+                <div className={`sidebar-section ${dashboardConfig.hideCalendarOnMobile ? 'hide-on-mobile' : ''}`}>
                     <Calendar
                         readingLogs={readingLogs}
                         compact={true}

@@ -25,11 +25,14 @@
     position: relative;
     overflow: hidden;
     /* Contain children */
+    gap: 0;
+    /* v1.4.1: 모바일 공백 버그 수정 */
 }
 
 .bible-viewer-wrapper {
     flex: 1;
-    padding: 1.5rem;
+    padding: 1.5rem 1.5rem 0.5rem 1.5rem;
+    /* v1.4.1: 하단 padding 줄임 - 모바일 공백 버그 수정 */
     max-width: 1400px;
     margin: 0 auto;
     width: 100%;
@@ -143,4 +146,11 @@
     min-height: 75vh;
     /* 모바일에서 확실하게 늘어나도록 강제 (약 2배 크기) */
     width: 100% !important;
+}
+
+/* v1.4.1: 모바일 달력 숨김 옵션 */
+@media (max-width: 768px) {
+    .hide-on-mobile {
+        display: none !important;
+    }
 }
