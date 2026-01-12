@@ -26,7 +26,7 @@ const NotePreview = ({ date, note, readingLogs, books, onClick }) => {
             <div className="note-preview-header">
                 <span className="preview-title">
                     <PenTool size={14} />
-                    {format(new Date(date), 'M월 d일 (EEEE)', { locale: ko })} 오늘의 말씀
+                    {format(new Date(date), 'M월 d일 (EEEE)', { locale: ko })} 오늘 읽은 말씀
                 </span>
             </div>
 

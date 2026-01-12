@@ -29,7 +29,29 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Middleware
-app.use(cors({ credentials: true, origin: true }));
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim())
+  : null;
+
+app.use(cors({
+  credentials: true,
+  origin: function (origin, callback) {
+    // 1. No origin (server-to-server, curl, mobile app) -> Allow
+    if (!origin) return callback(null, true);
+
+    // 2. No environment variable set -> Allow all (Backward compatibility / Dev)
+    if (!allowedOrigins) return callback(null, true);
+
+    // 3. Check allowed list
+    if (allowedOrigins.includes(origin) || allowedOrigins.includes('*')) {
+      return callback(null, true);
+    }
+
+    // 4. Block
+    console.warn(`[CORS] Blocked request from origin: ${origin}`);
+    callback(new Error('Not allowed by CORS'));
+  }
+}));
 app.use(express.json({ limit: '5mb' }));
 app.use(cookieParser());
 

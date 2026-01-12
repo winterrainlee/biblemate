@@ -135,11 +135,12 @@
 }
 
 /* 묵상 집중 모드 support */
+/* 묵상 집중 모드 support */
 .note-editor-wrapper.full-height {
     flex: 1;
-    height: 100%;
+    height: auto;
     max-height: none;
-    min-height: 0;
+    min-height: 75vh;
+    /* 모바일에서 확실하게 늘어나도록 강제 (약 2배 크기) */
     width: 100% !important;
-    /* Force full width overriding split calculation */
 }
