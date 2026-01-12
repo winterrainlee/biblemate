@@ -133,6 +133,21 @@ RUN echo 'if [ ! -f /app/server/data/bible.db ]; then' >> /entrypoint.sh && \
 
 ---
 
+## CORS 보안 설정 (선택사항)
+
+내 앱 도메인(예: `https://biblemate.fly.dev`) 외의 다른 사이트에서 API를 호출하지 못하도록 보안을 강화하려면 `ALLOWED_ORIGINS` 환경변수를 설정하세요:
+
+```powershell
+& "$env:USERPROFILE\.fly\bin\flyctl.exe" secrets set ALLOWED_ORIGINS="https://biblemate.fly.dev"
+```
+
+여러 도메인을 허용하려면 쉼표(`,`)로 구분하세요:
+```powershell
+& "$env:USERPROFILE\.fly\bin\flyctl.exe" secrets set ALLOWED_ORIGINS="https://biblemate.fly.dev,https://my-domain.com"
+```
+
+---
+
 ## 유지보수 명령어
 
 ### 상태 확인
