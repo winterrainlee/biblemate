@@ -1,0 +1,343 @@
+/* BibleChartPage.css */
+
+.chart-page-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    background: var(--pk-color-bg);
+    color: var(--pk-color-text);
+}
+
+/* Page Header */
+.chart-header {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    background: var(--pk-color-bg);
+    border-bottom: 1px solid var(--pk-color-border);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.chart-back-btn {
+    border: none;
+    background: transparent;
+    color: var(--pk-color-text);
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
+}
+
+.chart-back-btn:hover {
+    background-color: var(--pk-color-bg-secondary);
+}
+
+.chart-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+/* Filter Buttons in Header */
+.header-filters {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.filter-btn {
+    padding: 0.4rem 0.8rem;
+    border: 1px solid var(--pk-color-border);
+    border-radius: 999px;
+    background: var(--pk-color-bg);
+    color: var(--pk-color-text-secondary);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    /* Prevent text wrap */
+}
+
+.filter-btn:hover {
+    background: var(--pk-color-bg-secondary);
+}
+
+.filter-btn.active {
+    background: var(--pk-color-primary);
+    color: white;
+    border-color: var(--pk-color-primary);
+}
+
+/* Scrollable Content Area */
+.chart-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.5rem;
+}
+
+/* Summary Section */
+.chart-summary {
+    margin-bottom: 2rem;
+}
+
+.stat-row {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1.5rem;
+    background: var(--pk-color-bg-secondary);
+    border-radius: var(--pk-radius-lg);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.stat-main {
+    flex: 2;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-width: 0;
+    /* Prevent flex overflow */
+}
+
+.progress-area {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+}
+
+.stat-divider {
+    width: 1px;
+    height: 40px;
+    background: var(--pk-color-border);
+    flex-shrink: 0;
+}
+
+.stat-details {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    min-width: 120px;
+}
+
+.detail-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.95rem;
+}
+
+.detail-label {
+    color: var(--pk-color-text-secondary);
+    font-weight: 500;
+}
+
+.detail-value {
+    color: var(--pk-color-text);
+    font-weight: 600;
+}
+
+.stat-box {
+    display: flex;
+    align-items: baseline;
+    gap: 0.4rem;
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--pk-color-primary);
+    line-height: 1;
+}
+
+.stat-label {
+    color: var(--pk-color-text-secondary);
+    font-size: 0.9rem;
+}
+
+.progress-bar {
+    flex: 1;
+    height: 8px;
+    background: var(--pk-color-border);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: var(--pk-color-primary);
+    transition: width 0.3s ease;
+}
+
+.progress-text {
+    font-weight: 600;
+    color: var(--pk-color-primary);
+    min-width: 40px;
+    text-align: right;
+}
+
+/* Bible Chart Grid */
+.bible-chart-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.book-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.25rem 0;
+}
+
+.book-row.complete .book-name {
+    color: var(--pk-color-primary);
+}
+
+.book-name {
+    width: 80px;
+    font-size: 0.9rem;
+    text-align: right;
+    color: var(--pk-color-text-secondary);
+    flex-shrink: 0;
+    font-weight: 500;
+}
+
+.chapter-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+    flex: 1;
+}
+
+.chapter-cell {
+    width: 14px;
+    height: 14px;
+    background: var(--pk-color-border);
+    border-radius: 2px;
+}
+
+.chapter-cell.read {
+    background: var(--pk-color-primary);
+}
+
+.book-progress {
+    width: 40px;
+    font-size: 0.75rem;
+    color: var(--pk-color-text-tertiary);
+    text-align: left;
+    flex-shrink: 0;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .chart-header {
+        padding: 0.75rem 1rem;
+        gap: 0.5rem;
+    }
+
+    .chart-title {
+        font-size: 1.1rem;
+    }
+
+    .filter-btn {
+        padding: 0.35rem 0.7rem;
+        font-size: 0.8rem;
+    }
+
+    .chart-content {
+        padding: 1rem;
+    }
+
+    .chart-summary {
+        margin-bottom: 1.5rem;
+    }
+
+    .stat-row {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1.25rem;
+        padding: 1.25rem;
+    }
+
+    .stat-divider {
+        width: 100%;
+        height: 1px;
+        opacity: 0.5;
+    }
+
+    .stat-main {
+        width: 100%;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+    }
+
+    .stat-box {
+        margin-bottom: 0;
+    }
+
+    .progress-area {
+        flex: 1;
+        min-width: 140px;
+        /* Ensure bar doesn't get too small */
+    }
+
+    .stat-details {
+        width: 100%;
+        flex-direction: row;
+        justify-content: space-between;
+    }
+
+    .book-name {
+        width: 60px;
+        font-size: 0.8rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .chapter-cell {
+        width: 11px;
+        height: 11px;
+    }
+
+    .book-row {
+        gap: 0.5rem;
+    }
+}
+
+/* Extra Small Screens (iPhone Mini ~375px) */
+@media (max-width: 380px) {
+    .chart-title {
+        font-size: 1rem;
+    }
+
+    .filter-btn {
+        padding: 0.3rem 0.6rem;
+        font-size: 0.75rem;
+    }
+
+    .header-filters {
+        gap: 0.25rem;
+    }
+
+    .stat-number {
+        font-size: 1.5rem;
+    }
+
+    .progress-text {
+        font-size: 0.9rem;
+    }
+}

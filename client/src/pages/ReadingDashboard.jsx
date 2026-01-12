@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { format } from 'date-fns';
 import Calendar from '../components/Calendar';
 import BibleSelector from '../components/BibleSelector';
@@ -24,6 +24,73 @@ const ReadingDashboard = () => {
 
     // Loading State
     const [isLoading, setIsLoading] = useState(true);
+
+    // UI State
+    const [completionStatus, setCompletionStatus] = useState('idle'); // idle, loading, success, error
+    const [toast, setToast] = useState({ visible: false, message: '', type: 'info' });
+
+    // Split Screen State (R4)
+    const [splitRatio, setSplitRatio] = useState(50); // Default 50%
+    const [isDragging, setIsDragging] = useState(false);
+    const dashboardMainRef = useRef(null);
+
+    // Load split ratio from localStorage
+    useEffect(() => {
+        const savedRatio = localStorage.getItem('bibleSplitRatio');
+        if (savedRatio) {
+            const parsed = parseFloat(savedRatio);
+            if (!isNaN(parsed) && parsed >= 20 && parsed <= 80) {
+                setSplitRatio(parsed);
+            }
+        }
+    }, []);
+
+    // Drag Handlers
+    const handleDragStart = useCallback((e) => {
+        e.preventDefault();
+        setIsDragging(true);
+    }, []);
+
+    const handleDragMove = useCallback((e) => {
+        if (!isDragging || !dashboardMainRef.current) return;
+
+        const containerRect = dashboardMainRef.current.getBoundingClientRect();
+        // Calculate percentage relative to container width
+        // Mouse X relative to container left
+        const relativeX = e.clientX - containerRect.left;
+        const newRatio = (relativeX / containerRect.width) * 100;
+
+        // Constrain between 20% and 80%
+        const constrained = Math.min(Math.max(newRatio, 20), 80);
+        setSplitRatio(constrained);
+    }, [isDragging]);
+
+    const handleDragEnd = useCallback(() => {
+        setIsDragging(false);
+        localStorage.setItem('bibleSplitRatio', splitRatio.toString());
+    }, [splitRatio]);
+
+    // Global Drag Listeners
+    useEffect(() => {
+        if (isDragging) {
+            window.addEventListener('mousemove', handleDragMove);
+            window.addEventListener('mouseup', handleDragEnd);
+        } else {
+            window.removeEventListener('mousemove', handleDragMove);
+            window.removeEventListener('mouseup', handleDragEnd);
+        }
+        return () => {
+            window.removeEventListener('mousemove', handleDragMove);
+            window.removeEventListener('mouseup', handleDragEnd);
+        };
+    }, [isDragging, handleDragMove, handleDragEnd]);
+
+
+    // Show Toast Helper
+    const showToast = (message, type = 'info') => {
+        setToast({ visible: true, message, type });
+        setTimeout(() => setToast(prev => ({ ...prev, visible: false })), 3000);
+    };
 
     // Dashboard Config (from Settings)
     const [dashboardConfig, setDashboardConfig] = useState({ showReading: true, showNotes: true });
@@ -57,19 +124,40 @@ const ReadingDashboard = () => {
         // 오늘 날짜의 기록만 찾아서 토글
         const existingLog = readingLogs.find(l => l.date === dateStr && l.book === currentBook && l.chapter === currentChapter);
 
+        setCompletionStatus('loading');
         try {
             if (existingLog) {
+                // 이미 오늘 읽은 기록이 있다면 -> 삭제 (읽기 취소)
                 await api.removeReadingLog(existingLog.id);
+                showToast('읽기 기록이 취소되었습니다.', 'info');
+                setCompletionStatus('idle');
             } else {
+                // 추가
+                const isAlreadyLoggedToday = readingLogs.some(l => l.date === dateStr && l.book === currentBook && l.chapter === currentChapter);
+                if (isAlreadyLoggedToday) {
+                    showToast('이미 오늘 읽은 장입니다.', 'warning');
+                    setCompletionStatus('idle');
+                    return;
+                }
+
                 await api.addReadingLog({
                     date: dateStr,
                     book: currentBook,
                     chapter: currentChapter,
                     verses_count: verses.length
                 });
+                showToast('읽기 완료! 참 잘하셨습니다.', 'success');
+                setCompletionStatus('success');
+                // 잠시 후 success 상태 해제
+                setTimeout(() => setCompletionStatus('idle'), 2000);
             }
             loadReadingLogs(); // 이동 없이 로그만 새로고침
-        } catch (e) { console.error(e); }
+        } catch (e) {
+            console.error(e);
+            showToast('오류가 발생했습니다.', 'error');
+            setCompletionStatus('error');
+            setTimeout(() => setCompletionStatus('idle'), 2000);
+        }
     };
 
     // Initial Load
@@ -121,13 +209,10 @@ const ReadingDashboard = () => {
                 const todayLogs = logs.filter(l => l.date === todayStr);
 
                 if (todayLogs.length > 0) {
-                    // 오늘 읽은 기록이 있으면 첫 번째 기록으로
                     const firstLog = todayLogs[0];
                     setCurrentBook(firstLog.book);
                     setCurrentChapter(firstLog.chapter_from || firstLog.chapter || 1);
                 } else if (logs.length > 0) {
-                    // 오늘 기록은 없지만 과거 기록이 있으면 '가장 최신 기록의 다음 장' 계산
-                    // logs는 보통 최신순으로 오겠지만, 안전하게 정렬 (date DESC, id DESC)
                     const sortedLogs = [...logs].sort((a, b) => {
                         if (b.date !== a.date) return b.date.localeCompare(a.date);
                         return b.id - a.id;
@@ -136,23 +221,19 @@ const ReadingDashboard = () => {
                     const bookMeta = targetBooks.find(b => b.id === lastLog.book);
 
                     if (bookMeta && lastLog.chapter < bookMeta.chapters) {
-                        // 같은 책의 다음 장
                         setCurrentBook(lastLog.book);
                         setCurrentChapter(lastLog.chapter + 1);
                     } else {
-                        // 다음 책의 1장
                         const bookIndex = targetBooks.findIndex(b => b.id === lastLog.book);
                         if (bookIndex !== -1 && bookIndex < targetBooks.length - 1) {
                             setCurrentBook(targetBooks[bookIndex + 1].id);
                             setCurrentChapter(1);
                         } else {
-                            // 성경의 끝이면 창세기 1장으로 순환
                             setCurrentBook(targetBooks[0].id);
                             setCurrentChapter(1);
                         }
                     }
                 } else {
-                    // 기록이 하나도 없는 신규 사용자
                     setCurrentBook('Gen');
                     setCurrentChapter(1);
                 }
@@ -204,7 +285,7 @@ const ReadingDashboard = () => {
     const handleCopyCitation = (verseNum, verseText) => {
         const citation = `[${currentBookName} ${currentChapter}:${verseNum}] ${verseText}`;
         navigator.clipboard.writeText(citation).then(() => {
-            // alert('구절이 복사되었습니다.'); // Optionally silient
+            // alert('구절이 복사되었습니다.'); 
         });
     };
 
@@ -214,17 +295,15 @@ const ReadingDashboard = () => {
 
         if (noteEditorRef.current) {
             noteEditorRef.current.insertCitation(fullText);
-            // Scroll to editor if needed
             const editorElement = document.querySelector('.note-editor-wrapper');
             editorElement?.scrollIntoView({ behavior: 'smooth' });
         }
     };
 
-    const noteEditorRef = React.useRef(null);
+    const noteEditorRef = useRef(null);
 
     const handleNotePreviewClick = () => {
         noteEditorRef.current?.focus();
-        // On mobile, we might also want to scroll to editor
         const editorElement = document.querySelector('.note-editor-wrapper');
         editorElement?.scrollIntoView({ behavior: 'smooth' });
     };
@@ -233,6 +312,8 @@ const ReadingDashboard = () => {
         setCurrentBook(bookId);
         setCurrentChapter(1);
     };
+
+    const shouldShowResizer = dashboardConfig.showReading && dashboardConfig.showNotes;
 
     return (
         <div className="dashboard-container">
@@ -245,7 +326,6 @@ const ReadingDashboard = () => {
                         selectedDate={currentDate}
                         onDateClick={(date, logs) => {
                             setCurrentDate(date);
-                            // 해당 날짜에 읽기 기록이 있으면 첫 번째 기록의 본문으로 이동
                             if (logs && logs.length > 0) {
                                 const log = logs[0];
                                 setCurrentBook(log.book);
@@ -279,7 +359,11 @@ const ReadingDashboard = () => {
             </aside>
 
             {/* Main Content */}
-            <main className="dashboard-main">
+            <main
+                className="dashboard-main"
+                ref={dashboardMainRef}
+                style={{ '--split-ratio': `${splitRatio}%` }}
+            >
                 {dashboardConfig.showReading && (
                     <div className="bible-viewer-wrapper">
                         <BibleViewer
@@ -294,8 +378,18 @@ const ReadingDashboard = () => {
                             lastReadDate={lastReadDate}
                             bookName={currentBookName}
                             chapter={currentChapter}
+                            completionStatus={completionStatus}
                         />
                     </div>
+                )}
+
+                {/* Resizer Divider */}
+                {shouldShowResizer && (
+                    <div
+                        className={`resizer ${isDragging ? 'dragging' : ''}`}
+                        onMouseDown={handleDragStart}
+                        title="드래그하여 크기 조절"
+                    />
                 )}
 
                 {dashboardConfig.showNotes && (
@@ -309,6 +403,30 @@ const ReadingDashboard = () => {
                     </div>
                 )}
             </main>
+
+            {/* Global Toast */}
+            {toast.visible && (
+                <div style={{
+                    position: 'fixed',
+                    bottom: '24px',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    backgroundColor: toast.type === 'error' ? '#ef4444' : toast.type === 'warning' ? '#eab308' : '#3b82f6',
+                    color: 'white',
+                    padding: '12px 24px',
+                    borderRadius: '9999px',
+                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    zIndex: 2000,
+                    fontSize: '0.95rem',
+                    fontWeight: '600',
+                    animation: 'fadeIn 0.2s ease-out'
+                }}>
+                    <span>{toast.message}</span>
+                </div>
+            )}
         </div>
     );
 };

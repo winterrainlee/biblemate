@@ -1,13 +1,11 @@
 /* ReadingDashboard.css */
 
-/* Mobile First: Default to natural flow */
+/* Mobile First: Default to natural flow (Vertical) */
 .dashboard-container {
     display: flex;
     flex-direction: column;
     min-height: calc(100vh - 60px);
-    /* Allow growing beyond viewport */
     background-color: var(--pk-color-bg-secondary);
-    /* Removed overflow:hidden to allow body scroll */
 }
 
 .dashboard-sidebar {
@@ -17,15 +15,16 @@
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
-    /* Removed overflow-y:auto to allow it to take full height */
 }
 
 .dashboard-main {
     flex: 1;
-    /* Grow to fill remaining space */
     display: flex;
     flex-direction: column;
+    /* Mobile: Top-Down */
     position: relative;
+    overflow: hidden;
+    /* Contain children */
 }
 
 .bible-viewer-wrapper {
@@ -34,19 +33,21 @@
     max-width: 1400px;
     margin: 0 auto;
     width: 100%;
-    /* Removed overflow-y:auto to allow body scroll */
+    overflow-y: auto;
+    /* Allow scroll inside wrapper if needed */
 }
 
 .note-editor-wrapper {
     background: var(--pk-color-bg);
     border-top: 1px solid var(--pk-color-border);
     height: 35vh;
-    /* 모바일에서 뷰포트 높이의 35% 차지 */
     min-height: 250px;
     max-height: 450px;
     flex-shrink: 0;
     z-index: 10;
     box-shadow: 0 -2px 10px var(--pk-color-shadow);
+    display: flex;
+    flex-direction: column;
 }
 
 .sidebar-section {
@@ -55,14 +56,17 @@
     gap: 0.5rem;
 }
 
+/* Resizer Handle (Mobile Hidden) */
+.resizer {
+    display: none;
+}
+
 /* Tablet/Desktop Layout (Landscape / Larger Screens) */
 @media (min-width: 768px) {
     .dashboard-container {
         flex-direction: row;
         height: calc(100vh - 60px);
-        /* Fixed height only on desktop */
         overflow: hidden;
-        /* Hide body scroll */
     }
 
     .dashboard-sidebar {
@@ -72,23 +76,70 @@
         border-bottom: none;
         height: 100%;
         overflow-y: auto;
-        /* Internal scroll */
     }
 
     .dashboard-main {
-        overflow: hidden;
+        flex-direction: row;
+        /* Desktop: Left-Right Split */
     }
 
     .bible-viewer-wrapper {
+        height: 100%;
+        /* Fill height */
+        width: var(--split-ratio, 50%);
+        /* Controlled by JS variable */
         overflow-y: auto;
-        /* Internal scroll */
+        padding: 2rem;
+    }
+
+    .note-editor-wrapper {
+        border-top: none;
+        border-left: 1px solid var(--pk-color-border);
+        height: 100%;
+        max-height: none;
+        min-height: 0;
+        /* Subtract resizer width (12px) from the remaining space */
+        width: calc(100% - var(--split-ratio, 50%) - 12px);
+    }
+
+    /* Resizer Visible on Desktop */
+    .resizer {
+        display: flex;
+        width: 12px;
+        background: var(--pk-color-bg);
+        border-left: 1px solid var(--pk-color-border);
+        border-right: 1px solid var(--pk-color-border);
+        cursor: col-resize;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        z-index: 20;
+        transition: background-color 0.2s;
+        /* Prevent selection during drag */
+        user-select: none;
+    }
+
+    .resizer:hover,
+    .resizer.dragging {
+        background-color: var(--pk-color-bg-secondary);
+    }
+
+    .resizer::after {
+        content: "";
+        display: block;
+        width: 4px;
+        height: 24px;
+        border-left: 1px solid var(--pk-color-text-tertiary);
+        border-right: 1px solid var(--pk-color-text-tertiary);
     }
 }
 
-/* 묵상 집중 모드: 노트 에디터가 전체 높이 차지 */
+/* 묵상 집중 모드 support */
 .note-editor-wrapper.full-height {
     flex: 1;
-    height: auto;
+    height: 100%;
     max-height: none;
     min-height: 0;
+    width: 100% !important;
+    /* Force full width overriding split calculation */
 }

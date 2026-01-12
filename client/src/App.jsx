@@ -7,6 +7,7 @@ import ReadingDashboard from './pages/ReadingDashboard';
 import Notes from './pages/Notes';
 import Search from './pages/Search';
 import Settings from './pages/Settings';
+import BibleChartPage from './pages/BibleChartPage';
 import LoginPage from './pages/LoginPage';
 import { ThemeProvider } from './contexts/ThemeContext';
 
@@ -84,6 +85,7 @@ function App() {
         <Layout>
           <Routes>
             <Route path="/" element={<ReadingDashboard />} />
+            <Route path="/chart" element={<BibleChartPage />} />
             <Route path="/settings" element={<Settings />} />
             {/* Redirect legacy routes */}
             <Route path="*" element={<ReadingDashboard />} />

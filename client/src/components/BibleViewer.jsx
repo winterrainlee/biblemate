@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Check, Highlighter, MessageSquare, Copy, X, Send } from 'lucide-react';
+import { Check, Highlighter, MessageSquare, Copy, X, Send, Loader } from 'lucide-react';
 import './BibleViewer.css';
 
 const BibleViewer = ({
@@ -14,7 +14,8 @@ const BibleViewer = ({
     bookName = '',
     chapter = 1,
     onAddNote,
-    onCopyCitation
+    onCopyCitation,
+    completionStatus = 'idle' // idle, loading, success, error
 }) => {
     const [selectedVerseIds, setSelectedVerseIds] = useState([]);
     const [popup, setPopup] = useState({
@@ -189,40 +190,59 @@ const BibleViewer = ({
             }}>
                 {/* Highlight Palette could go here */}
 
-                <button
-                    onClick={onComplete}
-                    className={`action-btn ${isCompleted ? 'completed' : ''}`}
-                    style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.5rem',
-                        padding: '0.75rem 1.5rem',
-                        borderRadius: 'var(--pk-radius-full)',
-                        backgroundColor: isCompleted ? '#22c55e' : 'var(--pk-color-primary)',
-                        color: 'white',
-                        border: 'none',
-                        fontSize: '1rem',
-                        fontWeight: '600',
-                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-                        cursor: 'pointer',
-                        transition: 'all 0.2s'
-                    }}
-                >
-                    {isCompleted ? <Check size={20} /> : <BookOpenIcon size={20} />}
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                        <span>{isCompleted ? '읽기 취소' : '읽기 완료 체크'}</span>
-                        {lastReadDate && !isCompleted && (
-                            <span style={{ fontSize: '0.7rem', opacity: '0.9', fontWeight: '400' }}>
-                                (이전에 {lastReadDate}에 읽음)
-                            </span>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.5rem' }}>
+                    <button
+                        onClick={onComplete}
+                        disabled={completionStatus === 'loading'}
+                        className={`action-btn ${isCompleted ? 'completed' : ''}`}
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.5rem',
+                            padding: '0.75rem 1.75rem',
+                            borderRadius: '9999px', // Fully rounded pill
+                            backgroundColor: isCompleted
+                                ? '#22c55e'
+                                : completionStatus === 'success'
+                                    ? '#22c55e'
+                                    : 'var(--pk-color-primary)',
+                            color: 'white',
+                            border: 'none',
+                            fontSize: '1rem',
+                            fontWeight: '600',
+                            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                            cursor: completionStatus === 'loading' ? 'wait' : 'pointer',
+                            transition: 'all 0.2s',
+                            opacity: completionStatus === 'loading' ? 0.8 : 1
+                        }}
+                    >
+                        {completionStatus === 'loading' ? (
+                            <Loader size={20} className="spin" style={{ animation: 'spin 1s linear infinite' }} />
+                        ) : isCompleted || completionStatus === 'success' ? (
+                            <Check size={20} />
+                        ) : (
+                            <BookOpenIcon size={20} />
                         )}
-                        {isCompleted && lastReadDate && (
-                            <span style={{ fontSize: '0.7rem', opacity: '0.9', fontWeight: '400' }}>
-                                ({isToday ? '오늘 외 ' : '이날 외 '} {lastReadDate}에도 읽음)
-                            </span>
-                        )}
-                    </div>
-                </button>
+
+                        <span>
+                            {completionStatus === 'loading' ? '처리 중...' :
+                                completionStatus === 'success' ? '완료!' :
+                                    isCompleted ? '읽기 취소' : '읽기 완료 체크'}
+                        </span>
+                    </button>
+
+                    {/* 부가 정보 표시 (버튼 하단) */}
+                    {(isCompleted || lastReadDate) && (
+                        <div style={{ fontSize: '0.75rem', color: 'var(--pk-color-text-secondary)', textAlign: 'right', paddingRight: '0.5rem' }}>
+                            {isCompleted && lastReadDate && (
+                                <span>(이날 외 {lastReadDate}에도 읽음)</span>
+                            )}
+                            {!isCompleted && lastReadDate && (
+                                <span>(이전에 {lastReadDate}에 읽음)</span>
+                            )}
+                        </div>
+                    )}
+                </div>
             </div>
 
             {/* Popup Tooltip */}

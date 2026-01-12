@@ -44,7 +44,7 @@ const Header = ({ onTrackerClick }) => {
                 <div className="header-actions">
                     <button
                         className="header-action-btn"
-                        onClick={onTrackerClick}
+                        onClick={() => navigate('/chart')}
                         title="읽기표"
                     >
                         <BarChart2 size={20} />
