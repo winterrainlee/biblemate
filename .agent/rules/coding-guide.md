@@ -12,8 +12,9 @@ trigger: always_on
 | Patch (x.y.z) | 핫픽스, 오타, 보안 패치 |
 
 ### 브랜치 워크플로우
-- 버전 통합 (Integration): `feature/v버전명` 브랜치 (모든 기능이 모이는 곳)
-- 기능 작업 (Working): `feature/v버전명-기능명` 브랜치 (실제 코드 수정)
+- 버전 통합 (Integration): `feature/v버전명` 브랜치
+- 기능 작업 (Working): `feature/v버전명-기능명` 브랜치 → `/feature` workflow 실행
+- 작업 완료 (Done): 구현 및 검증 완료 → `/pr` workflow 실행
 - 긴급 수정: 마지막 릴리즈 태그에서 분기
 - 배포: `/deploy` workflow 실행
 
