@@ -1,4 +1,4 @@
-# Bible Reading Mate 개발 방법론 (Dev Methodology)
+﻿# Bible Reading Mate 개발 방법론 (Dev Methodology)
 
 - 최초 생성일: 2026-01-05
 - 최신 수정일: 2026-01-08
@@ -91,7 +91,7 @@ graph TD
 - Hot fix의 경우 난이도가 간단할 경우, 사용자의 승인 하에 브랜치를 생성하지 않고 `master` 브랜치에서 바로 작업할 수 있습니다.
 
 ### 2단계: 구현 계획 작성 (Implementation Planning)
-- 수정 전, `implementation_plan.md`를 **아티팩트**로 작성하여 제출합니다.
+- 수정 전, `docs/01-planning/implementation-plans/implementation-plan-vX.Y.Z-기능명.md`를 **아티팩트**로 작성하여 제출합니다.
   - **변경 범위**: 수정할 파일/컴포넌트, 수정된 코드의 주요 내용 혹은 변경 로직
   - **기대 결과**: 변경 후의 기능 동작
   - **변경 단계**: 변경의 작업 단계별 내용, 검증 절차 및 전략
@@ -101,7 +101,7 @@ graph TD
   
 
 ### 3단계: 작업별 구현 및 검증
-- 구현 계획을 작업별로 구현하고, AI가 자체 검증 결과를 포함한 `walkthrough.md`를 제출합니다.
+- 구현 계획을 작업별로 구현하고, AI가 자체 검증 결과를 포함한 `docs/03-logs/walkthroughs/walkthrough-vX.Y.Z-기능명.md`를 제출합니다.
 - 구현 시 `docs/lessons.md`를 참고하여 구현합니다.
 - 사용자가 로컬 서버(`npm run dev`)에서 기능을 직접 확인합니다. 
 - 동작이 의도와 같을 경우 작업 승인 후 다음 작업으로 넘어갑니다.
@@ -143,3 +143,4 @@ graph TD
 - **Data & Environment Constancy**: 데이터베이스 경로(`server/data/`)와 서버 설정(.env)은 표준을 준수합니다.
 
 > 💡 **핵심**: 이 프로세스는 코드의 품질을 보장할 뿐만 아니라, 개발자가 전체 개발 주기를 건강하게 경험하며 성장하는 데 목적이 있습니다.
+
