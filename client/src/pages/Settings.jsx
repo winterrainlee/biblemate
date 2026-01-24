@@ -9,7 +9,16 @@ import Modal from '../components/Modal';
 const Settings = () => {
     const navigate = useNavigate();
     const { fontSize, setFontSize } = useTheme();
-    const [dashboardConfig, setDashboardConfig] = useState({ showReading: true, showNotes: true, hideCalendarOnMobile: false });
+    // Dashboard Config - Lazy state initialization for performance
+    const [dashboardConfig, setDashboardConfig] = useState(() => {
+        try {
+            const saved = localStorage.getItem('dashboardConfig');
+            return saved ? JSON.parse(saved) : { showReading: true, showNotes: true, hideCalendarOnMobile: false };
+        } catch (e) {
+            console.error('Failed to parse dashboard config:', e);
+            return { showReading: true, showNotes: true, hideCalendarOnMobile: false };
+        }
+    });
     const [statusMessage, setStatusMessage] = useState('');
     const [resultModal, setResultModal] = useState({
         isOpen: false,
@@ -20,18 +29,8 @@ const Settings = () => {
     });
     const [authInfo, setAuthInfo] = useState({ authRequired: false });
 
-    // Load dashboard config from localStorage
+    // Check auth status on mount
     useEffect(() => {
-        const saved = localStorage.getItem('dashboardConfig');
-        if (saved) {
-            try {
-                setDashboardConfig(JSON.parse(saved));
-            } catch (e) {
-                console.error('Failed to parse dashboard config:', e);
-            }
-        }
-
-        // Check auth status
         fetch('/api/auth/status', { credentials: 'include' })
             .then(res => res.json())
             .then(data => setAuthInfo({ authRequired: data.authRequired }))

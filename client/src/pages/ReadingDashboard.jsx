@@ -29,21 +29,14 @@ const ReadingDashboard = () => {
     const [completionStatus, setCompletionStatus] = useState('idle'); // idle, loading, success, error
     const [toast, setToast] = useState({ visible: false, message: '', type: 'info' });
 
-    // Split Screen State (R4)
-    const [splitRatio, setSplitRatio] = useState(50); // Default 50%
+    // Split Screen State (R4) - Lazy state initialization for performance
+    const [splitRatio, setSplitRatio] = useState(() => {
+        const saved = localStorage.getItem('bibleSplitRatio');
+        const parsed = parseFloat(saved);
+        return (!isNaN(parsed) && parsed >= 20 && parsed <= 80) ? parsed : 50;
+    });
     const [isDragging, setIsDragging] = useState(false);
     const dashboardMainRef = useRef(null);
-
-    // Load split ratio from localStorage
-    useEffect(() => {
-        const savedRatio = localStorage.getItem('bibleSplitRatio');
-        if (savedRatio) {
-            const parsed = parseFloat(savedRatio);
-            if (!isNaN(parsed) && parsed >= 20 && parsed <= 80) {
-                setSplitRatio(parsed);
-            }
-        }
-    }, []);
 
     // Drag Handlers
     const handleDragStart = useCallback((e) => {
@@ -92,20 +85,16 @@ const ReadingDashboard = () => {
         setTimeout(() => setToast(prev => ({ ...prev, visible: false })), 3000);
     };
 
-    // Dashboard Config (from Settings)
-    const [dashboardConfig, setDashboardConfig] = useState({ showReading: true, showNotes: true });
-
-    // Load dashboard config from localStorage
-    useEffect(() => {
-        const saved = localStorage.getItem('dashboardConfig');
-        if (saved) {
-            try {
-                setDashboardConfig(JSON.parse(saved));
-            } catch (e) {
-                console.error('Failed to parse dashboard config:', e);
-            }
+    // Dashboard Config (from Settings) - Lazy state initialization for performance
+    const [dashboardConfig, setDashboardConfig] = useState(() => {
+        try {
+            const saved = localStorage.getItem('dashboardConfig');
+            return saved ? JSON.parse(saved) : { showReading: true, showNotes: true };
+        } catch (e) {
+            console.error('Failed to parse dashboard config:', e);
+            return { showReading: true, showNotes: true };
         }
-    }, []);
+    });
 
     const currentBookName = books.find(b => b.id === currentBook)?.name || currentBook;
     const dateStr = format(currentDate, 'yyyy-MM-dd');

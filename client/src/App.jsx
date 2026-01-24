@@ -1,15 +1,28 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout';
 // import Home from './pages/Home';
 // import Bible from './pages/Bible';
 import ReadingDashboard from './pages/ReadingDashboard';
-import Notes from './pages/Notes';
-import Search from './pages/Search';
-import Settings from './pages/Settings';
-import BibleChartPage from './pages/BibleChartPage';
+// Dynamic imports for code splitting - reduces initial bundle size
+const Settings = lazy(() => import('./pages/Settings'));
+const BibleChartPage = lazy(() => import('./pages/BibleChartPage'));
 import LoginPage from './pages/LoginPage';
 import { ThemeProvider } from './contexts/ThemeContext';
+
+// Loading fallback component
+const PageLoader = () => (
+  <div style={{
+    minHeight: '100vh',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    background: 'var(--bg-primary)',
+    color: 'var(--text-primary)'
+  }}>
+    로딩 중...
+  </div>
+);
 
 function App() {
   const [authState, setAuthState] = useState({
@@ -83,13 +96,15 @@ function App() {
     <ThemeProvider>
       <Router>
         <Layout>
-          <Routes>
-            <Route path="/" element={<ReadingDashboard />} />
-            <Route path="/chart" element={<BibleChartPage />} />
-            <Route path="/settings" element={<Settings />} />
-            {/* Redirect legacy routes */}
-            <Route path="*" element={<ReadingDashboard />} />
-          </Routes>
+          <Suspense fallback={<PageLoader />}>
+            <Routes>
+              <Route path="/" element={<ReadingDashboard />} />
+              <Route path="/chart" element={<BibleChartPage />} />
+              <Route path="/settings" element={<Settings />} />
+              {/* Redirect legacy routes */}
+              <Route path="*" element={<ReadingDashboard />} />
+            </Routes>
+          </Suspense>
         </Layout>
       </Router>
     </ThemeProvider>

@@ -419,4 +419,4 @@ const BookOpenIcon = ({ size }) => (
     </svg>
 );
 
-export default BibleViewer;
+export default React.memo(BibleViewer);

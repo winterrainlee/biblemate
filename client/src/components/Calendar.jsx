@@ -126,4 +126,4 @@ const Calendar = ({ readingLogs = [], compact = false, onDateClick, selectedDate
     );
 };
 
-export default Calendar;
+export default React.memo(Calendar);
