@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html class="dark" lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>BibleMate - 묵상 편집 및 읽기표</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700;800&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#3b82f6",
+                        "background-light": "#f8fafc",
+                        "background-dark": "#0f1115",
+                        "surface-dark": "#1a1d23",
+                        "border-dark": "#2d3139",
+                    },
+                    fontFamily: {
+                        "sans": ["Pretendard", "Inter", "sans-serif"],
+                        "serif": ["Nanum Myeongjo", "serif"]
+                    },
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .calendar-mini-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 5px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #3b82f633;
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #3b82f666;
+        }
+        .panel-standard {
+            @apply bg-white dark:bg-surface-dark border border-slate-200 dark:border-border-dark rounded-xl shadow-sm;
+        }.edit-mode .read-only-content { display: none; }
+        .edit-mode .edit-input-content { display: block; }
+        .edit-input-content { display: none; }.verse-edit-card {
+            @apply flex flex-col gap-3 p-5 rounded-xl bg-slate-50/50 dark:bg-slate-900/40 border border-slate-200 dark:border-border-dark;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-sans text-slate-900 dark:text-slate-100 transition-colors duration-300 antialiased overflow-hidden">
+<header class="fixed top-0 z-50 w-full bg-white/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-slate-200 dark:border-border-dark px-6 py-3">
+<div class="max-w-[1600px] mx-auto flex items-center justify-between">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-2">
+<div class="text-primary">
+<span class="material-symbols-outlined text-2xl font-bold">menu_book</span>
+</div>
+<h1 class="text-lg font-bold tracking-tight dark:text-white">BibleMate</h1>
+</div>
+<nav class="hidden md:flex items-center gap-1">
+<a class="px-4 py-1.5 text-sm font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors" href="#">성경 읽기</a>
+<a class="px-4 py-1.5 text-sm font-semibold text-primary bg-primary/10 rounded-lg" href="#">묵상 및 읽기표</a>
+</nav>
+</div>
+<div class="flex items-center gap-1">
+<button class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400" onclick="document.documentElement.classList.toggle('dark')">
+<span class="material-symbols-outlined text-xl dark:hidden">dark_mode</span>
+<span class="material-symbols-outlined hidden dark:block text-amber-400 text-xl">light_mode</span>
+</button>
+<button class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400">
+<span class="material-symbols-outlined text-xl">text_fields</span>
+</button>
+<button class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400">
+<span class="material-symbols-outlined text-xl">settings</span>
+</button>
+</div>
+</div>
+</header>
+<main class="pt-[64px] h-screen flex justify-center">
+<div class="flex w-full max-w-[1600px] gap-5 px-6 py-6 h-full overflow-hidden">
+<aside class="w-[20%] shrink-0 flex flex-col panel-standard overflow-hidden">
+<div class="p-5 border-b border-slate-100 dark:border-border-dark flex items-center justify-between">
+<h3 class="text-sm font-bold dark:text-white flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-xl">checklist</span>
+                    성경읽기표
+                </h3>
+</div>
+<div class="p-4 border-b border-slate-100 dark:border-border-dark bg-slate-50/50 dark:bg-slate-900/20">
+<div class="flex bg-slate-200/50 dark:bg-slate-800 p-1 rounded-lg">
+<button class="flex-1 py-1.5 text-[11px] font-bold bg-white dark:bg-slate-700 shadow-sm rounded-md dark:text-white">전체</button>
+<button class="flex-1 py-1.5 text-[11px] font-medium text-slate-500 dark:text-slate-400">구약</button>
+<button class="flex-1 py-1.5 text-[11px] font-medium text-slate-500 dark:text-slate-400">신약</button>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto custom-scrollbar p-5 space-y-5">
+<div class="space-y-2">
+<div class="flex justify-between items-center text-xs">
+<span class="font-semibold dark:text-slate-300">창세기</span>
+<span class="text-slate-400 font-medium">50 / 50</span>
+</div>
+<div class="h-1 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+<div class="h-full bg-emerald-500" style="width: 100%"></div>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between items-center text-xs">
+<span class="font-semibold dark:text-slate-300">출애굽기</span>
+<span class="text-slate-400 font-medium">0 / 40</span>
+</div>
+<div class="h-1 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+<div class="h-full bg-primary" style="width: 0%"></div>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between items-center text-xs">
+<span class="font-bold text-primary">시편</span>
+<span class="text-primary font-bold">23 / 150</span>
+</div>
+<div class="h-1 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+<div class="h-full bg-primary" style="width: 15%"></div>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between items-center text-xs">
+<span class="font-semibold dark:text-slate-300">잠언</span>
+<span class="text-slate-400 font-medium">12 / 31</span>
+</div>
+<div class="h-1 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+<div class="h-full bg-primary" style="width: 38%"></div>
+</div>
+</div>
+</div>
+</aside>
+<section class="w-[60%] flex flex-col panel-standard overflow-hidden bg-white dark:bg-surface-dark" id="center-panel">
+<div class="p-8 border-b border-slate-100 dark:border-border-dark flex items-center justify-between">
+<div>
+<h2 class="text-2xl font-bold dark:text-white tracking-tight">2024년 5월 20일 (월)</h2>
+<p class="text-sm text-slate-500 dark:text-slate-400 mt-1 font-medium font-sans">오늘의 한 걸음, 주님과 함께 걷는 시간</p>
+</div>
+<div class="flex gap-2">
+<button class="flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-primary hover:text-white dark:hover:bg-primary text-slate-600 dark:text-slate-300 rounded-lg transition-all text-sm font-bold" onclick="document.getElementById('center-panel').classList.toggle('edit-mode')">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+                        편집
+                    </button>
+<button class="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-lg transition-all">
+<span class="material-symbols-outlined text-xl">delete</span>
+</button>
+</div>
+</div>
+<div class="flex-1 flex flex-col overflow-hidden">
+<div class="h-[15%] p-8 flex flex-col border-b border-slate-50 dark:border-border-dark/50 justify-center">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-primary text-xl">auto_stories</span>
+<h4 class="text-xs font-bold dark:text-slate-300 uppercase tracking-widest font-sans">읽은 말씀</h4>
+</div>
+<a class="flex items-center px-6 py-3 bg-slate-50 dark:bg-slate-900/40 rounded-xl border border-slate-100 dark:border-border-dark hover:border-primary/40 hover:bg-primary/5 transition-all group" href="#">
+<span class="text-xl font-serif dark:text-slate-100 group-hover:text-primary transition-colors">시편 23편 1-6절</span>
+<span class="material-symbols-outlined ml-auto text-slate-300 dark:text-slate-600 group-hover:text-primary group-hover:translate-x-1 transition-all">chevron_right</span>
+</a>
+</div>
+<div class="h-[65%] p-8 flex flex-col overflow-hidden">
+<div class="flex items-center gap-2 mb-6">
+<span class="material-symbols-outlined text-primary text-xl">edit_note</span>
+<h4 class="text-xs font-bold dark:text-slate-300 uppercase tracking-widest font-sans">묵상 내용</h4>
+</div>
+<div class="flex-1 overflow-y-auto custom-scrollbar pr-4 space-y-6">
+<div class="verse-group">
+<div class="read-only-content flex items-start gap-4 p-5 rounded-xl bg-slate-50/50 dark:bg-slate-900/20 border border-slate-100/50 dark:border-border-dark/50">
+<span class="text-sm font-bold text-primary shrink-0 font-sans mt-1">1절</span>
+<div class="space-y-3">
+<p class="text-base font-serif text-slate-800 dark:text-slate-200 leading-relaxed italic">"여호와는 나의 목자시니 내게 부족함이 없으리로다"</p>
+<div class="pl-4 border-l-2 border-primary/30">
+<p class="text-sm font-sans text-slate-600 dark:text-slate-400 leading-relaxed">주님이 나의 목자가 되어 주시기에 더 이상 세상의 결핍에 집중하지 않기로 했습니다. 나의 모든 필요를 아시는 분께 온전히 맡길 때 참된 평안이 찾아옴을 느낍니다.</p>
+</div>
+</div>
+</div>
+<div class="edit-input-content verse-edit-card">
+<div class="flex items-center justify-between">
+<span class="text-xs font-bold text-primary tracking-widest">1절 묵상</span>
+<button class="p-1 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-lg">save</span>
+</button>
+</div>
+<textarea class="w-full bg-white dark:bg-slate-800 border-slate-200 dark:border-border-dark rounded-lg text-sm font-sans p-3 focus:ring-primary focus:border-primary dark:text-slate-200 leading-relaxed outline-none min-h-[100px]" placeholder="1절에 대한 묵상을 입력하세요...">주님이 나의 목자가 되어 주시기에 더 이상 세상의 결핍에 집중하지 않기로 했습니다. 나의 모든 필요를 아시는 분께 온전히 맡길 때 참된 평안이 찾아옴을 느낍니다.</textarea>
+</div>
+</div>
+<div class="verse-group">
+<div class="read-only-content flex items-start gap-4 p-5 rounded-xl bg-slate-50/50 dark:bg-slate-900/20 border border-slate-100/50 dark:border-border-dark/50">
+<span class="text-sm font-bold text-primary shrink-0 font-sans mt-1">4절</span>
+<div class="space-y-3">
+<p class="text-base font-serif text-slate-800 dark:text-slate-200 leading-relaxed italic">"내가 사망의 음침한 골짜기로 다닐지라도 해를 두려워하지 않을 것은..."</p>
+<div class="pl-4 border-l-2 border-primary/30">
+<p class="text-sm font-sans text-slate-600 dark:text-slate-400 leading-relaxed">가장 어두운 시간을 지날 때조차 주님이 곁에 계심을 확신합니다. 상황은 변하지 않아도 주님의 임재가 나를 보호하고 계심을 믿으며 담대하게 나아갑니다.</p>
+</div>
+</div>
+</div>
+<div class="edit-input-content verse-edit-card">
+<div class="flex items-center justify-between">
+<span class="text-xs font-bold text-primary tracking-widest">4절 묵상</span>
+<button class="p-1 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-lg">save</span>
+</button>
+</div>
+<textarea class="w-full bg-white dark:bg-slate-800 border-slate-200 dark:border-border-dark rounded-lg text-sm font-sans p-3 focus:ring-primary focus:border-primary dark:text-slate-200 leading-relaxed outline-none min-h-[100px]" placeholder="4절에 대한 묵상을 입력하세요...">가장 어두운 시간을 지날 때조차 주님이 곁에 계심을 확신합니다. 상황은 변하지 않아도 주님의 임재가 나를 보호하고 계심을 믿으며 담대하게 나아갑니다.</textarea>
+</div>
+</div>
+<button class="edit-input-content w-full py-4 border-2 border-dashed border-slate-200 dark:border-border-dark rounded-xl text-slate-400 hover:text-primary hover:border-primary/50 transition-all flex items-center justify-center gap-2 text-sm font-bold">
+<span class="material-symbols-outlined">add_circle</span>
+                            다른 구절 묵상 추가
+                        </button>
+</div>
+</div>
+<div class="h-[20%] bg-primary/[0.03] dark:bg-primary/[0.02] border-t border-primary/5 p-8 flex flex-col">
+<div class="flex items-center gap-2 mb-3">
+<span class="material-symbols-outlined text-primary text-xl">prayer_times</span>
+<h4 class="text-xs font-bold text-primary uppercase tracking-widest font-sans">오늘의 기도</h4>
+</div>
+<div class="flex-1 flex flex-col">
+<div class="read-only-content flex-1 flex items-center bg-white/60 dark:bg-slate-900/60 px-6 py-4 rounded-xl border border-primary/10">
+<p class="text-base font-serif italic text-slate-700 dark:text-slate-300 leading-relaxed">
+                                "사랑의 하나님, 오늘도 선한 목자가 되어 주셔서 감사합니다. 메마른 땅을 걸어갈 때에도 주님이 주시는 생명수를 마시며 기뻐하게 하소서. 아멘."
+                            </p>
+</div>
+<div class="edit-input-content flex-1 relative">
+<input class="w-full h-full bg-white dark:bg-slate-900/60 pl-6 pr-12 py-4 rounded-xl border border-primary/20 focus:ring-primary focus:border-primary text-base font-serif italic text-slate-700 dark:text-slate-300 outline-none" placeholder="오늘의 기도를 입력하세요..." type="text" value="사랑의 하나님, 오늘도 선한 목자가 되어 주셔서 감사합니다. 메마른 땅을 걸어갈 때에도 주님이 주시는 생명수를 마시며 기뻐하게 하소서. 아멘."/>
+<button class="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-primary hover:bg-primary/5 rounded-lg">
+<span class="material-symbols-outlined">save</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</section>
+<aside class="w-[20%] shrink-0 flex flex-col gap-5 overflow-hidden">
+<div class="panel-standard p-5">
+<div class="flex items-center justify-between mb-5">
+<h3 class="text-sm font-bold dark:text-white font-sans">2024년 5월</h3>
+<div class="flex gap-1">
+<button class="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded text-slate-400">
+<span class="material-symbols-outlined text-lg">chevron_left</span>
+</button>
+<button class="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded text-slate-400">
+<span class="material-symbols-outlined text-lg">chevron_right</span>
+</button>
+</div>
+</div>
+<div class="calendar-mini-grid mb-2">
+<div class="text-center text-[10px] font-bold text-red-400/80">S</div>
+<div class="text-center text-[10px] font-bold text-slate-400">M</div>
+<div class="text-center text-[10px] font-bold text-slate-400">T</div>
+<div class="text-center text-[10px] font-bold text-slate-400">W</div>
+<div class="text-center text-[10px] font-bold text-slate-400">T</div>
+<div class="text-center text-[10px] font-bold text-slate-400">F</div>
+<div class="text-center text-[10px] font-bold text-slate-400">S</div>
+</div>
+<div class="calendar-mini-grid gap-px bg-slate-100 dark:bg-border-dark border border-slate-100 dark:border-border-dark rounded-lg overflow-hidden">
+<div class="bg-white dark:bg-surface-dark aspect-square flex items-center justify-center text-[11px] text-slate-400">1</div>
+<div class="bg-white dark:bg-surface-dark aspect-square flex flex-col items-center justify-center relative hover:bg-primary/5 cursor-pointer">
+<span class="text-[11px] text-slate-700 dark:text-slate-300">2</span>
+<div class="w-1 h-1 bg-primary rounded-full absolute bottom-1.5"></div>
+</div>
+<div class="bg-primary aspect-square flex flex-col items-center justify-center relative shadow-inner">
+<span class="text-[11px] text-white font-bold">20</span>
+<div class="w-1 h-1 bg-white rounded-full absolute bottom-1.5"></div>
+</div>
+<div class="bg-white dark:bg-surface-dark aspect-square flex items-center justify-center text-[11px] text-slate-700 dark:text-slate-300">21</div>
+</div>
+</div>
+<div class="panel-standard p-5 flex-1 overflow-y-auto custom-scrollbar">
+<h3 class="text-sm font-bold dark:text-white mb-6 flex items-center gap-2 font-sans">
+<span class="material-symbols-outlined text-primary text-xl">insights</span>
+                    이번 달 요약
+                </h3>
+<div class="space-y-8">
+<div class="group">
+<div class="flex items-center justify-between mb-3">
+<p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest font-sans">총 묵상 일수</p>
+<span class="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full font-bold">+2일</span>
+</div>
+<div class="flex items-baseline gap-1">
+<p class="text-3xl font-extrabold dark:text-white font-sans">18</p>
+<p class="text-sm text-slate-400 font-bold font-sans">일 / 31일</p>
+</div>
+<div class="mt-4 h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+<div class="h-full bg-primary" style="width: 58%"></div>
+</div>
+</div>
+<div class="pt-6 border-t border-slate-100 dark:border-border-dark">
+<p class="text-[10px] text-slate-500 font-bold mb-4 uppercase tracking-widest font-sans">가장 많이 읽은 성경</p>
+<div class="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-100 dark:border-border-dark">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-xl">book</span>
+</div>
+<div>
+<p class="text-sm font-bold dark:text-white font-sans">시편</p>
+<p class="text-[10px] text-slate-500 font-medium font-sans">총 12회 묵상</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-slate-300 dark:text-slate-600 text-lg">trending_up</span>
+</div>
+</div>
+</div>
+</div>
+</aside>
+</div>
+</main>
+
+</body></html>
