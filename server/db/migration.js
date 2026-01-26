@@ -30,6 +30,7 @@ export function runMigrations(db) {
                     book TEXT NOT NULL,
                     chapter INTEGER NOT NULL,
                     verse INTEGER NOT NULL,
+                    verse_range TEXT,
                     content TEXT NOT NULL,
                     created_at TEXT DEFAULT (datetime('now')),
                     updated_at TEXT DEFAULT (datetime('now')),
@@ -89,6 +90,21 @@ export function runMigrations(db) {
         }
     } else {
         console.log('✅ Database is up to date (V2)');
+        // Patch: Check if verse_range column exists in verse_notes
+        try {
+            const tableInfo = db.exec("PRAGMA table_info(verse_notes)");
+            if (tableInfo.length > 0) {
+                const columns = tableInfo[0].values.map(v => v[1]);
+                if (!columns.includes('verse_range')) {
+                    console.log('🩹 Patching verse_notes table: Adding verse_range column...');
+                    db.run("ALTER TABLE verse_notes ADD COLUMN verse_range TEXT");
+                    console.log('✅ Added verse_range column to verse_notes.');
+                    v2MigrationApplied = true;
+                }
+            }
+        } catch (error) {
+            console.error('❌ Failed to patch verse_notes table:', error);
+        }
     }
 
     // 3. User Settings Table
