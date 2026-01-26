@@ -1,6 +1,6 @@
-# 🏗️ System Architecture (v1.3)
+# 🏗️ System Architecture (v2.0)
 
-> **Last Updated: 2026-01-08**
+> **Last Updated: 2026-01-26**
 
 BibleMate의 현재 시스템 구조와 설계 철학을 정리한 문서입니다.
 
@@ -92,7 +92,7 @@ erDiagram
         string book "OSIS Code"
         int chapter
         int verse
-        string version "krv, oeb"
+        string version "krv, web, bbe"
         string text
     }
     highlights {
@@ -100,39 +100,62 @@ erDiagram
         string book
         int chapter
         int verse
-        string style "yellow, red, etc."
-        datetime created_at
-    }
-    notes {
-        int id PK
-        string date "YYYY-MM-DD"
-        string content
+        string style "yellow, green, blue, red"
         datetime created_at
     }
     reading_logs {
         int id PK
         string date "YYYY-MM-DD"
         string book
-        int chapter_from
-        int chapter_to
+        int chapter
+        int verses_count "Total verses in chapter"
         datetime created_at
+    }
+    verse_notes {
+        int id PK
+        string book
+        int chapter
+        int verse
+        string content
+        datetime created_at
+    }
+    free_notes {
+        int id PK
+        string date "YYYY-MM-DD"
+        string content
+        datetime created_at
+    }
+    daily_prayers {
+        int id PK
+        string date "YYYY-MM-DD"
+        string content
+        datetime created_at
+    }
+    user_settings {
+        int id PK
+        string key "highlightLabels, fontFamily etc."
+        string value "JSON string"
+        datetime updated_at
     }
 ```
 
-### 2) Backup JSON Schema (v1.3)
+### 2) Backup JSON Schema (v2.0)
 내보내기/가져오기에 사용되는 JSON의 기본 구조입니다.
 메타데이터(`app_version`, `schema_version`)를 통해 호환성을 관리합니다.
 
 ```json
 {
-  "version": "1.3",
-  "app_version": "1.3.0",
-  "schema_version": 2,
-  "exported_at": "2026-01-08T...",
+  "version": "2.0",
+  "app_version": "2.0.0",
+  "schema_version": 3,
+  "exported_at": "2026-01-26T...",
   "data": {
     "reading_logs": [...],
-    "notes": [...],
-    "highlights": [...]
+    "verse_notes": [...],
+    "free_notes": [...],
+    "daily_prayers": [...],
+    "highlights": [...],
+    "user_settings": [...]
   }
 }
 ```

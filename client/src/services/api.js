@@ -41,7 +41,14 @@ export const api = {
 
     // Notes
     getNotes: () => request('GET', '/notes'),
-    getNote: (date) => request('GET', `/notes/${date}`),
+    getNote: async (date) => {
+        try {
+            return await request('GET', `/notes/${date}`);
+        } catch (error) {
+            if (error.message.includes('404')) return null;
+            throw error;
+        }
+    },
     saveNote: (data) => request('POST', '/notes', data), // upsert by date { date, content }
     addNote: (data) => request('POST', '/notes', data), // alias for saveNote
     updateNote: (id, data) => request('PUT', `/notes/${id}`, data),
@@ -54,4 +61,8 @@ export const api = {
 
     // Health
     checkHealth: () => request('GET', '/health'),
+
+    // Settings
+    getSettings: () => request('GET', '/settings'),
+    saveSetting: (key, value) => request('POST', '/settings', { key, value }),
 };

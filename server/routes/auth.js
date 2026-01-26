@@ -49,10 +49,17 @@ export function isValidSession(token) {
     return true;
 }
 
+
 /**
  * Authentication middleware
  */
 export function authMiddleware(req, res, next) {
+    // [NEW] Skip auth for localhost (Local Development)
+    const isLocal = req.hostname === 'localhost' || req.hostname === '127.0.0.1';
+    if (isLocal) {
+        return next();
+    }
+
     // Skip if no password set
     if (!isAuthRequired()) {
         return next();
@@ -87,7 +94,10 @@ export function authMiddleware(req, res, next) {
  * Check if authentication is required and current status
  */
 router.get('/status', (req, res) => {
-    const authRequired = isAuthRequired();
+    // [NEW] Skip auth for localhost
+    const isLocal = req.hostname === 'localhost' || req.hostname === '127.0.0.1';
+    const authRequired = isLocal ? false : isAuthRequired();
+
     const token = req.cookies?.session_token;
     const authenticated = authRequired ? isValidSession(token) : true;
 

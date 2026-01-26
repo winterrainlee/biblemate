@@ -1,0 +1,470 @@
+import React, { useState, useEffect } from 'react';
+import { ArrowLeft, Type, Download, Upload, Eye, EyeOff, LogOut, CheckCircle, AlertCircle, CalendarOff, Edit2, Trash2, ChevronLeft, ChevronRight } from 'lucide-react'; // Ensure Edit2 and Trash2 are imported
+import { format, addDays, subDays, isToday } from 'date-fns';
+import { ko } from 'date-fns/locale';
+import Modal from '../components/Modal'; // Import Modal
+import {
+    getVerseNotesByDate,
+    getAllVerseNotes,
+    saveVerseNote,
+    deleteVerseNote,
+    getFreeNote,
+    saveFreeNote,
+    deleteFreeNote,
+    getPrayer,
+    savePrayer,
+    deletePrayer,
+    getAllFreeNotes
+} from '../services/journalApi';
+import './JournalPage.css';
+
+// Components
+import ReadingProgress from '../components/ReadingProgress';
+import JournalStats from '../components/JournalStats';
+
+
+const JournalPage = ({ date, onDateChange, readingLogs = [], books = [], onNavigateToBible }) => {
+    const dateStr = format(date, 'yyyy-MM-dd');
+
+    // Date navigation handlers
+    const handlePrevDay = () => onDateChange?.(subDays(date, 1));
+    const handleNextDay = () => onDateChange?.(addDays(date, 1));
+    const handleToday = () => onDateChange?.(new Date());
+
+    // Data States
+    const [verseNotes, setVerseNotes] = useState([]);
+    const [allVerseNotes, setAllVerseNotes] = useState([]); // stats 용
+    const [allFreeNotes, setAllFreeNotes] = useState([]); // stats 용 [NEW]
+    const [freeNote, setFreeNote] = useState(null);
+    const [prayer, setPrayer] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
+
+    // Edit States
+    const [editingFreeNote, setEditingFreeNote] = useState(false);
+    const [editingPrayer, setEditingPrayer] = useState(false);
+    const [freeNoteContent, setFreeNoteContent] = useState('');
+    const [prayerContent, setPrayerContent] = useState('');
+
+    // Verse Note Edit State
+    const [editingVerseNote, setEditingVerseNote] = useState(null); // { note, content }
+
+    // Load data when date changes
+    useEffect(() => {
+        loadJournalData();
+    }, [dateStr]);
+
+    // Swipe handlers for mobile
+    const [touchStart, setTouchStart] = useState(null);
+    const [touchEnd, setTouchEnd] = useState(null);
+
+    const minSwipeDistance = 50;
+
+    const onTouchStart = (e) => {
+        setTouchEnd(null);
+        setTouchStart(e.targetTouches[0].clientX);
+    };
+
+    const onTouchMove = (e) => setTouchEnd(e.targetTouches[0].clientX);
+
+    const onTouchEnd = () => {
+        if (!touchStart || !touchEnd) return;
+        const distance = touchStart - touchEnd;
+        const isLeftSwipe = distance > minSwipeDistance;
+        const isRightSwipe = distance < -minSwipeDistance;
+
+        if (isLeftSwipe) {
+            handleNextDay();
+        } else if (isRightSwipe) {
+            handlePrevDay();
+        }
+    };
+
+    const loadJournalData = async () => {
+        setIsLoading(true);
+        try {
+            const [notesData, allNotesData, freeNotesData, freeNoteData, prayerData] = await Promise.all([
+                getVerseNotesByDate(dateStr),
+                getAllVerseNotes(),
+                getAllFreeNotes(),
+                getFreeNote(dateStr).catch(() => null),
+                getPrayer(dateStr).catch(() => null)
+            ]);
+
+            // [Modified] Filter notes by created_at instead of date
+            // The user wants to see notes CREATED on this day, regardless of the assigned reading date.
+            const filteredNotes = (allNotesData || []).filter(note => {
+                const createdDate = note.created_at || note.date;
+                return format(new Date(createdDate), 'yyyy-MM-dd') === dateStr;
+            });
+
+            // Sort by Book > Chapter > Verse
+            filteredNotes.sort((a, b) => {
+                const bookIdxA = books.findIndex(bk => bk.id === a.book);
+                const bookIdxB = books.findIndex(bk => bk.id === b.book);
+                if (bookIdxA !== bookIdxB) return bookIdxA - bookIdxB;
+                if (a.chapter !== b.chapter) return a.chapter - b.chapter;
+                return a.verse - b.verse;
+            });
+
+            setVerseNotes(filteredNotes);
+            setAllVerseNotes(allNotesData || []);
+            setAllFreeNotes(freeNotesData || []);
+            setFreeNote(freeNoteData);
+            setPrayer(prayerData);
+            setFreeNoteContent(freeNoteData?.content || '');
+            setPrayerContent(prayerData?.content || '');
+        } catch (error) {
+            console.error('Failed to load journal data:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    // Get book name helper
+    const getBookName = (bookId) => {
+        const book = books.find(b => b.id === bookId);
+        return book?.name || bookId;
+    };
+    // Handler: Save Free Note
+    const handleSaveFreeNote = async () => {
+        if (!freeNoteContent.trim()) return;
+        try {
+            await saveFreeNote({ date: dateStr, content: freeNoteContent });
+            setFreeNote({ date: dateStr, content: freeNoteContent });
+            setEditingFreeNote(false);
+        } catch (error) {
+            console.error('Failed to save free note:', error);
+        }
+    };
+
+    // Handler: Delete Free Note
+    const handleDeleteFreeNote = async () => {
+        if (!confirm('자유 묵상을 삭제하시겠습니까?')) return;
+        try {
+            await deleteFreeNote(dateStr);
+            setFreeNote(null);
+            setFreeNoteContent('');
+        } catch (error) {
+            console.error('Failed to delete free note:', error);
+        }
+    };
+
+    // Handler: Save Prayer
+    const handleSavePrayer = async () => {
+        if (!prayerContent.trim()) return;
+        try {
+            await savePrayer({ date: dateStr, content: prayerContent });
+            setPrayer({ date: dateStr, content: prayerContent });
+            setEditingPrayer(false);
+        } catch (error) {
+            console.error('Failed to save prayer:', error);
+        }
+    };
+
+    // Handler: Delete Prayer
+    const handleDeletePrayer = async () => {
+        if (!confirm('오늘의 기도를 삭제하시겠습니까?')) return;
+        try {
+            await deletePrayer(dateStr);
+            setPrayer(null);
+            setPrayerContent('');
+        } catch (error) {
+            console.error('Failed to delete prayer:', error);
+        }
+    };
+
+    // Handler: Delete Verse Note
+    const handleDeleteVerseNote = async (id) => {
+        if (!confirm('이 묵상을 삭제하시겠습니까?')) return;
+        try {
+            await deleteVerseNote(id);
+            setVerseNotes(prev => prev.filter(n => n.id !== id));
+        } catch (error) {
+            console.error('Failed to delete verse note:', error);
+        }
+    };
+
+    // Handler: Save Verse Note Edit
+    const handleSaveVerseNoteEdit = async () => {
+        if (!editingVerseNote || !editingVerseNote.content.trim()) return;
+        try {
+            const { note, content } = editingVerseNote;
+            await saveVerseNote({
+                id: note.id, // Ensure ID is passed for update
+                date: note.date,
+                book: note.book,
+                chapter: note.chapter,
+                verse: note.verse,
+                verse_range: note.verse_range, // Preserve range
+                content: content
+            });
+
+            // Update local state
+            setVerseNotes(prev => prev.map(n =>
+                n.id === note.id ? { ...n, content: content } : n
+            ));
+
+            setEditingVerseNote(null);
+        } catch (error) {
+            console.error('Failed to update verse note:', error);
+            alert('수정 실패');
+        }
+    };
+
+    // Filter reading logs for selected date and sort by Bible order
+    const todayLogs = readingLogs
+        .filter(log => log.date === dateStr)
+        .sort((a, b) => {
+            const bookIdxA = books.findIndex(bk => bk.id === a.book);
+            const bookIdxB = books.findIndex(bk => bk.id === b.book);
+            if (bookIdxA !== bookIdxB) return bookIdxA - bookIdxB;
+
+            const startA = a.chapter_from || a.chapter || 0;
+            const startB = b.chapter_from || b.chapter || 0;
+            return startA - startB;
+        });
+
+    if (isLoading) {
+        return (
+            <div className="journal-page">
+                <div className="journal-loading">로딩 중...</div>
+            </div>
+        );
+    }
+
+    const hasAnyContent = todayLogs.length > 0 || verseNotes.length > 0 || freeNote || prayer;
+
+    return (
+        <div
+            className="journal-container"
+            onTouchStart={onTouchStart}
+            onTouchMove={onTouchMove}
+            onTouchEnd={onTouchEnd}
+        >
+
+
+            <div className="journal-inner">
+                {/* Desktop Left Sidebar: Reading Progress */}
+                <aside className="journal-side journal-left">
+                    <div className="journal-side-content">
+                        <ReadingProgress
+                            books={books}
+                            readingLogs={readingLogs}
+                        />
+                    </div>
+                </aside>
+
+                {/* Main Center Panel */}
+                <main className="journal-page">
+                    {/* Header */}
+                    <header className="journal-header">
+                        <div className="date-nav">
+                            <button className="nav-btn" onClick={handlePrevDay} title="이전 날짜">
+                                <ChevronLeft size={24} />
+                            </button>
+                            <div className="date-info">
+                                <h2 className="journal-date">{format(date, 'yyyy년 M월 d일 (E)', { locale: ko })}</h2>
+                                {isToday(date) && <span className="today-badge-static">오늘</span>}
+                            </div>
+                            <button className="nav-btn" onClick={handleNextDay} title="다음 날짜">
+                                <ChevronRight size={24} />
+                            </button>
+                        </div>
+                    </header>
+
+                    {/* Empty State */}
+                    {!hasAnyContent && !editingFreeNote && !editingPrayer && (
+                        <div className="journal-empty">
+                            <span className="empty-icon">📝</span>
+                            <p>작성된 묵상이 없습니다</p>
+                            <div className="empty-actions">
+                                <button onClick={() => setEditingFreeNote(true)}>자유 묵상 작성</button>
+                                <button onClick={() => setEditingPrayer(true)}>기도 작성</button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Section: 읽은 말씀 */}
+                    {todayLogs.length > 0 && (
+                        <section className="journal-section">
+                            <h3 className="section-title">📖 읽은 말씀</h3>
+                            <ul className="reading-list">
+                                {todayLogs.map((log, idx) => (
+                                    <li
+                                        key={idx}
+                                        className="reading-item"
+                                        onClick={() => onNavigateToBible?.(log.book, log.chapter_from || log.chapter)}
+                                    >
+                                        <span className="reading-badge">✓</span>
+                                        {getBookName(log.book)} {log.chapter_from || log.chapter}장
+                                    </li>
+                                ))}
+                            </ul>
+                        </section>
+                    )}
+
+                    {/* Section: 구절별 묵상 */}
+                    {verseNotes.length > 0 && (
+                        <section className="journal-section">
+                            <h3 className="section-title">✨ 구절별 묵상</h3>
+                            <div className="verse-notes-list">
+                                {verseNotes.map(note => {
+                                    const isEditing = editingVerseNote?.note.id === note.id;
+
+                                    return (
+                                        <div key={note.id} className="verse-note-card">
+                                            <div className="verse-note-header">
+                                                <span
+                                                    className="verse-ref"
+                                                    onClick={() => onNavigateToBible?.(note.book, note.chapter)}
+                                                >
+                                                    {getBookName(note.book)} {note.chapter}:{note.verse_range || note.verse}
+                                                </span>
+                                                {!isEditing && (
+                                                    <div className="note-actions">
+                                                        <button
+                                                            className="icon-btn"
+                                                            onClick={() => setEditingVerseNote({ note, content: note.content })}
+                                                            title="수정"
+                                                        >
+                                                            <Edit2 size={16} />
+                                                        </button>
+                                                        <button
+                                                            className="icon-btn delete"
+                                                            onClick={() => handleDeleteVerseNote(note.id)}
+                                                            title="삭제"
+                                                        >
+                                                            <Trash2 size={16} />
+                                                        </button>
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            {isEditing ? (
+                                                <div className="editor-box" style={{ marginTop: '0.5rem' }}>
+                                                    <textarea
+                                                        value={editingVerseNote.content}
+                                                        onChange={(e) => setEditingVerseNote(prev => ({ ...prev, content: e.target.value }))}
+                                                        rows={5}
+                                                        style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid var(--pk-color-border)' }}
+                                                    />
+                                                    <div className="editor-actions">
+                                                        <button className="btn-save" onClick={handleSaveVerseNoteEdit}>저장</button>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <>
+                                                    <div className="verse-note-content">
+                                                        {note.content.split(/(".*?")/s).map((part, idx) => {
+                                                            if (part.startsWith('"') && part.endsWith('"') && part.length > 2) {
+                                                                return (
+                                                                    <div key={idx} className="verse-quote-box">
+                                                                        {part.slice(1, -1)}
+                                                                    </div>
+                                                                );
+                                                            }
+                                                            return <span key={idx}>{part}</span>;
+                                                        })}
+                                                    </div>
+                                                    <div className="note-date">{new Date(note.created_at || note.date).toLocaleDateString()}</div>
+                                                </>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </section>
+                    )}
+
+                    {/* Section: 자유 묵상 */}
+                    <section className="journal-section">
+                        <div className="section-header">
+                            <h3 className="section-title">💭 자유 묵상</h3>
+                            {freeNote && !editingFreeNote && (
+                                <div className="section-actions">
+                                    <button className="icon-btn" onClick={() => setEditingFreeNote(true)} title="수정"><Edit2 size={16} /></button>
+                                    <button className="icon-btn delete" onClick={handleDeleteFreeNote} title="삭제"><Trash2 size={16} /></button>
+                                </div>
+                            )}
+                        </div>
+                        {editingFreeNote ? (
+                            <div className="editor-box">
+                                <textarea
+                                    value={freeNoteContent}
+                                    onChange={(e) => setFreeNoteContent(e.target.value)}
+                                    placeholder="오늘의 묵상을 자유롭게 작성하세요..."
+                                    rows={5}
+                                />
+                                <div className="editor-actions">
+                                    <button className="btn-save" onClick={handleSaveFreeNote}>저장</button>
+                                    <button className="btn-cancel" onClick={() => {
+                                        setEditingFreeNote(false);
+                                        setFreeNoteContent(freeNote?.content || '');
+                                    }}>취소</button>
+                                </div>
+                            </div>
+                        ) : freeNote ? (
+                            <p className="section-content">{freeNote.content}</p>
+                        ) : (
+                            <button className="add-btn" onClick={() => setEditingFreeNote(true)}>
+                                + 자유 묵상 추가
+                            </button>
+                        )}
+                    </section>
+
+                    {/* Section: 오늘의 기도 */}
+                    <section className="journal-section">
+                        <div className="section-header">
+                            <h3 className="section-title">🙏 오늘의 기도</h3>
+                            {prayer && !editingPrayer && (
+                                <div className="section-actions">
+                                    <button className="icon-btn" onClick={() => setEditingPrayer(true)} title="수정"><Edit2 size={16} /></button>
+                                    <button className="icon-btn delete" onClick={handleDeletePrayer} title="삭제"><Trash2 size={16} /></button>
+                                </div>
+                            )}
+                        </div>
+                        {editingPrayer ? (
+                            <div className="editor-box">
+                                <textarea
+                                    value={prayerContent}
+                                    onChange={(e) => setPrayerContent(e.target.value)}
+                                    placeholder="오늘 드리는 기도를 작성하세요..."
+                                    rows={5}
+                                />
+                                <div className="editor-actions">
+                                    <button className="btn-save" onClick={handleSavePrayer}>저장</button>
+                                    <button className="btn-cancel" onClick={() => {
+                                        setEditingPrayer(false);
+                                        setPrayerContent(prayer?.content || '');
+                                    }}>취소</button>
+                                </div>
+                            </div>
+                        ) : prayer ? (
+                            <p className="section-content">{prayer.content}</p>
+                        ) : (
+                            <button className="add-btn" onClick={() => setEditingPrayer(true)}>
+                                + 오늘의 기도 추가
+                            </button>
+                        )}
+                    </section>
+                </main>
+
+                {/* Desktop Right Sidebar: Stats & Calendar */}
+                <aside className="journal-side journal-right">
+                    <div className="journal-side-content">
+                        <JournalStats
+                            date={date}
+                            onDateChange={onDateChange}
+                            readingLogs={readingLogs}
+                            verseNotes={allVerseNotes}
+                            freeNotes={allFreeNotes}
+                            books={books}
+                        />
+                    </div>
+                </aside>
+            </div>
+        </div>
+    );
+};
+
+export default JournalPage;

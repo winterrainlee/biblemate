@@ -2,8 +2,9 @@
 
 .layout-container {
     display: flex;
-    min-height: 100vh;
+    height: 100vh;
     background-color: var(--pk-color-bg-secondary);
+    overflow: hidden;
 }
 
 .main-content-wrapper {
@@ -11,6 +12,7 @@
     display: flex;
     flex-direction: column;
     min-width: 0;
+    overflow: hidden;
     /* Prevent flex overflow */
 }
 
@@ -72,10 +74,16 @@
 .app-main {
     flex: 1;
     padding-top: 0;
-    padding-bottom: var(--pk-spacing-8);
+    padding-bottom: 0;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
 }
 
 .app-footer {
+    display: none;
+    /* Hide footer for now as we want a full-screen app-like experience */
     border-top: 1px solid var(--pk-color-border);
     padding: var(--pk-spacing-8) 0;
     text-align: center;

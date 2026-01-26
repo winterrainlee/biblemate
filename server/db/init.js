@@ -7,11 +7,12 @@ import initSqlJs from 'sql.js';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { runMigrations } from './migration.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const DB_PATH = path.join(__dirname, '..', 'data', 'bible.db');
+const DB_PATH = process.env.DB_PATH || path.join(__dirname, '..', 'data', 'bible.db');
 const SCHEMA_PATH = path.join(__dirname, 'schema.sql');
 
 let db = null;
@@ -40,6 +41,12 @@ export async function initDB() {
         console.log('📋 Schema applied');
 
         // Save to file
+        saveDB();
+    }
+
+    // Check for migrations (V2 update)
+    const migrated = runMigrations(db);
+    if (migrated) {
         saveDB();
     }
 

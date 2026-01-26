@@ -1,0 +1,27 @@
+.page-settings {
+    height: 100%;
+    overflow-y: auto;
+    padding: var(--pk-spacing-6);
+    background-color: var(--pk-color-bg);
+}
+
+.settings-header {
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--pk-color-border);
+}
+
+.settings-section {
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background-color: var(--pk-color-bg);
+    border: 1px solid var(--pk-color-border);
+    border-radius: var(--pk-radius-lg);
+}
+
+/* Response for mobile */
+@media (max-width: 768px) {
+    .page-settings {
+        padding: var(--pk-spacing-4);
+    }
+}

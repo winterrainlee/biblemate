@@ -4,7 +4,6 @@ import Header from './Header';
 import Modal from './Modal';
 import TrackerModal from './TrackerModal';
 import './Layout.css';
-import './Layout.css'; // Component specific styles if needed, mainly relying on utility classes or global CSS
 
 const Layout = ({ children }) => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -34,3 +33,4 @@ const Layout = ({ children }) => {
 };
 
 export default Layout;
+

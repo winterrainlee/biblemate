@@ -1,14 +1,13 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout';
-// import Home from './pages/Home';
-// import Bible from './pages/Bible';
 import ReadingDashboard from './pages/ReadingDashboard';
 // Dynamic imports for code splitting - reduces initial bundle size
 const Settings = lazy(() => import('./pages/Settings'));
 const BibleChartPage = lazy(() => import('./pages/BibleChartPage'));
 import LoginPage from './pages/LoginPage';
 import { ThemeProvider } from './contexts/ThemeContext';
+import { TabProvider } from './contexts/TabContext';
 
 // Loading fallback component
 const PageLoader = () => (
@@ -94,19 +93,21 @@ function App() {
 
   return (
     <ThemeProvider>
-      <Router>
-        <Layout>
-          <Suspense fallback={<PageLoader />}>
-            <Routes>
-              <Route path="/" element={<ReadingDashboard />} />
-              <Route path="/chart" element={<BibleChartPage />} />
-              <Route path="/settings" element={<Settings />} />
-              {/* Redirect legacy routes */}
-              <Route path="*" element={<ReadingDashboard />} />
-            </Routes>
-          </Suspense>
-        </Layout>
-      </Router>
+      <TabProvider>
+        <Router>
+          <Layout>
+            <Suspense fallback={<PageLoader />}>
+              <Routes>
+                <Route path="/" element={<ReadingDashboard />} />
+                <Route path="/chart" element={<BibleChartPage />} />
+                <Route path="/settings" element={<Settings />} />
+                {/* Redirect legacy routes */}
+                <Route path="*" element={<ReadingDashboard />} />
+              </Routes>
+            </Suspense>
+          </Layout>
+        </Router>
+      </TabProvider>
     </ThemeProvider>
   );
 }

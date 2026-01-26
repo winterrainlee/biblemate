@@ -31,6 +31,8 @@ Bible Reading Mate 프로젝트를 진행하며 각 버전(v1.0 ~ v1.3.1)에서 
   - `sql.js`와 같은 인메모리/파일 기반 DB 사용 시, 트랜잭션 후 반드시 파일 시스템으로의 동기화(`saveDB`)를 명시적으로 호출해야 데이터 유실을 막을 수 있습니다.
 - **SQLite 라이브러리 선정** `v1.0`
   - 배포 환경(Node/Python 버전 등)에 제약이 많다면, 네이티브 빌드가 필요한 `better-sqlite3` 대신 WebAssembly 기반의 `sql.js`가 이식성 면에서 유리합니다.
+- **레거시 API 호환성 유지 (Backend Facade)** `v2.0`
+  - V2 업데이트로 테이블 구조가 변경(`notes` ➔ `free_notes`)되었더라도, 모든 프론트엔드 코드를 즉시 수정하기 어렵다면 서버 API 레이어에서 기존 엔드포인트가 신규 테이블을 바라보도록 맵핑하세요. 이는 작업의 원자성을 보장하고 UI가 깨지는 것을 방지하는 안전한 브릿지 역할을 합니다.
 
 ---
 
@@ -90,4 +92,106 @@ Bible Reading Mate 프로젝트를 진행하며 각 버전(v1.0 ~ v1.3.1)에서 
   - 데스크톱(2rem)과 모바일(0.5rem~1rem)에서 적절한 간격이 다릅니다. 미디어 쿼리로 분리하거나, 처음부터 작은 값으로 통일하는 것이 안전합니다.
 - **Sticky Position과 Bottom 값** `v1.4.1`
   - `position: sticky; bottom: 2rem;`은 데스크톱에서 보기 좋지만 모바일에서는 불필요한 공백을 유발합니다. 모바일 우선 설계 시 `bottom: 0.5rem` 정도가 적절합니다.
+
+---
+
+## 6. DB Migration & Scripting (DB 마이그레이션) `v2.0`
+
+### 🧪 Node.js ESM 환경에서의 스크립팅
+- **Dynamic Import와 환경 변수** `v2.0`
+  - Node.js에서 ESM(`import`)은 모듈 평가(Evaluation)가 코드 실행보다 먼저 일어납니다(Hoisting).
+  - 따라서 `process.env.MY_VAR = '...'` 설정 후 `import { ... } from './config.js'`를 호출하면, `config.js` 내부에서는 환경 변수가 설정되기 전 값을 참조할 수 있습니다.
+  - **Lesson**: 테스트 스크립트 등에서 런타임에 환경 설정을 주입해야 한다면 `await import(...)` (Dynamic Import)를 사용하여 실행 순서를 제어해야 합니다.
+
+### 🧹 DB Connection 관리
+- **Connection Leak 방지** `v2.0`
+  - 마이그레이션 테스트처럼 하나의 프로세스에서 DB 연결→종료→재연결을 반복할 때, `sql.js` (WebAssembly)나 파일 핸들이 완전히 해제되지 않아 `assertion failed`나 `EBUSY` 에러가 발생할 수 있습니다.
+  - 명시적인 `close()` 호출뿐만 아니라, 필요하다면 프로세스를 분리하거나 가비지 컬렉션을 고려해야 합니다.
+
+### 🔧 Windows PowerShell API 테스트
+- **curl vs Invoke-RestMethod** `v2.0`
+  - Windows PowerShell에서 `curl`은 `Invoke-WebRequest`의 별칭으로, Unix/Linux의 curl과 문법이 다릅니다.
+  - API 테스트 시 `-H "Content-Type: application/json"` 대신 `-ContentType "application/json"`을 사용해야 하며, JSON body는 single quote로 감싸야 합니다.
+  - **Lesson**: 크로스 플랫폼 스크립트에서는 `Invoke-RestMethod` (PowerShell)와 `curl` (bash/cmd)를 구분하여 사용하세요.
+
+---
+
+## 7. React State Coordination & Navigation `v2.0`
+
+### 🔄 부모-자식 간의 상태 동기화 (Targeted State Update)
+- **책/장 네비게이션 동기화** `v2.0`
+  - 자식 컴포넌트(`BibleViewer`)에서 '이전 책의 마지막 장'으로 이동하는 것과 같이 복합적인 상태 변경이 필요할 때, 부모의 핸들러(`handleBookChange`)가 단순히 책 ID만 받는 것이 아니라 선택적으로 `chapterId`를 받도록 확장해야 합니다.
+  - **Lesson**: `handleBookChange = (bookId, chapterId = 1) => { ... }`와 같이 기본 매개변수를 활용하면 기존 호출처는 유지하면서 특정 시나리오에서의 정밀한 제어가 가능해집니다.
+
+### 🛡️ 삭제된 기능 복구 (The Overwrite Accident)
+- **도구 사용 오류와 코드 유실** `v2.0`
+  - `multi_replace_file_content`와 같은 도구를 사용할 때, 타겟 범위가 겹치거나 잘못 지정되면 의도치 않게 기존 함수가 삭제될 수 있습니다. (예: `ReadingDashboard`의 핵심 핸들러 유실 사고)
+  - **Lesson**: 대규모 코드 수정 후에는 반드시 Health Check(`npm run dev`)를 수행하고, 화면이 나오지 않는다면 즉시 최근의 파일 수정 이력을 검토하여 유실된 함수가 없는지 확인해야 합니다.
+
+---
+
+## 8. Mobile/Tablet Web Experience `v2.0`
+
+### 🚫 브라우저 기본 제스처 차단 (Overscroll Lock)
+- **Swipe-to-navigate 충돌** `v2.0`
+  - 태블릿 브라우저에서 가로 스크롤이나 대각선 스크롤 시 '뒤로 가기/앞으로 가기' 제스처가 발동되어 앱 사용 흐름을 방해할 수 있습니다.
+  - **Lesson**: `html`, `body`에 `overscroll-behavior: none;`을 적용하면 시스템 수준의 swipe navigation을 차단할 수 있습니다. 또한 `touch-action: pan-y;`를 통해 터치 동작을 필요한 방향(수직 스크롤)으로만 한정시키는 것이 좋습니다.
+
+
+---
+
+## 9. Feature Implementation & Debugging Details `v2.0`
+
+### 🔑 데이터 키 관리 (Semantic Keys over Raw Values)
+- **Hex Code Key의 위험성**:
+  - 색상 코드(`#fef08a`)를 객체의 키로 직접 사용하면, 대소문자 차이(`F` vs `f`)나 미세한 값 변경 시 데이터 정합성이 깨집니다.
+  - **Lesson**: 변동 가능한 값(Value) 대신 변하지 않는 의미론적 키(Semantic Key, 예: `yellow`, `green`)를 사용하여 데이터 구조의 안정성을 확보하세요.
+- **다크 모드와 하드코딩의 충돌** `v2.0`
+  - JS에서 `backgroundColor: '#...` 처럼 헥사 코드를 직접 컴포넌트에 넘기면 CSS의 다크 모드 변수(`:root.dark`)가 적용되지 않습니다.
+  - **Lesson**: 테마에 따라 변해야 하는 색상은 반드시 CSS 변수(`var(--pk-color-...)`)를 사용하거나, DB에 저장된 레거시 값을 렌더링 시점에 변수로 치환하는 **Theme Mapping Layer**를 경유하게 하세요.
+
+### 📦 컴포넌트 간 데이터 전달 (The Delivery Accident)
+- **로직 완벽, 연결 실패** `v2.0`
+  - 부모에서 데이터를 완벽하게 넘겨주더라도 자식 컴포넌트의 Props 비구조화 할당 목록에서 누락되면 `ReferenceError`와 함께 화면이 멈추게 됩니다.
+  - **Lesson**: 신규 데이터를 컴포넌트에 주입할 때는 반드시 **Props 선언부**, **Prop 전달부**, **사용부** 이 세 지점을 모두 확인해야 합니다.
+
+### ⚖️ 타입 비교의 함정 (Strict vs Loose)
+- **DB(Number) vs API(String)** `v2.0`
+  - SQLite 등 DB에서는 숫자로 저장되더라도, JSON API를 거치거나 클라이언트 상태로 넘어올 때 문자열로 변환될 수 있습니다.
+  - **Lesson**: ID나 구절 번호 같은 식별자를 비교할 때 `===` (Strict Equality)가 실패한다면, 데이터 출처가 서로 다른지 확인하고 `==` (Loose Equality)를 사용하거나 명시적인 형 변환(`Number()`)을 수행하여 동기화 오류를 방지하세요.
+
+### 📱 모바일 적응형 레이아웃 (Adaptive Hiding)
+- **복잡한 재배치 대신 숨김**:
+  - 데스크톱의 3단 레이아웃을 모바일에서 모두 보여주려 하면 오히려 사용성을 해칩니다.
+  - **Lesson**: 모바일에서는 핵심 경험(성경 읽기)에 집중하기 위해 보조 패널(사이드바)을 과감히 숨기고(`display: none`), 본문을 1단으로 단순화하는 것이 훌륭한 최적화 전략입니다.
+
+### 💾 데이터 지속성의 함정 (The Persistence Trap)
+- **메모리 vs 파일 시스템**:
+  - `sql.js`와 같은 인메모리 기반 DB는 프로세스 종료 시점(`exit`)에 파일로 저장(`saveDB`)하는 로직이 있을 수 있습니다.
+  - 테스트를 위해 외부 스크립트로 DB 파일을 삭제하거나 초기화하더라도, 실행 중인 메인 서버 프로세스가 살아있다면 종료 시점에 메모리의 데이터를 다시 덮어써서 초기화를 무효화시킵니다.
+  - **Lesson**: DB 초기화나 복원 테스트를 수행할 때는 반드시 관련 서버 프로세스를 확실하게 종료(`taskkill`)하여 메모리 상의 데이터가 파일을 덮어쓰는 상황을 방지하세요.
+
+---
+
+## 10. UI Interaction & CSS Layout `v2.0`
+
+### 🎈 이벤트 전파와 팝업 (Bubble Trouble)
+- **외부 클릭 감지의 부작용**:
+  - `document` 레벨에 '외부 클릭 시 팝업 닫기' 리스너가 걸려있을 때, 팝업 트리거 요소(구절)를 클릭하면 이벤트가 버블링되어 팝업이 열리자마자 닫히는 현상이 발생할 수 있습니다.
+  - **Lesson**: 팝업 내부나 트리거 요소의 `onClick` 핸들러 시작 부분에 반드시 `e.stopPropagation()`을 추가하여 불필요한 이벤트 전파를 막아야 합니다.
+
+### 📐 Flexbox와 텍스트 확장
+- **Header Title 공간 확보**:
+  - 팝업 헤더처럼 공간이 제한적인 곳에서 가변 길이 텍스트(예: 구절 범위)를 표시할 때, 단순히 `width`를 주면 레이아웃이 깨지기 쉽습니다.
+  - **Lesson**: 텍스트 요소에 `flex: 1`을 주어 남은 공간을 모두 차지하게 하고, 옆의 고정 요소(닫기 버튼)에는 `flex-shrink: 0`을 명시하여, 텍스트가 늘어나도 버튼이 찌그러지지 않고 텍스트 영역만 최대로 확보되도록 하십시오.
+
+### 🎯 액션 맥락과 이력 관리의 분리 (Context vs History) `v2.0`
+- **'어제 읽음'과 '오늘 읽기'의 구분**:
+  - 상단 헤더는 "이 장을 읽었는지 여부(이력)"를 보여주지만, 하단 완료 버튼은 "오늘의 일과를 수행했는지 여부(액션)"를 의미합니다.
+  - **Lesson**: 하나의 상태(`isCompleted`)로 여러 목적을 달성하려 하지 말고, 목적에 맞는 별도의 상태(`isReadOnCurrentDate`)를 정의하여 사용자의 혼동을 방지하십시오.
+
+### 🔐 로컬 인증 예외 처리 (Localhost Exception) `v2.0`
+- **개발 생산성 vs 보안**:
+  - `.env`에 비밀번호가 설정되어 있더라도, 개발자가 로컬(`localhost`)에서 매번 로그인하는 것은 비효율적입니다.
+  - **Lesson**: 인증 미들웨어에서 `req.hostname === 'localhost'` 조건을 확인하여 로컬 환경은 무조건 통과시키는 예외 처리를 추가하면, 보안을 유지하면서 개발 경험(DX)을 해치지 않을 수 있습니다.
 

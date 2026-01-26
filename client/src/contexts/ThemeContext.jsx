@@ -9,6 +9,9 @@ export const ThemeProvider = ({ children }) => {
     // Font Size: base pixel size (default 16)
     const [fontSize, setFontSize] = useState(() => Number(localStorage.getItem('fontSize')) || 16);
 
+    // Font Family: 'sans', 'serif'
+    const [fontFamily, setFontFamily] = useState(() => localStorage.getItem('fontFamily') || 'sans');
+
     useEffect(() => {
         const root = window.document.documentElement;
 
@@ -34,17 +37,23 @@ export const ThemeProvider = ({ children }) => {
     }, [theme]);
 
     useEffect(() => {
-        // Apply Font Size
+        // Apply Font Size & Family
         const root = window.document.documentElement;
         root.style.setProperty('--pk-font-size-base', `${fontSize}px`);
+        root.style.setProperty('--pk-font-family', fontFamily === 'serif' ? 'var(--pk-font-serif)' : 'var(--pk-font-sans)');
 
         // Persist settings
         localStorage.setItem('theme', theme);
         localStorage.setItem('fontSize', fontSize);
-    }, [theme, fontSize]);
+        localStorage.setItem('fontFamily', fontFamily);
+    }, [theme, fontSize, fontFamily]);
 
     return (
-        <ThemeContext.Provider value={{ theme, setTheme, fontSize, setFontSize }}>
+        <ThemeContext.Provider value={{
+            theme, setTheme,
+            fontSize, setFontSize,
+            fontFamily, setFontFamily
+        }}>
             {children}
         </ThemeContext.Provider>
     );

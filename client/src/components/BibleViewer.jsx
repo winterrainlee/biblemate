@@ -1,5 +1,8 @@
+
 import React, { useState, useEffect, useRef } from 'react';
-import { Check, Highlighter, MessageSquare, Copy, X, Send, Loader } from 'lucide-react';
+import { Check, Highlighter, MessageSquare, Copy, X, Send, Loader, ChevronLeft, ChevronRight, Settings, Trash2, Edit2, Eraser } from 'lucide-react';
+import { getVerseNotesByChapter, saveVerseNote, deleteVerseNote } from '../services/journalApi';
+import { format } from 'date-fns';
 import './BibleViewer.css';
 
 const BibleViewer = ({
@@ -11,13 +14,61 @@ const BibleViewer = ({
     isCompleted,
     isToday,
     lastReadDate,
+    isReadOnCurrentDate,
+    book = '',
     bookName = '',
     chapter = 1,
     onAddNote,
     onCopyCitation,
-    completionStatus = 'idle' // idle, loading, success, error
+    completionStatus = 'idle', // idle, loading, success, error
+    highlightLabels, // [NEW] Shared labels from dashboard
+
+    // Navigation Props
+    books = [],
+    currentBook,
+    currentChapter,
+    currentVersion,
+    onBookChange,
+    onChapterChange,
+    onVersionChange
 }) => {
-    const [selectedVerseIds, setSelectedVerseIds] = useState([]);
+
+
+    // Derived state for navigation
+    const selectedBookObj = books.find(b => b.id === currentBook);
+    const totalChapters = selectedBookObj ? selectedBookObj.chapters : 0;
+    const chapters = Array.from({ length: totalChapters }, (_, i) => i + 1);
+
+    // Navigation Handlers
+    const handlePrevChapter = () => {
+        if (currentChapter > 1) {
+            onChapterChange(currentChapter - 1);
+        } else {
+            // Find previous book
+            const currIdx = books.findIndex(b => b.id === currentBook);
+            if (currIdx > 0) {
+                const prevBook = books[currIdx - 1];
+                // Navigate to the LAST chapter of the previous book
+                onBookChange(prevBook.id, prevBook.chapters);
+            }
+        }
+    };
+
+    const handleNextChapter = () => {
+        if (currentChapter < totalChapters) {
+            onChapterChange(currentChapter + 1);
+        } else {
+            // Next book
+            const currIdx = books.findIndex(b => b.id === currentBook);
+            if (currIdx < books.length - 1) {
+                const nextBook = books[currIdx + 1];
+                onBookChange(nextBook.id);
+            }
+        }
+    };
+    const [chapterNotes, setChapterNotes] = useState([]);
+    const [isLoadingNotes, setIsLoadingNotes] = useState(false);
+    const [selectedVerses, setSelectedVerses] = useState([]);
     const [popup, setPopup] = useState({
         visible: false,
         x: 0,
@@ -25,14 +76,79 @@ const BibleViewer = ({
         verseNum: null,
         verseText: '',
         mode: 'menu',
-        memoInput: ''
+        memoInput: '',
+        quoteEnabled: false,
+        quoteText: '',
+        editTargetDate: null // [NEW] Track original date for edits
     });
     const popupRef = useRef(null);
+    const dragRef = useRef({ isDragging: false, startX: 0, startY: 0, initialLeft: 0, initialTop: 0 });
+
+    // [NEW] Swipe handlers for mobile chapter navigation
+    const [touchStart, setTouchStart] = useState(null);
+    const [touchEnd, setTouchEnd] = useState(null);
+    const minSwipeDistance = 50;
+
+    const onTouchStart = (e) => {
+        setTouchEnd(null);
+        setTouchStart(e.targetTouches[0].clientX);
+    };
+    const onTouchMove = (e) => setTouchEnd(e.targetTouches[0].clientX);
+    const onTouchEnd = () => {
+        if (!touchStart || !touchEnd) return;
+        const distance = touchStart - touchEnd;
+        const isLeftSwipe = distance > minSwipeDistance;
+        const isRightSwipe = distance < -minSwipeDistance;
+
+        if (isLeftSwipe) {
+            handleNextChapter();
+        } else if (isRightSwipe) {
+            handlePrevChapter();
+        }
+    };
+
+    // Drag handlers
+    const handleMouseDown = (e) => {
+        // Prevent drag if clicking on interactive elements (textarea, button, etc.)
+        if (['BUTTON', 'TEXTAREA', 'INPUT'].includes(e.target.tagName)) return;
+
+        dragRef.current = {
+            isDragging: true,
+            startX: e.clientX,
+            startY: e.clientY,
+            initialLeft: popup.x,
+            initialTop: popup.y
+        };
+        document.addEventListener('mousemove', handleMouseMove);
+        document.addEventListener('mouseup', handleMouseUp);
+    };
+
+    const handleMouseMove = (e) => {
+        if (!dragRef.current.isDragging) return;
+
+        const dx = e.clientX - dragRef.current.startX;
+        const dy = e.clientY - dragRef.current.startY;
+
+        setPopup(prev => ({
+            ...prev,
+            x: dragRef.current.initialLeft + dx,
+            y: dragRef.current.initialTop + dy
+        }));
+    };
+
+    const handleMouseUp = () => {
+        dragRef.current.isDragging = false;
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+    };
 
     // Close popup on escape
     useEffect(() => {
         const handleKeyDown = (e) => {
-            if (e.key === 'Escape') setPopup(prev => ({ ...prev, visible: false }));
+            if (e.key === 'Escape') {
+                setPopup(prev => ({ ...prev, visible: false }));
+                setSelectedVerses([]);
+            }
         };
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
@@ -43,6 +159,7 @@ const BibleViewer = ({
         const handleClickOutside = (e) => {
             if (popupRef.current && !popupRef.current.contains(e.target)) {
                 setPopup(prev => ({ ...prev, visible: false }));
+                setSelectedVerses([]);
             }
         };
         if (popup.visible) {
@@ -53,22 +170,81 @@ const BibleViewer = ({
 
     // Check if a verse has a highlight
     const getHighlightStyle = (verseNum) => {
-        // highlights structure needs to be checked. Assuming list of objects with verse field
         const hl = highlights.find(h => h.verse === verseNum);
-        return hl ? hl.style : null; // style is color hex code
+        if (!hl) return null;
+
+        const style = hl.style;
+        // Legacy hex to CSS variable mapping for theme responsiveness
+        const mapping = {
+            '#fef08a': 'var(--pk-highlight-yellow)',
+            '#bbf7d0': 'var(--pk-highlight-green)',
+            '#bfdbfe': 'var(--pk-highlight-blue)',
+            '#fecaca': 'var(--pk-highlight-red)'
+        };
+
+        return mapping[style] || style;
     };
 
     const handleVerseClick = (e, verse) => {
-        const rect = e.currentTarget.getBoundingClientRect();
-        setPopup({
-            visible: true,
-            x: e.clientX,
-            y: e.clientY - 10, // Slightly above the click
-            verseNum: verse.verse,
-            verseText: verse.text,
-            mode: 'menu',
-            memoInput: ''
-        });
+        e.stopPropagation(); // Prevent popup from closing (outside click detection)
+
+        let newSelected = [];
+        if (popup.visible) {
+            // Toggle selection if popup is open
+            if (selectedVerses.includes(verse.verse)) {
+                newSelected = selectedVerses.filter(v => v !== verse.verse);
+            } else {
+                newSelected = [...selectedVerses, verse.verse];
+            }
+        } else {
+            // Start new selection
+            newSelected = [verse.verse];
+        }
+
+        newSelected.sort((a, b) => a - b);
+        setSelectedVerses(newSelected);
+
+        // If nothing selected (all deselected), close popup
+        if (newSelected.length === 0) {
+            setPopup(prev => ({ ...prev, visible: false }));
+            return;
+        }
+
+        // Aggregate Text for Quote
+        const selectedText = verses
+            .filter(v => newSelected.includes(v.verse))
+            .map(v => newSelected.length > 1 ? `(${v.verse}) ${v.text || v.content}` : (v.text || v.content))
+            .join(' ');
+
+        // Primary verse (first one)
+        const primaryVerseNum = newSelected[0];
+
+        if (!popup.visible) {
+            // Center popup initially (Desktop & Mobile)
+            const popupWidth = Math.min(420, window.innerWidth * 0.9);
+            const popupHeight = 300; // approx
+            const centerX = (window.innerWidth - popupWidth) / 2;
+            const centerY = (window.innerHeight - popupHeight) / 2;
+
+            setPopup({
+                visible: true,
+                x: centerX,
+                y: Math.max(20, centerY), // Avoid top cut off
+                verseNum: primaryVerseNum,
+                verseText: selectedText,
+                mode: 'menu',
+                memoInput: '',
+                quoteEnabled: false,
+                quoteText: selectedText
+            });
+        } else {
+            // Update popup context
+            setPopup(prev => ({
+                ...prev,
+                verseNum: primaryVerseNum,
+                quoteText: selectedText
+            }));
+        }
     };
 
     const handleHighlightClick = () => {
@@ -81,322 +257,573 @@ const BibleViewer = ({
         setPopup(prev => ({ ...prev, visible: false }));
     };
 
-    const handleMemoSubmit = () => {
+    const handleMemoSubmit = async () => {
         if (!popup.memoInput.trim()) return;
-        onAddNote(popup.verseNum, popup.memoInput);
-        setPopup(prev => ({ ...prev, visible: false }));
+
+        const finalContent = popup.quoteEnabled
+            ? `"${popup.quoteText}"\n\n${popup.memoInput} `
+            : popup.memoInput;
+
+        // Use selected verses for range if available, otherwise fall back to existing range in popup
+        const rangeString = selectedVerses.length > 1
+            ? formatVerseRange(selectedVerses)
+            : (popup.verseRange || null);
+
+        const primaryVerse = selectedVerses.length > 0 ? selectedVerses[0] : popup.verseNum;
+
+        const noteData = {
+            date: popup.editTargetDate || format(new Date(), 'yyyy-MM-dd'),
+            book: book || currentBook, // Use currentBook if book prop is empty
+            chapter: chapter || currentChapter,
+            verse: primaryVerse,
+            verse_range: rangeString,
+            content: finalContent
+        };
+
+        try {
+            await saveVerseNote(noteData);
+            setPopup(prev => ({ ...prev, visible: false, verseRange: null, editTargetDate: null })); // Clear range & date
+            setSelectedVerses([]);
+
+            // Refresh notes
+            const targetBook = book || currentBook; // Consistent with noteData
+            const notes = await getVerseNotesByChapter(targetBook, chapter || currentChapter);
+            setChapterNotes(notes);
+
+            // Optional: alert or toast success
+        } catch (error) {
+            console.error('Failed to save note:', error);
+            alert('묵상 저장 실패');
+        }
+    };
+
+    // Load chapter notes when book/chapter changes
+    useEffect(() => {
+        const loadNotes = async () => {
+            const targetBook = book || bookName; // Use book code if available
+            if (!targetBook || !chapter) return;
+            setIsLoadingNotes(true);
+            try {
+                const notes = await getVerseNotesByChapter(targetBook, chapter);
+                setChapterNotes(notes);
+            } catch (err) {
+                console.error('Failed to load chapter notes:', err);
+                setChapterNotes([]); // Clear notes on error
+            } finally {
+                setIsLoadingNotes(false);
+            }
+        };
+        loadNotes();
+    }, [book, bookName, chapter]);
+
+    const handleDeleteNote = async (id) => {
+        if (!window.confirm('묵상을 삭제하시겠습니까?')) return;
+        try {
+            await deleteVerseNote(id);
+            // Refresh
+            const targetBook = book || currentBook;
+            const notes = await getVerseNotesByChapter(targetBook, chapter || currentChapter);
+            setChapterNotes(notes);
+        } catch (error) {
+            console.error('Failed to delete note:', error);
+            alert('삭제 실패');
+        }
+    };
+
+    const handleEditNote = (note) => {
+        // Parse content to check for quote
+        const quoteMatch = note.content.match(/^"([\s\S]+?)"\n\n([\s\S]+)$/);
+        let quoteText = '';
+        let memoInput = note.content;
+        let quoteEnabled = false;
+
+        if (quoteMatch) {
+            quoteText = quoteMatch[1];
+            memoInput = quoteMatch[2];
+            quoteEnabled = true;
+        } else {
+            // Try to find verse text if not in note, but for edit just init empty or basic
+            const v = verses.find(v => v.verse === note.verse);
+            quoteText = v?.text || v?.content || '';
+        }
+
+        setSelectedVerses([]); // Clear any selection
+        setPopup({
+            visible: true,
+            x: window.innerWidth / 2 - 180, // Center horizontally
+            y: window.innerHeight / 2 - 200, // Center vertically
+            verseNum: note.verse,
+            verseRange: note.verse_range, // [NEW] Set range
+            verseText: verses.find(v => v.verse === note.verse)?.text || '',
+            mode: 'memo',
+            memoInput: memoInput,
+            quoteEnabled: quoteEnabled,
+            quoteText: quoteText,
+            editTargetDate: note.date // [NEW] Keep original date
+        });
+    };
+
+    // Split notes for left/right sidebars
+    // Use floor to favor putting the middle item on the right (except for length 1)
+    const midVerse = verses.length > 0 ? verses[Math.max(0, Math.floor(verses.length / 2) - 1)]?.verse : 0;
+    const leftNotes = chapterNotes.filter(n => n.verse <= midVerse);
+    const rightNotes = chapterNotes.filter(n => n.verse > midVerse);
+
+    // Helper to render note content with optional quote styling
+    const renderNoteContent = (content) => {
+        // Check if content starts with a quote pattern: "..."\n\n
+        // Pattern: Starts with ", ends with "\n\n
+        const quoteMatch = content.match(/^"([\s\S]+?)"\n\n([\s\S]+)$/);
+
+        if (quoteMatch) {
+            const quoteText = quoteMatch[1];
+            const userMemo = quoteMatch[2];
+            return (
+                <div className="note-content-wrapper">
+                    <div className="note-quote-styled" style={{
+                        fontSize: '0.9rem',
+                        fontStyle: 'italic',
+                        fontFamily: 'Nanum Myeongjo, serif',
+                        color: 'var(--pk-color-text-secondary)',
+                        padding: '8px',
+                        backgroundColor: 'var(--pk-color-bg-secondary)',
+                        borderRadius: '4px',
+                        borderLeft: '3px solid var(--pk-color-primary-light, #e0e7ff)',
+                        marginBottom: '8px'
+                    }}>
+                        "{quoteText}"
+                    </div>
+                    <p className="note-text">{userMemo}</p>
+                </div>
+            );
+        }
+        return <p className="note-text">{content}</p>;
     };
 
     return (
-        <div className="bible-viewer">
-            {/* Breadcrumb Header */}
-            <div className="viewer-header" style={{
-                marginBottom: '1rem',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.75rem'
-            }}>
-                <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>
-                    {bookName} {chapter}장
-                </h2>
-                {isCompleted && (
-                    <span style={{
-                        backgroundColor: '#dcfce7',
-                        color: '#15803d',
-                        padding: '4px 10px',
-                        borderRadius: '999px',
-                        fontSize: '0.85rem',
-                        fontWeight: '600',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '4px'
-                    }}>
-                        <Check size={14} />
-                        {isToday ? '오늘 읽음' : '이날 읽음'} {lastReadDate && <span style={{ fontSize: '0.75rem', fontWeight: '400', opacity: '0.8' }}>(그 외: {lastReadDate})</span>}
-                    </span>
-                )}
-                {!isCompleted && lastReadDate && (
-                    <span style={{
-                        backgroundColor: '#f1f5f9',
-                        color: '#475569',
-                        padding: '4px 10px',
-                        borderRadius: '999px',
-                        fontSize: '0.85rem',
-                        fontWeight: '600',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '4px'
-                    }}>
-                        <Check size={14} />
-                        이전에 읽음 ({lastReadDate})
-                    </span>
-                )}
-            </div>
-
-            <div className="verses-container" style={{
-                backgroundColor: 'var(--pk-color-bg)',
-                borderRadius: 'var(--pk-radius-lg)',
-                padding: '2rem',
-                boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
-                border: '1px solid var(--pk-color-border)',
-                lineHeight: '1.8',
-                fontSize: '1.1rem'
-            }}>
-                {verses.length > 0 ? (
-                    verses.map((verse) => {
-                        const hlColor = getHighlightStyle(verse.verse);
-                        return (
-                            <div
-                                key={verse.verse}
-                                className="verse-item"
-                                onClick={(e) => handleVerseClick(e, verse)}
-                                style={{
-                                    marginBottom: '0.5rem',
-                                    position: 'relative',
-                                    backgroundColor: hlColor || 'transparent',
-                                    padding: hlColor ? '2px 4px' : '0',
-                                    borderRadius: '4px',
-                                    cursor: 'pointer',
-                                    transition: 'background-color 0.2s'
-                                }}
-                            >
-                                <sup style={{
-                                    marginRight: '0.5rem',
-                                    color: 'var(--pk-color-primary)',
-                                    fontWeight: 'bold',
-                                    fontSize: '0.8rem'
-                                }}>
-                                    {verse.verse}
-                                </sup>
-                                <span className="verse-text">{verse.text}</span>
+        <div
+            className="bible-viewer-container"
+            onTouchStart={onTouchStart}
+            onTouchMove={onTouchMove}
+            onTouchEnd={onTouchEnd}
+        >
+            {/* 좌측 사이드바: 1절 ~ 중간절 묵상 */}
+            <aside className="bible-side-panel left">
+                <div className="side-panel-content">
+                    {leftNotes.map(n => (
+                        <div key={n.id} className="verse-note-card-v2" style={{ position: 'relative' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                <div className="note-ref">{bookName} {chapter}:{n.verse_range || n.verse}</div>
+                                <div style={{ display: 'flex', gap: '8px' }}>
+                                    <button onClick={() => handleEditNote(n)} style={{ border: 'none', background: 'none', cursor: 'pointer', color: 'var(--pk-color-text-secondary)', padding: '2px' }} title="수정">
+                                        <Edit2 size={14} />
+                                    </button>
+                                    <button onClick={() => handleDeleteNote(n.id)} style={{ border: 'none', background: 'none', cursor: 'pointer', color: 'var(--pk-color-danger)', padding: '2px' }} title="삭제">
+                                        <Trash2 size={14} />
+                                    </button>
+                                </div>
                             </div>
-                        );
-                    })
-                ) : (
-                    <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--pk-color-text-secondary)' }}>
-                        구절을 불러오는 중입니다...
+
+                            {renderNoteContent(n.content)}
+                            <div className="note-date">{new Date(n.created_at || n.date).toLocaleDateString()}</div>
+                        </div>
+                    ))}
+                    {leftNotes.length === 0 && !isLoadingNotes && (
+                        <div className="empty-side-note">전반부 묵상이 없습니다.</div>
+                    )}
+                </div>
+            </aside>
+
+            {/* 중앙 본문 영역 */}
+            <main className="bible-main-content">
+                <header className="bible-nav-header">
+                    <div className="nav-controls-container">
+                        {/* Previous Chapter Button */}
+                        <button
+                            className="nav-btn prev"
+                            onClick={handlePrevChapter}
+                            disabled={!currentBook || (currentBook === books[0]?.id && currentChapter === 1)}
+                            title="이전 장"
+                        >
+                            <ChevronLeft size={24} />
+                        </button>
+
+                        <div className="nav-selectors">
+                            {/* Version Selector */}
+                            <div className="nav-select-wrapper version-select-wrapper">
+                                <select
+                                    value={currentVersion}
+                                    onChange={(e) => onVersionChange(e.target.value)}
+                                    className="nav-select version-select"
+                                >
+                                    <option value="krv">개역한글</option>
+                                    <option value="web">WEB</option>
+                                    <option value="bbe">BBE</option>
+                                </select>
+                            </div>
+
+                            {/* Book Selector */}
+                            <div className="nav-select-wrapper">
+                                <select
+                                    value={currentBook}
+                                    onChange={(e) => onBookChange(e.target.value)}
+                                    className="nav-select book-select"
+                                >
+                                    {books.map(b => (
+                                        <option key={b.id} value={b.id}>{b.name}</option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            {/* Chapter Selector */}
+                            <div className="nav-select-wrapper">
+                                <select
+                                    value={currentChapter}
+                                    onChange={(e) => onChapterChange(Number(e.target.value))}
+                                    className="nav-select chapter-select"
+                                >
+                                    {chapters.map(ch => (
+                                        <option key={ch} value={ch}>{ch}장</option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+
+                        {/* Next Chapter Button */}
+                        <button
+                            className="nav-btn next"
+                            onClick={handleNextChapter}
+                            disabled={!currentBook || (currentBook === books[books.length - 1]?.id && currentChapter === totalChapters)}
+                            title="다음 장"
+                        >
+                            <ChevronRight size={24} />
+                        </button>
                     </div>
-                )}
-            </div>
 
-            {/* Action Bar (Floating or Fixed at bottom) */}
-            <div className="viewer-actions" style={{
-                marginTop: '1rem',
-                /* v1.4.1: 2rem -> 1rem 모바일 공백 줄임 */
-                display: 'flex',
-                justifyContent: 'flex-end',
-                gap: '1rem',
-                position: 'sticky',
-                bottom: '0.5rem'
-                /* v1.4.1: 2rem -> 0.5rem 모바일 간격 줄임 */
-            }}>
-                {/* Highlight Palette could go here */}
+                    <div className="reading-status-container">
+                        <span className={`status-label ${isCompleted ? 'completed' : ''}`}>
+                            {isCompleted ? '읽음' : '읽지 않음'}
+                        </span>
+                        {lastReadDate && (
+                            <span className="status-date">
+                                ({lastReadDate === format(new Date(), 'yyyy-MM-dd') ? '오늘' : lastReadDate})
+                            </span>
+                        )}
+                    </div>
+                </header>
 
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.5rem' }}>
+
+
+                <div className="bible-text-grid">
+                    {verses.length > 0 ? (
+                        verses.map(v => {
+                            const hlColor = getHighlightStyle(v.verse);
+                            const hasNote = chapterNotes.some(n => n.verse == v.verse);
+                            const isSelected = selectedVerses.includes(v.verse);
+                            return (
+                                <div
+                                    key={v.verse}
+                                    className={`verse-row ${hlColor ? 'has-highlight' : ''}`}
+                                    style={{
+                                        ...(hlColor ? { backgroundColor: hlColor } : {}),
+                                        ...(isSelected ? {
+                                            backgroundColor: 'var(--pk-color-primary-light, #e0e7ff)',
+                                            boxShadow: 'inset 3px 0 0 var(--pk-color-primary)'
+                                        } : {})
+                                    }}
+                                    onClick={(e) => handleVerseClick(e, v)}
+                                    onMouseDown={(e) => e.stopPropagation()} // Prevent document click outside
+                                >
+                                    <span className="verse-num">{v.verse}</span>
+                                    <span className={`verse-content ${hasNote ? 'has-note' : ''}`}>
+                                        {v.text || v.content || ''}
+                                        {hasNote && <span className="note-indicator">📝</span>}
+                                    </span>
+                                </div>
+                            );
+                        })
+                    ) : (
+                        <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--pk-color-text-secondary)', breakInside: 'avoid-column' }}>
+                            구절을 불러오는 중입니다...
+                        </div>
+                    )}
+                </div>
+
+                {/* [NEW] Chapter Completion Button */}
+                <div className="chapter-complete-section">
                     <button
+                        className={`chapter-complete-btn ${isReadOnCurrentDate ? 'completed' : ''}`}
                         onClick={onComplete}
                         disabled={completionStatus === 'loading'}
-                        className={`action-btn ${isCompleted ? 'completed' : ''}`}
-                        style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.5rem',
-                            padding: '0.75rem 1.75rem',
-                            borderRadius: '9999px', // Fully rounded pill
-                            backgroundColor: isCompleted
-                                ? '#22c55e'
-                                : completionStatus === 'success'
-                                    ? '#22c55e'
-                                    : 'var(--pk-color-primary)',
-                            color: 'white',
-                            border: 'none',
-                            fontSize: '1rem',
-                            fontWeight: '600',
-                            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-                            cursor: completionStatus === 'loading' ? 'wait' : 'pointer',
-                            transition: 'all 0.2s',
-                            opacity: completionStatus === 'loading' ? 0.8 : 1
-                        }}
                     >
                         {completionStatus === 'loading' ? (
-                            <Loader size={20} className="spin" style={{ animation: 'spin 1s linear infinite' }} />
-                        ) : isCompleted || completionStatus === 'success' ? (
-                            <Check size={20} />
+                            <Loader size={20} className="animate-spin" />
+                        ) : isReadOnCurrentDate ? (
+                            <>
+                                <Check size={20} />
+                                {isToday ? '오늘 읽음' : '읽음'}
+                            </>
                         ) : (
-                            <BookOpenIcon size={20} />
+                            isToday ? '오늘 읽음 표시하기' : '읽음 표시하기'
                         )}
-
-                        <span>
-                            {completionStatus === 'loading' ? '처리 중...' :
-                                completionStatus === 'success' ? '완료!' :
-                                    isCompleted ? '읽기 취소' : '읽기 완료 체크'}
-                        </span>
                     </button>
-
-                    {/* 부가 정보 표시 (버튼 하단) */}
-                    {(isCompleted || lastReadDate) && (
-                        <div style={{ fontSize: '0.75rem', color: 'var(--pk-color-text-secondary)', textAlign: 'right', paddingRight: '0.5rem' }}>
-                            {isCompleted && lastReadDate && (
-                                <span>(이날 외 {lastReadDate}에도 읽음)</span>
-                            )}
-                            {!isCompleted && lastReadDate && (
-                                <span>(이전에 {lastReadDate}에 읽음)</span>
-                            )}
-                        </div>
+                    {isReadOnCurrentDate && (
+                        <p className="chapter-complete-msg">
+                            {isToday ? '오늘 성경 읽기를 완료했습니다. 참 잘하셨습니다!' : '이 날짜의 성경 읽기가 완료되었습니다.'}
+                        </p>
                     )}
                 </div>
-            </div>
 
-            {/* Popup Tooltip */}
-            {popup.visible && (
-                <div
-                    ref={popupRef}
-                    className="verse-popup"
-                    style={{
-                        position: 'fixed',
-                        left: `${popup.x}px`,
-                        top: `${popup.y}px`,
-                        transform: 'translate(-50%, -100%)',
-                        backgroundColor: 'var(--pk-color-bg)',
-                        border: '1px solid var(--pk-color-border)',
-                        borderRadius: 'var(--pk-radius-lg)',
-                        boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-                        zIndex: 1000,
-                        padding: '8px',
-                        minWidth: '180px',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '4px'
-                    }}
-                >
-                    {popup.mode === 'menu' ? (
-                        <div style={{ display: 'flex', gap: '4px' }}>
-                            <button
-                                onClick={handleHighlightClick}
-                                style={{
-                                    flex: 1,
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    alignItems: 'center',
-                                    gap: '4px',
-                                    padding: '8px',
-                                    border: 'none',
-                                    borderRadius: 'var(--pk-radius-md)',
-                                    backgroundColor: 'transparent',
-                                    cursor: 'pointer',
-                                    transition: 'background-color 0.2s',
-                                    fontSize: '0.75rem',
-                                    color: 'var(--pk-color-text)'
-                                }}
-                                className="popup-btn"
-                            >
-                                <Highlighter size={18} color={getHighlightStyle(popup.verseNum) ? "#64748b" : "#eab308"} />
-                                <span>{getHighlightStyle(popup.verseNum) ? '취소' : '형광펜'}</span>
-                            </button>
-                            <button
-                                onClick={() => setPopup(prev => ({ ...prev, mode: 'memo' }))}
-                                style={{
-                                    flex: 1,
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    alignItems: 'center',
-                                    gap: '4px',
-                                    padding: '8px',
-                                    border: 'none',
-                                    borderRadius: 'var(--pk-radius-md)',
-                                    backgroundColor: 'transparent',
-                                    cursor: 'pointer',
-                                    transition: 'background-color 0.2s',
-                                    fontSize: '0.75rem',
-                                    color: 'var(--pk-color-text)'
-                                }}
-                                className="popup-btn"
-                            >
-                                <MessageSquare size={18} color="var(--pk-color-primary)" />
-                                <span>메모</span>
-                            </button>
-                            <button
-                                onClick={handleCopyClick}
-                                style={{
-                                    flex: 1,
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    alignItems: 'center',
-                                    gap: '4px',
-                                    padding: '8px',
-                                    border: 'none',
-                                    borderRadius: 'var(--pk-radius-md)',
-                                    backgroundColor: 'transparent',
-                                    cursor: 'pointer',
-                                    transition: 'background-color 0.2s',
-                                    fontSize: '0.75rem',
-                                    color: 'var(--pk-color-text)'
-                                }}
-                                className="popup-btn"
-                            >
-                                <Copy size={18} color="#6366f1" />
-                                <span>복사</span>
-                            </button>
-                        </div>
-                    ) : (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '4px' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <span style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--pk-color-text-secondary)' }}>
-                                    {popup.verseNum}절 메모
-                                </span>
+                {popup.visible && (
+                    <div
+                        ref={popupRef}
+                        className="verse-popup"
+                        style={{ left: popup.x, top: popup.y, cursor: 'move' }}
+                        onMouseDown={handleMouseDown}
+                    >
+                        {popup.mode === 'view-notes' ? (
+                            <div className="popup-menu-v2">
+                                <div className="popup-header">
+                                    <span className="popup-title">
+                                        기록된 묵상 ({chapterNotes.filter(n => n.verse === popup.verseNum).length}개)
+                                    </span>
+                                    <button
+                                        onClick={() => setPopup(prev => ({ ...prev, mode: 'menu' }))}
+                                        className="popup-close-btn"
+                                        title="뒤로가기"
+                                    >
+                                        <ChevronLeft size={18} />
+                                    </button>
+                                </div>
+                                <div className="popup-notes-list" style={{ maxHeight: '200px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                    {chapterNotes.filter(n => n.verse === popup.verseNum).map(note => (
+                                        <div key={note.id} className="verse-note-card-v2" style={{ padding: '0.75rem', fontSize: '0.9rem' }}>
+                                            {renderNoteContent(note.content)}
+                                            <div className="note-date">{new Date(note.created_at || note.date).toLocaleDateString()}</div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        ) : popup.mode === 'menu' ? (
+                            <div className="popup-menu-v2">
+                                <div className="popup-header">
+                                    <span className="popup-title">
+                                        {bookName} {chapter}:{popup.verseRange || (selectedVerses.length > 1 ? formatVerseRange(selectedVerses) : popup.verseNum)}
+                                    </span>
+                                    <button
+                                        onClick={() => {
+                                            setPopup(prev => ({ ...prev, visible: false }));
+                                            setSelectedVerses([]);
+                                        }}
+                                        className="popup-close-btn"
+                                    >
+                                        <X size={18} />
+                                    </button>
+                                </div>
+                                <div className="highlight-palette">
+                                    {[
+                                        { key: 'yellow', color: 'var(--pk-highlight-yellow)' },
+                                        { key: 'green', color: 'var(--pk-highlight-green)' },
+                                        { key: 'blue', color: 'var(--pk-highlight-blue)' },
+                                        { key: 'red', color: 'var(--pk-highlight-red)' }
+                                    ].map(item => (
+                                        <div key={item.key} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
+                                            <button
+                                                className="palette-color-btn"
+                                                style={{ backgroundColor: item.color }}
+                                                onClick={() => {
+                                                    if (selectedVerses.length > 0) {
+                                                        selectedVerses.forEach(v => onHighlight(v, item.color));
+                                                    } else {
+                                                        onHighlight(popup.verseNum, item.color);
+                                                    }
+                                                    setPopup(prev => ({ ...prev, visible: false }));
+                                                    setSelectedVerses([]);
+                                                }}
+                                                title={highlightLabels?.[item.key] || item.key}
+                                            />
+                                            <span style={{ fontSize: '0.7rem', color: 'var(--pk-color-text-tertiary)', maxWidth: '36px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                                {highlightLabels?.[item.key] || (
+                                                    item.key === 'yellow' ? '1' :
+                                                        item.key === 'green' ? '2' :
+                                                            item.key === 'blue' ? '3' : '4'
+                                                )}
+                                            </span>
+                                        </div>
+                                    ))}
+                                    {(selectedVerses.length > 0 ? selectedVerses.some(v => highlights.some(h => h.verse === v)) : highlights.find(h => h.verse === popup.verseNum)) && (
+                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
+                                            <button
+                                                className="palette-color-btn"
+                                                style={{
+                                                    backgroundColor: '#f3f4f6',
+                                                    color: 'var(--pk-color-text-secondary)',
+                                                    border: '1px solid var(--pk-color-border)',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center'
+                                                }}
+                                                onClick={() => {
+                                                    const targets = selectedVerses.length > 0 ? selectedVerses : [popup.verseNum];
+                                                    targets.forEach(v => {
+                                                        const existing = highlights.find(h => h.verse === v);
+                                                        if (existing) {
+                                                            onHighlight(v, existing.style);
+                                                        }
+                                                    });
+                                                    setPopup(prev => ({ ...prev, visible: false }));
+                                                    setSelectedVerses([]);
+                                                }}
+                                                title="하이라이트 지우기"
+                                            >
+                                                <Eraser size={24} />
+                                            </button>
+                                            <span style={{ fontSize: '0.7rem', color: 'var(--pk-color-text-tertiary)' }}>지우기</span>
+                                        </div>
+                                    )}
+                                </div>
+                                {chapterNotes.some(n => n.verse === popup.verseNum) && (
+                                    <button className="action-btn" onClick={() => setPopup(prev => ({ ...prev, mode: 'view-notes' }))}>
+                                        <BookOpenIcon size={16} /> 묵상 보기 ({chapterNotes.filter(n => n.verse === popup.verseNum).length})
+                                    </button>
+                                )}
+                                <button className="action-btn" onClick={() => setPopup(prev => ({ ...prev, mode: 'memo' }))}><MessageSquare size={16} /> 묵상하기</button>
+                                <button className="action-btn" onClick={handleCopyClick}><Copy size={16} /> 구절 복사</button>
+                            </div>
+                        ) : (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', padding: '4px', width: '100%' }}>
+                                <div className="popup-header">
+                                    <span className="popup-title">
+                                        {bookName} {chapter}:{popup.verseRange || (selectedVerses.length > 1 ? formatVerseRange(selectedVerses) : popup.verseNum)} 묵상
+                                    </span>
+                                    <button
+                                        onClick={() => {
+                                            setPopup(prev => ({ ...prev, mode: 'menu' }));
+                                            if (popup.visible) {
+                                                setPopup(prev => ({ ...prev, visible: false }));
+                                                setSelectedVerses([]);
+                                            }
+                                        }}
+                                        className="popup-close-btn"
+                                    >
+                                        <X size={18} />
+                                    </button>
+                                </div>
+                                {
+                                    /* v2.1: Quote Checkbox & Editable Area */
+                                }
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                                    <input
+                                        type="checkbox"
+                                        id="quote-check"
+                                        checked={popup.quoteEnabled}
+                                        onChange={(e) => setPopup(prev => ({ ...prev, quoteEnabled: e.target.checked }))}
+                                        style={{ accentColor: 'var(--pk-color-primary)', cursor: 'pointer' }}
+                                    />
+                                    <label htmlFor="quote-check" style={{ fontSize: '0.9rem', color: 'var(--pk-color-text)', cursor: 'pointer', fontWeight: '500' }}>
+                                        말씀 인용
+                                    </label>
+                                </div>
+
+                                {popup.quoteEnabled && (
+                                    <textarea
+                                        value={popup.quoteText}
+                                        onChange={(e) => setPopup(prev => ({ ...prev, quoteText: e.target.value }))}
+                                        style={{
+                                            width: '100%',
+                                            minHeight: '60px',
+                                            padding: '8px',
+                                            fontSize: '0.9rem',
+                                            fontStyle: 'italic',
+                                            fontFamily: 'Nanum Myeongjo, serif',
+                                            color: 'var(--pk-color-text-secondary)',
+                                            backgroundColor: 'var(--pk-color-bg-secondary)',
+                                            borderRadius: '4px',
+                                            border: '1px solid var(--pk-color-border)',
+                                            borderLeft: '3px solid var(--pk-color-primary-light, #e0e7ff)',
+                                            resize: 'vertical',
+                                            outline: 'none',
+                                            marginBottom: '4px'
+                                        }}
+                                    />
+                                )}
+                                <textarea
+                                    autoFocus
+                                    value={popup.memoInput}
+                                    onChange={(e) => setPopup(prev => ({ ...prev, memoInput: e.target.value }))}
+                                    placeholder="이 구절을 통해 주신 마음을 적어보세요..."
+                                    style={{
+                                        width: '100%',
+                                        minHeight: '100px',
+                                        padding: '10px',
+                                        borderRadius: 'var(--pk-radius-md)',
+                                        border: '1px solid var(--pk-color-border)',
+                                        fontSize: '0.95rem',
+                                        backgroundColor: 'var(--pk-color-bg)',
+                                        color: 'var(--pk-color-text)',
+                                        resize: 'none',
+                                        lineHeight: '1.5'
+                                    }}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+                                            handleMemoSubmit();
+                                        }
+                                    }}
+                                />
                                 <button
-                                    onClick={() => setPopup(prev => ({ ...prev, mode: 'menu' }))}
-                                    style={{ border: 'none', background: 'none', cursor: 'pointer', padding: '2px', color: 'var(--pk-color-text-secondary)' }}
+                                    onClick={handleMemoSubmit}
+                                    style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        gap: '8px',
+                                        padding: '10px',
+                                        backgroundColor: 'var(--pk-color-primary)',
+                                        color: 'white',
+                                        border: 'none',
+                                        borderRadius: 'var(--pk-radius-md)',
+                                        cursor: 'pointer',
+                                        fontSize: '0.95rem',
+                                        fontWeight: '600',
+                                        transition: 'background-color 0.2s'
+                                    }}
                                 >
-                                    <X size={14} />
+                                    <Send size={16} />
+                                    묵상 저장하기
                                 </button>
                             </div>
-                            <textarea
-                                autoFocus
-                                value={popup.memoInput}
-                                onChange={(e) => setPopup(prev => ({ ...prev, memoInput: e.target.value }))}
-                                placeholder="묵상을 적어보세요..."
-                                style={{
-                                    width: '100%',
-                                    minHeight: '80px',
-                                    padding: '8px',
-                                    borderRadius: 'var(--pk-radius-md)',
-                                    border: '1px solid var(--pk-color-border)',
-                                    fontSize: '0.9rem',
-                                    backgroundColor: 'var(--pk-color-bg)',
-                                    color: 'var(--pk-color-text)',
-                                    resize: 'none'
-                                }}
-                                onKeyDown={(e) => {
-                                    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
-                                        handleMemoSubmit();
-                                    }
-                                }}
-                            />
-                            <button
-                                onClick={handleMemoSubmit}
-                                style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    gap: '6px',
-                                    padding: '6px',
-                                    backgroundColor: 'var(--pk-color-primary)',
-                                    color: 'white',
-                                    border: 'none',
-                                    borderRadius: 'var(--pk-radius-md)',
-                                    cursor: 'pointer',
-                                    fontSize: '0.85rem',
-                                    fontWeight: '600'
-                                }}
-                            >
-                                <Send size={14} />
-                                추가하기
-                            </button>
+                        )}
+                    </div>
+                )}
+
+            </main>
+
+            {/* 우측 사이드바: 중간절+1 ~ 마지막절 묵상 */}
+            <aside className="bible-side-panel right">
+                <div className="side-panel-content">
+                    {rightNotes.map(n => (
+                        <div key={n.id} className="verse-note-card-v2" style={{ position: 'relative' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                <div className="note-ref">{bookName} {chapter}:{n.verse_range || n.verse}</div>
+                                <div style={{ display: 'flex', gap: '8px' }}>
+                                    <button onClick={() => handleEditNote(n)} style={{ border: 'none', background: 'none', cursor: 'pointer', color: 'var(--pk-color-text-secondary)', padding: '2px' }} title="수정">
+                                        <Edit2 size={14} />
+                                    </button>
+                                    <button onClick={() => handleDeleteNote(n.id)} style={{ border: 'none', background: 'none', cursor: 'pointer', color: 'var(--pk-color-danger)', padding: '2px' }} title="삭제">
+                                        <Trash2 size={14} />
+                                    </button>
+                                </div>
+                            </div>
+
+                            {renderNoteContent(n.content)}
+                            <div className="note-date">{new Date(n.created_at || n.date).toLocaleDateString()}</div>
                         </div>
+                    ))}
+                    {rightNotes.length === 0 && !isLoadingNotes && (
+                        <div className="empty-side-note">후반부 묵상이 없습니다.</div>
                     )}
                 </div>
-            )}
+            </aside>
         </div>
     );
 };
@@ -418,5 +845,25 @@ const BookOpenIcon = ({ size }) => (
         <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
     </svg>
 );
+
+const formatVerseRange = (verses) => {
+    if (!verses.length) return '';
+    const sorted = [...verses].sort((a, b) => a - b);
+    let result = [];
+    let start = sorted[0];
+    let prev = start;
+
+    for (let i = 1; i < sorted.length; i++) {
+        if (sorted[i] === prev + 1) {
+            prev = sorted[i];
+        } else {
+            result.push(start === prev ? `${start}` : `${start}-${prev}`);
+            start = sorted[i];
+            prev = start;
+        }
+    }
+    result.push(start === prev ? `${start}` : `${start}-${prev}`);
+    return result.join(', ');
+};
 
 export default React.memo(BibleViewer);

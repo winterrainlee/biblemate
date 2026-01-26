@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700&family=Nanum+Myeongjo:wght@400;700;800&display=swap');
 
 :root {
   /* Colors */
@@ -18,6 +18,9 @@
 
   /* Typography */
   --pk-font-sans: 'Inter', 'Noto Sans KR', sans-serif;
+  --pk-font-serif: 'Nanum Myeongjo', serif;
+  --pk-font-family: var(--pk-font-sans);
+  /* Default */
 
   /* Spacing */
   --pk-spacing-1: 0.25rem;
@@ -45,11 +48,26 @@
   --pk-color-overlay: rgba(0, 0, 0, 0.5);
   --pk-color-disabled-bg: #f3f4f6;
   --pk-color-disabled-text: #cbd5e1;
+  --pk-color-danger: #ef4444;
   --pk-color-danger-hover: #fee2e2;
+  --pk-color-success: #10b981;
+
+  /* Legacy & Journal Variable Mappings (Light) */
+  --text-primary: var(--pk-color-text);
+  --text-secondary: var(--pk-color-text-secondary);
+  --bg-primary: var(--pk-color-bg);
+  --bg-secondary: var(--pk-color-bg-secondary);
+  --bg-tertiary: #f1f5f9;
+  --border-color: var(--pk-color-border);
+  --primary-color: var(--pk-color-primary);
+  --primary-color-light: #eff6ff;
+  --success-color: #22c55e;
 }
 
 html {
   font-size: var(--pk-font-size-base);
+  overscroll-behavior: none;
+  /* Disable browser-level swipe-to-navigate */
 }
 
 /* Dark Mode Support (Basic) - Media Query OR .dark class */
@@ -69,19 +87,38 @@ html {
 
 /* Force Dark Mode Class */
 :root.dark {
-  --pk-color-bg: #0f172a;
-  --pk-color-bg-secondary: #1e293b;
-  --pk-color-text: #f1f5f9;
-  --pk-color-text-secondary: #94a3b8;
-  --pk-color-text-tertiary: #64748b;
-  --pk-color-border: #334155;
+  --pk-color-primary: #60a5fa;
+  /* Muted Cobalt Blue */
+  --pk-color-primary-hover: #3b82f6;
+  --pk-color-bg: #111827;
+  /* Gray 900 */
+  --pk-color-bg-secondary: #1f2937;
+  /* Gray 800 */
+  --pk-color-text: #f9fafb;
+  --pk-color-text-secondary: #9ca3af;
+  --pk-color-text-tertiary: #6b7280;
+  --pk-color-border: #374151;
 
   /* Semantic Colors - Dark */
-  --pk-color-shadow: rgba(0, 0, 0, 0.5);
-  --pk-color-overlay: rgba(0, 0, 0, 0.7);
-  --pk-color-disabled-bg: #1e293b;
-  --pk-color-disabled-text: #475569;
+  --pk-color-shadow: rgba(0, 0, 0, 0.6);
+  --pk-color-overlay: rgba(0, 0, 0, 0.8);
+  --pk-color-disabled-bg: #1f2937;
+  --pk-color-disabled-text: #4b5563;
   --pk-color-danger-hover: rgba(239, 68, 68, 0.2);
+
+  /* Highlights - Dark Mode (More saturated, slightly darker for better text contrast) */
+  --pk-highlight-yellow: #aeb213;
+  /* User preference */
+  --pk-highlight-green: #618d61;
+  /* User preference */
+  --pk-highlight-blue: #1e3a8a;
+  /* Deep blue */
+  --pk-highlight-red: #7f1d1d;
+  /* Deep red */
+
+  /* Legacy & Journal Variable Mappings (Dark) */
+  --bg-tertiary: #374151;
+  --primary-color-light: rgba(96, 165, 250, 0.15);
 }
 
 * {
@@ -91,11 +128,16 @@ html {
 }
 
 body {
-  font-family: var(--pk-font-sans);
+  margin: 0;
+  font-family: var(--pk-font-family);
   background-color: var(--pk-color-bg);
   color: var(--pk-color-text);
-  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.6;
+  overscroll-behavior: none;
+  touch-action: pan-y;
+  /* Only allow vertical scroll internally to prevent gestures */
 }
 
 button {
@@ -108,9 +150,27 @@ a {
   text-decoration: none;
 }
 
-/* Utilities */
 .container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 var(--pk-spacing-4);
+}
+
+/* Global Scrollbar Styles */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--pk-color-border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--pk-color-text-tertiary);
 }

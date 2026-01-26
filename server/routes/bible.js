@@ -39,8 +39,8 @@ router.get('/books', (req, res) => {
         const books = Object.keys(osisMapping).map(osis => ({
             id: osis,
             name: osisMapping[osis].ko, // Assuming 'ko' property exists
-            chapters: chapterCounts[osis] || 0 // Default to 0 if not found
-        })).filter(b => b.chapters > 0); // Only return books that exist in DB
+            chapters: chapterCounts[osis] || osisMapping[osis].chapters || 0 // Use DB count, fallback to metadata
+        })); // Return all books regardless of DB status (allow pre-loading)
 
         res.json(books);
     } catch (error) {
@@ -107,14 +107,19 @@ router.get('/:book/range', (req, res) => {
 router.get('/:book/:chapter', (req, res) => {
     try {
         const { book, chapter } = req.params;
-        const { version = 'krv' } = req.query; // Default to 'krv' if not specified
+        const { version = 'krv' } = req.query;
+
+        console.log(`[API] GET /bible/${book}/${chapter} (ver: ${version})`);
 
         const db = getDB();
 
         // Validate book and chapter
         if (!osisMapping[book]) {
+            console.error(`[API] Book not found: ${book}`);
             return res.status(404).json({ error: 'Book not found' });
         }
+
+        console.log(`[API] Querying DB for ${book} ${chapter}...`);
 
         // Get verses
         const stmt = db.prepare(`
@@ -125,11 +130,15 @@ router.get('/:book/:chapter', (req, res) => {
     `);
 
         const verses = [];
-        stmt.bind([book, chapter, version]);
+        // parseInt added here
+        stmt.bind([book, parseInt(chapter), version]);
+
         while (stmt.step()) {
             verses.push(stmt.getAsObject());
         }
         stmt.free();
+
+        console.log(`[API] Found ${verses.length} verses`);
 
         res.json({
             book,
@@ -138,7 +147,8 @@ router.get('/:book/:chapter', (req, res) => {
             verses
         });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        console.error('[API] Error in /bible/:book/:chapter:', error);
+        res.status(500).send(`Server Error: ${error.message}`);
     }
 });
 

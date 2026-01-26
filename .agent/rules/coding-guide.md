@@ -9,7 +9,11 @@ trigger: always_on
 |------|------|
 | Major (x.0) | 아키텍처 변경, 핵심 UX 변경 |
 | Minor (x.y) | 신규 기능, UI/UX 개선 |
+| Minor (x.y) | 신규 기능, UI/UX 개선 |
 | Patch (x.y.z) | 핫픽스, 오타, 보안 패치 |
+
+### 작업 전 확인 사항
+- **Lessons Learned**: 코딩 시작 전 `docs/lessons.md`를 반드시 정독하여 과거의 실수를 반복하지 마라.
 
 ### 브랜치 워크플로우
 - 버전 통합 (Integration): `feature/v버전명` 브랜치
@@ -55,6 +59,16 @@ React/Next.js 코드 작성 시 아래 글로벌 스킬을 참조하라:
 2. **Re-render 최적화** - `React.memo`, `useMemo`, `useCallback` 활용
 3. **Lazy State Init** - localStorage 읽기는 `useState(() => ...)` 콜백 사용
 4. **조건부 렌더링** - `&&` 대신 삼항연산자 사용 권장
+
+---
+
+## Layout 및 Styling 가이드
+
+레이아웃 설계 및 구현 시 반드시 아래 명세서를 참조하라:
+- **명세서 경로**: `docs/02-specs/layout-v2.0.md`
+- **핵심 원칙**: 
+  1. `Layout Container`는 `100vh`, `overflow: hidden` 유지 (Global Scroll 방지)
+  2. 스크롤은 반드시 각 페이지 내부의 콘텐츠 영역(`side-panel`, `main-content`)에서 독립적으로 발생해야 함
 
 ---
 

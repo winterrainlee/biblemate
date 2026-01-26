@@ -3,12 +3,14 @@ import { format } from 'date-fns';
 import Calendar from '../components/Calendar';
 import BibleSelector from '../components/BibleSelector';
 import BibleViewer from '../components/BibleViewer';
-import NoteEditor from '../components/NoteEditor';
 import NotePreview from '../components/NotePreview';
+import JournalPage from './JournalPage';
 import { api } from '../services/api';
+import { useTab } from '../contexts/TabContext';
 import './ReadingDashboard.css';
 
 const ReadingDashboard = () => {
+    const { activeTab, setActiveTab } = useTab();
     // Global State
     const [currentDate, setCurrentDate] = useState(new Date());
     const [currentBook, setCurrentBook] = useState('Gen');
@@ -28,6 +30,8 @@ const ReadingDashboard = () => {
     // UI State
     const [completionStatus, setCompletionStatus] = useState('idle'); // idle, loading, success, error
     const [toast, setToast] = useState({ visible: false, message: '', type: 'info' });
+
+
 
     // Split Screen State (R4) - Lazy state initialization for performance
     const [splitRatio, setSplitRatio] = useState(() => {
@@ -85,33 +89,83 @@ const ReadingDashboard = () => {
         setTimeout(() => setToast(prev => ({ ...prev, visible: false })), 3000);
     };
 
-    // Dashboard Config (from Settings) - Lazy state initialization for performance
-    const [dashboardConfig, setDashboardConfig] = useState(() => {
+    // Highlight Labels (UX1)
+    const [highlightLabels, setHighlightLabels] = useState(() => {
         try {
-            const saved = localStorage.getItem('dashboardConfig');
-            return saved ? JSON.parse(saved) : { showReading: true, showNotes: true };
+            const saved = localStorage.getItem('highlightLabels_v2');
+            return saved ? JSON.parse(saved) : {
+                'yellow': '1',
+                'green': '2',
+                'blue': '3',
+                'red': '4'
+            };
         } catch (e) {
-            console.error('Failed to parse dashboard config:', e);
-            return { showReading: true, showNotes: true };
+            return {
+                'yellow': '1',
+                'green': '2',
+                'blue': '3',
+                'red': '4'
+            };
         }
     });
+
+    // Force sync highlight labels on mount and focus/visible to ensure updates from Settings are reflected
+    useEffect(() => {
+        const loadLabels = async () => {
+            try {
+                // 1. Try server first
+                const settings = await api.getSettings();
+                if (settings && settings.highlightLabels_v2) {
+                    const serverLabels = settings.highlightLabels_v2;
+                    setHighlightLabels(serverLabels);
+                    localStorage.setItem('highlightLabels_v2', JSON.stringify(serverLabels));
+                    return;
+                }
+
+                // 2. Fallback to localStorage
+                const saved = localStorage.getItem('highlightLabels_v2');
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    setHighlightLabels(parsed);
+                }
+            } catch (e) {
+                console.error('Failed to sync highlight labels', e);
+                // Fallback to localStorage on error
+                const saved = localStorage.getItem('highlightLabels_v2');
+                if (saved) {
+                    try {
+                        setHighlightLabels(JSON.parse(saved));
+                    } catch (pe) { }
+                }
+            }
+        };
+
+        loadLabels(); // Run immediately
+        window.addEventListener('focus', loadLabels); // Run on tab focus
+        window.addEventListener('highlightLabelsUpdated', loadLabels); // [NEW] Sync on custom event
+        return () => {
+            window.removeEventListener('focus', loadLabels);
+            window.removeEventListener('highlightLabelsUpdated', loadLabels);
+        };
+    }, []);
 
     const currentBookName = books.find(b => b.id === currentBook)?.name || currentBook;
     const dateStr = format(currentDate, 'yyyy-MM-dd');
     const todayStr = format(new Date(), 'yyyy-MM-dd');
     const isToday = dateStr === todayStr;
 
-    // 선택된 날짜(dateStr)에 읽었는지 여부
-    const isChapterCompleted = readingLogs.some(l => l.date === dateStr && l.book === currentBook && l.chapter === currentChapter);
+    // 선택된 날짜(dateStr)에 읽었는지 여부 (날짜 상관없이 읽은 기록이 있으면 True)
+    const isChapterCompleted = readingLogs.some(l => l.book === currentBook && l.chapter == currentChapter);
 
-    // 이전에 읽은 기록들 (오늘 제외)
-    const pastLogs = readingLogs.filter(l => l.date !== dateStr && l.book === currentBook && l.chapter === currentChapter);
-    const lastReadDate = pastLogs.length > 0 ? pastLogs[0].date : null;
+    // 가장 최근 읽은 기록 (오늘 포함 모든 기록 중 최신)
+    const allLogs = readingLogs.filter(l => l.book === currentBook && l.chapter == currentChapter);
+    let lastReadDate = allLogs.length > 0 ? allLogs[0].date : null;
+    if (lastReadDate === todayStr) lastReadDate = '오늘';
 
     const handleChapterComplete = async () => {
         const dateStr = format(currentDate, 'yyyy-MM-dd');
         // 오늘 날짜의 기록만 찾아서 토글
-        const existingLog = readingLogs.find(l => l.date === dateStr && l.book === currentBook && l.chapter === currentChapter);
+        const existingLog = readingLogs.find(l => l.date === dateStr && l.book === currentBook && l.chapter == currentChapter);
 
         setCompletionStatus('loading');
         try {
@@ -122,7 +176,7 @@ const ReadingDashboard = () => {
                 setCompletionStatus('idle');
             } else {
                 // 추가
-                const isAlreadyLoggedToday = readingLogs.some(l => l.date === dateStr && l.book === currentBook && l.chapter === currentChapter);
+                const isAlreadyLoggedToday = readingLogs.some(l => l.date === dateStr && l.book === currentBook && l.chapter == currentChapter);
                 if (isAlreadyLoggedToday) {
                     showToast('이미 오늘 읽은 장입니다.', 'warning');
                     setCompletionStatus('idle');
@@ -188,7 +242,14 @@ const ReadingDashboard = () => {
     const loadReadingLogs = async (shouldMove = false, booksData = null) => {
         try {
             const logs = await api.getReadingLogs();
-            setReadingLogs(logs);
+            // [Fix] Ensure chapter numbers are actually numbers to prevent sync issues
+            const sanitizedLogs = logs.map(log => ({
+                ...log,
+                chapter: Number(log.chapter),
+                chapter_from: Number(log.chapter_from), // Keep original if exists
+                chapter_to: Number(log.chapter_to)
+            }));
+            setReadingLogs(sanitizedLogs);
 
             if (shouldMove && !hasInitialMoved) {
                 const targetBooks = booksData || books;
@@ -259,13 +320,23 @@ const ReadingDashboard = () => {
         } catch (e) { console.error(e); }
     };
 
-    const handleHighlight = async (verseNum) => {
+    const handleHighlight = async (verseNum, color = '#fef08a') => {
         const existing = highlights.find(h => h.book === currentBook && h.verse === verseNum);
+
         if (existing) {
-            await api.removeHighlight(existing.id);
-            setHighlights(prev => prev.filter(h => h.id !== existing.id));
+            if (existing.style === color) {
+                // Toggle off if same color
+                await api.removeHighlight(existing.id);
+                setHighlights(prev => prev.filter(h => h.id !== existing.id));
+            } else {
+                // Update color if different (Server uses INSERT OR REPLACE)
+                const updatedHl = { book: currentBook, chapter: currentChapter, verse: verseNum, style: color };
+                await api.addHighlight(updatedHl);
+                loadHighlights();
+            }
         } else {
-            const newHl = { book: currentBook, chapter: currentChapter, verse: verseNum, style: '#fef08a' };
+            // New highlight
+            const newHl = { book: currentBook, chapter: currentChapter, verse: verseNum, style: color };
             await api.addHighlight(newHl);
             loadHighlights();
         }
@@ -278,75 +349,67 @@ const ReadingDashboard = () => {
         });
     };
 
-    const handleAddNote = (verseNum, memo) => {
-        const citationPrefix = `[${currentBookName} ${currentChapter}:${verseNum}] `;
-        const fullText = `${citationPrefix}${memo}\n`;
-
-        if (noteEditorRef.current) {
-            noteEditorRef.current.insertCitation(fullText);
-            const editorElement = document.querySelector('.note-editor-wrapper');
-            editorElement?.scrollIntoView({ behavior: 'smooth' });
-        }
-    };
-
-    const noteEditorRef = useRef(null);
-
     const handleNotePreviewClick = () => {
-        noteEditorRef.current?.focus();
-        const editorElement = document.querySelector('.note-editor-wrapper');
-        editorElement?.scrollIntoView({ behavior: 'smooth' });
+        // v2.0: Note preview click action can be defined here (e.g. open popup)
+        // Currently NoteEditor is removed from main view
     };
 
-    const handleBookChange = (bookId) => {
+    const handleBookChange = (bookId, chapterId = 1) => {
         setCurrentBook(bookId);
-        setCurrentChapter(1);
+        setCurrentChapter(chapterId);
     };
 
-    const shouldShowResizer = dashboardConfig.showReading && dashboardConfig.showNotes;
+    const handleNavigateToBible = (book, chapter) => {
+        setCurrentBook(book);
+        setCurrentChapter(chapter);
+        setActiveTab('bible');
+    };
 
     return (
-        <div className="dashboard-container">
-            {/* Left Sidebar */}
-            <aside className="dashboard-sidebar">
-                {/* v1.4.1: hideCalendarOnMobile 적용 - CSS media query로 숨김 처리 */}
-                <div className={`sidebar-section ${dashboardConfig.hideCalendarOnMobile ? 'hide-on-mobile' : ''}`}>
-                    <Calendar
-                        readingLogs={readingLogs}
-                        compact={true}
-                        selectedDate={currentDate}
-                        onDateClick={(date, logs) => {
-                            setCurrentDate(date);
-                            if (logs && logs.length > 0) {
-                                const log = logs[0];
-                                setCurrentBook(log.book);
-                                setCurrentChapter(log.chapter_from || log.chapter || 1);
-                            }
-                        }}
-                    />
-                </div>
+        <div className={`dashboard-container ${activeTab === 'bible' ? 'bible-mode-active' : ''}`}>
+            {/* Left Sidebar - Only show on Bible tab */}
+            {activeTab === 'bible' && (
+                <aside className="dashboard-sidebar">
+                    {/* v1.4.1: hideCalendarOnMobile 적용 - CSS media query로 숨김 처리 */}
+                    <div className="sidebar-section">
+                        <Calendar
+                            readingLogs={readingLogs}
+                            compact={true}
+                            selectedDate={currentDate}
+                            onDateClick={(date, logs) => {
+                                setCurrentDate(date);
+                                if (logs && logs.length > 0) {
+                                    const log = logs[0];
+                                    setCurrentBook(log.book);
+                                    setCurrentChapter(log.chapter_from || log.chapter || 1);
+                                }
+                            }}
+                        />
+                    </div>
 
-                <div className="sidebar-section">
-                    <NotePreview
-                        date={dateStr}
-                        note={currentNote}
-                        readingLogs={readingLogs.filter(l => l.date === dateStr)}
-                        books={books}
-                        onClick={handleNotePreviewClick}
-                    />
-                </div>
+                    <div className="sidebar-section">
+                        <NotePreview
+                            date={dateStr}
+                            note={currentNote}
+                            readingLogs={readingLogs.filter(l => l.date === dateStr)}
+                            books={books}
+                            onClick={handleNotePreviewClick}
+                        />
+                    </div>
 
-                <div className="sidebar-section">
-                    <BibleSelector
-                        books={books}
-                        currentBook={currentBook}
-                        currentChapter={currentChapter}
-                        currentVersion={currentVersion}
-                        onBookChange={handleBookChange}
-                        onChapterChange={setCurrentChapter}
-                        onVersionChange={setCurrentVersion}
-                    />
-                </div>
-            </aside>
+                    <div className="sidebar-section">
+                        <BibleSelector
+                            books={books}
+                            currentBook={currentBook}
+                            currentChapter={currentChapter}
+                            currentVersion={currentVersion}
+                            onBookChange={handleBookChange}
+                            onChapterChange={setCurrentChapter}
+                            onVersionChange={setCurrentVersion}
+                        />
+                    </div>
+                </aside>
+            )}
 
             {/* Main Content */}
             <main
@@ -354,43 +417,41 @@ const ReadingDashboard = () => {
                 ref={dashboardMainRef}
                 style={{ '--split-ratio': `${splitRatio}%` }}
             >
-                {dashboardConfig.showReading && (
-                    <div className="bible-viewer-wrapper">
+                {/* V2.0: Conditional rendering based on active tab */}
+                {activeTab === 'bible' ? (
+                    <div className="bible-viewer-wrapper" style={{ width: '100%' }}>
                         <BibleViewer
                             verses={verses}
                             highlights={highlights}
                             onHighlight={handleHighlight}
-                            onAddNote={handleAddNote}
                             onCopyCitation={handleCopyCitation}
                             onComplete={handleChapterComplete}
                             isCompleted={isChapterCompleted}
+                            highlightLabels={highlightLabels}
                             isToday={isToday}
                             lastReadDate={lastReadDate}
+                            isReadOnCurrentDate={readingLogs.some(l => l.date === dateStr && l.book === currentBook && l.chapter == currentChapter)}
+                            book={currentBook}
                             bookName={currentBookName}
                             chapter={currentChapter}
                             completionStatus={completionStatus}
-                        />
-                    </div>
-                )}
-
-                {/* Resizer Divider */}
-                {shouldShowResizer && (
-                    <div
-                        className={`resizer ${isDragging ? 'dragging' : ''}`}
-                        onMouseDown={handleDragStart}
-                        title="드래그하여 크기 조절"
-                    />
-                )}
-
-                {dashboardConfig.showNotes && (
-                    <div className={`note-editor-wrapper ${!dashboardConfig.showReading ? 'full-height' : ''}`}>
-                        <NoteEditor
-                            ref={noteEditorRef}
-                            date={dateStr}
-                            readingLogs={readingLogs.filter(l => l.date === dateStr)}
                             books={books}
+                            currentBook={currentBook}
+                            currentChapter={currentChapter}
+                            currentVersion={currentVersion}
+                            onBookChange={handleBookChange}
+                            onChapterChange={setCurrentChapter}
+                            onVersionChange={setCurrentVersion}
                         />
                     </div>
+                ) : (
+                    <JournalPage
+                        date={currentDate}
+                        onDateChange={setCurrentDate}
+                        readingLogs={readingLogs}
+                        books={books}
+                        onNavigateToBible={handleNavigateToBible}
+                    />
                 )}
             </main>
 

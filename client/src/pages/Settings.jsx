@@ -5,20 +5,55 @@ import { ArrowLeft, Type, Download, Upload, Eye, EyeOff, LogOut, CheckCircle, Al
 import { format } from 'date-fns';
 import { api } from '../services/api';
 import Modal from '../components/Modal';
+import './Settings.css';
 
 const Settings = () => {
     const navigate = useNavigate();
-    const { fontSize, setFontSize } = useTheme();
-    // Dashboard Config - Lazy state initialization for performance
-    const [dashboardConfig, setDashboardConfig] = useState(() => {
+    const { fontSize, setFontSize, fontFamily, setFontFamily } = useTheme();
+    // Highlight Labels State
+    const [highlightLabels, setHighlightLabels] = useState(() => {
         try {
-            const saved = localStorage.getItem('dashboardConfig');
-            return saved ? JSON.parse(saved) : { showReading: true, showNotes: true, hideCalendarOnMobile: false };
+            const saved = localStorage.getItem('highlightLabels_v2'); // New key for v2
+            return saved ? JSON.parse(saved) : {
+                'yellow': '1',
+                'green': '2',
+                'blue': '3',
+                'red': '4'
+            };
         } catch (e) {
-            console.error('Failed to parse dashboard config:', e);
-            return { showReading: true, showNotes: true, hideCalendarOnMobile: false };
+            return {
+                'yellow': '1',
+                'green': '2',
+                'blue': '3',
+                'red': '4'
+            };
         }
     });
+
+    const handleLabelChange = async (key, value) => {
+        const newLabels = { ...highlightLabels, [key]: value };
+        setHighlightLabels(newLabels);
+        localStorage.setItem('highlightLabels_v2', JSON.stringify(newLabels));
+        // Dispatch custom event for immediate sync
+        window.dispatchEvent(new Event('highlightLabelsUpdated'));
+
+        // Save to server
+        try {
+            await api.saveSetting('highlightLabels_v2', newLabels);
+        } catch (err) {
+            console.error('Failed to save label to server', err);
+        }
+    };
+    const handleFontChange = async (value) => {
+        setFontFamily(value);
+        localStorage.setItem('fontFamily', value);
+        try {
+            await api.saveSetting('fontFamily', value);
+        } catch (err) {
+            console.error('Failed to save font preference to server', err);
+        }
+    };
+
     const [statusMessage, setStatusMessage] = useState('');
     const [resultModal, setResultModal] = useState({
         isOpen: false,
@@ -29,12 +64,31 @@ const Settings = () => {
     });
     const [authInfo, setAuthInfo] = useState({ authRequired: false });
 
-    // Check auth status on mount
+    // Check auth status and load settings on mount
     useEffect(() => {
+        // 1. Check auth
         fetch('/api/auth/status', { credentials: 'include' })
             .then(res => res.json())
             .then(data => setAuthInfo({ authRequired: data.authRequired }))
             .catch(() => { });
+
+        // 2. Load settings from server
+        api.getSettings()
+            .then(settings => {
+                if (settings) {
+                    if (settings.highlightLabels_v2) {
+                        const serverLabels = settings.highlightLabels_v2;
+                        setHighlightLabels(serverLabels);
+                        localStorage.setItem('highlightLabels_v2', JSON.stringify(serverLabels));
+                        window.dispatchEvent(new Event('highlightLabelsUpdated'));
+                    }
+                    if (settings.fontFamily) {
+                        setFontFamily(settings.fontFamily);
+                        localStorage.setItem('fontFamily', settings.fontFamily);
+                    }
+                }
+            })
+            .catch(err => console.error('Failed to load settings from server', err));
     }, []);
 
     // Handle logout
@@ -163,20 +217,6 @@ const Settings = () => {
         event.target.value = ''; // Reset file input
     };
 
-    // Handle dashboard visibility toggle
-    const handleDashboardToggle = (key) => {
-        const newConfig = { ...dashboardConfig, [key]: !dashboardConfig[key] };
-
-        // Prevent both from being disabled
-        if (!newConfig.showReading && !newConfig.showNotes) {
-            alert('최소 하나의 영역은 켜져 있어야 합니다.');
-            return;
-        }
-
-        setDashboardConfig(newConfig);
-        localStorage.setItem('dashboardConfig', JSON.stringify(newConfig));
-    };
-
     return (
         <div className="page-settings container">
             {/* v1.4.1: BibleChartPage 스타일 헤더 */}
@@ -246,7 +286,8 @@ const Settings = () => {
                     </button>
                 </div>
             )}
-            {/* v1.4.1: 화면 표시 설정 - 맨 위로 이동 */}
+
+            {/* Highlight Labels Section (Moved to 3rd position) */}
             <div className="settings-section" style={{
                 marginBottom: '2rem',
                 padding: '1.5rem',
@@ -255,108 +296,60 @@ const Settings = () => {
                 borderRadius: 'var(--pk-radius-lg)'
             }}>
                 <h3 style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <Eye size={20} /> 화면 표시 설정
+                    <span style={{ fontSize: '1.2rem', display: 'flex' }}>🎨</span> 형광펜 설정
                 </h3>
                 <p style={{ color: 'var(--pk-color-text-secondary)', marginBottom: '1rem', fontSize: '0.9rem' }}>
-                    홈 화면에서 표시할 영역을 선택하세요.
+                    각 색상이 의미하는 속성 이름(예: 관찰, 적용, 질문 등)을 설정하세요. 최대 4글자까지 입력 가능합니다.
                 </p>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                    <div style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        padding: '1rem',
-                        backgroundColor: 'var(--pk-color-bg-secondary)',
-                        borderRadius: 'var(--pk-radius-md)',
-                        border: '1px solid var(--pk-color-border)'
-                    }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            {dashboardConfig.showReading ? <Eye size={18} /> : <EyeOff size={18} />}
-                            <span style={{ fontWeight: '500' }}>말씀 영역</span>
+                <div className="highlight-labels-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1rem' }}>
+                    {[
+                        { key: 'yellow', color: '#fef08a', name: '노랑' },
+                        { key: 'green', color: '#bbf7d0', name: '초록' },
+                        { key: 'blue', color: '#bfdbfe', name: '파랑' },
+                        { key: 'red', color: '#fecaca', name: '빨강' }
+                    ].map(item => (
+                        <div key={item.key} style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '0.5rem',
+                            padding: '0.75rem',
+                            backgroundColor: 'var(--pk-color-bg-secondary)',
+                            borderRadius: 'var(--pk-radius-md)',
+                            border: '1px solid var(--pk-color-border)',
+                            alignItems: 'center'
+                        }}>
+                            <div style={{
+                                width: '32px',
+                                height: '32px',
+                                borderRadius: '50%',
+                                backgroundColor: item.color,
+                                border: '1px solid rgba(0,0,0,0.1)'
+                            }} />
+                            <input
+                                type="text"
+                                value={highlightLabels[item.key] || ''}
+                                onChange={(e) => handleLabelChange(item.key, e.target.value.slice(0, 4))}
+                                placeholder={item.name}
+                                style={{
+                                    width: '100%',
+                                    padding: '0.4rem',
+                                    textAlign: 'center',
+                                    border: '1px solid var(--pk-color-border)',
+                                    borderRadius: '4px',
+                                    fontSize: '0.9rem',
+                                    backgroundColor: 'var(--pk-color-bg)',
+                                    color: 'var(--pk-color-text)'
+                                }}
+                                maxLength={4}
+                            />
                         </div>
-                        <button
-                            onClick={() => handleDashboardToggle('showReading')}
-                            style={{
-                                padding: '0.5rem 1rem',
-                                backgroundColor: dashboardConfig.showReading ? 'var(--pk-color-primary)' : 'var(--pk-color-bg)',
-                                color: dashboardConfig.showReading ? 'white' : 'var(--pk-color-text)',
-                                border: `2px solid ${dashboardConfig.showReading ? 'var(--pk-color-primary)' : 'var(--pk-color-border)'}`,
-                                borderRadius: 'var(--pk-radius-sm)',
-                                cursor: 'pointer',
-                                fontWeight: '600'
-                            }}
-                        >
-                            {dashboardConfig.showReading ? 'ON' : 'OFF'}
-                        </button>
-                    </div>
-
-                    <div style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        padding: '1rem',
-                        backgroundColor: 'var(--pk-color-bg-secondary)',
-                        borderRadius: 'var(--pk-radius-md)',
-                        border: '1px solid var(--pk-color-border)'
-                    }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            {dashboardConfig.showNotes ? <Eye size={18} /> : <EyeOff size={18} />}
-                            <span style={{ fontWeight: '500' }}>묵상 영역</span>
-                        </div>
-                        <button
-                            onClick={() => handleDashboardToggle('showNotes')}
-                            style={{
-                                padding: '0.5rem 1rem',
-                                backgroundColor: dashboardConfig.showNotes ? 'var(--pk-color-primary)' : 'var(--pk-color-bg)',
-                                color: dashboardConfig.showNotes ? 'white' : 'var(--pk-color-text)',
-                                border: `2px solid ${dashboardConfig.showNotes ? 'var(--pk-color-primary)' : 'var(--pk-color-border)'}`,
-                                borderRadius: 'var(--pk-radius-sm)',
-                                cursor: 'pointer',
-                                fontWeight: '600'
-                            }}
-                        >
-                            {dashboardConfig.showNotes ? 'ON' : 'OFF'}
-                        </button>
-                    </div>
-
-                    {/* 모바일 달력 숨김 옵션 */}
-                    <div style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        padding: '1rem',
-                        backgroundColor: 'var(--pk-color-bg-secondary)',
-                        borderRadius: 'var(--pk-radius-md)',
-                        border: '1px solid var(--pk-color-border)'
-                    }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <CalendarOff size={18} />
-                            <div>
-                                <span style={{ fontWeight: '500' }}>모바일 달력 숨김</span>
-                                <p style={{ fontSize: '0.75rem', color: 'var(--pk-color-text-secondary)', margin: 0 }}>
-                                    오늘 말씀에 집중할 수 있어요
-                                </p>
-                            </div>
-                        </div>
-                        <button
-                            onClick={() => handleDashboardToggle('hideCalendarOnMobile')}
-                            style={{
-                                padding: '0.5rem 1rem',
-                                backgroundColor: dashboardConfig.hideCalendarOnMobile ? 'var(--pk-color-primary)' : 'var(--pk-color-bg)',
-                                color: dashboardConfig.hideCalendarOnMobile ? 'white' : 'var(--pk-color-text)',
-                                border: `2px solid ${dashboardConfig.hideCalendarOnMobile ? 'var(--pk-color-primary)' : 'var(--pk-color-border)'}`,
-                                borderRadius: 'var(--pk-radius-sm)',
-                                cursor: 'pointer',
-                                fontWeight: '600'
-                            }}
-                        >
-                            {dashboardConfig.hideCalendarOnMobile ? 'ON' : 'OFF'}
-                        </button>
-                    </div>
+                    ))}
                 </div>
             </div>
 
+            {/* Display Settings removed as per request (Mobile calendar naturally hidden) */}
+
             <div className="settings-section" style={{
                 marginBottom: '2rem',
                 padding: '1.5rem',
@@ -364,11 +357,50 @@ const Settings = () => {
                 border: '1px solid var(--pk-color-border)',
                 borderRadius: 'var(--pk-radius-lg)'
             }}>
-                <h3 style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <Type size={20} /> 글자 크기
+                <h3 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <Type size={20} /> 글꼴 및 크기 설정
                 </h3>
 
-                <div className="font-control">
+                {/* Font Family Selection */}
+                <div className="font-family-control" style={{ marginBottom: '2rem' }}>
+                    <p style={{ color: 'var(--pk-color-text-secondary)', marginBottom: '1rem', fontSize: '0.9rem' }}>
+                        성경 본문을 읽기 편한 서체로 선택하세요.
+                    </p>
+                    <div style={{ display: 'flex', gap: '1rem' }}>
+                        <button
+                            onClick={() => handleFontChange('sans')}
+                            style={{
+                                flex: 1,
+                                padding: '1rem',
+                                borderRadius: 'var(--pk-radius-md)',
+                                border: fontFamily === 'sans' ? '2px solid var(--pk-color-primary)' : '1px solid var(--pk-color-border)',
+                                backgroundColor: fontFamily === 'sans' ? 'var(--pk-color-bg-secondary)' : 'var(--pk-color-bg)',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s'
+                            }}
+                        >
+                            <div style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.25rem', fontFamily: 'var(--pk-font-sans)' }}>고딕 (Sans-serif)</div>
+                            <div style={{ fontSize: '0.8rem', color: 'var(--pk-color-text-secondary)' }}>현대적이고 깔끔함</div>
+                        </button>
+                        <button
+                            onClick={() => handleFontChange('serif')}
+                            style={{
+                                flex: 1,
+                                padding: '1rem',
+                                borderRadius: 'var(--pk-radius-md)',
+                                border: fontFamily === 'serif' ? '2px solid var(--pk-color-primary)' : '1px solid var(--pk-color-border)',
+                                backgroundColor: fontFamily === 'serif' ? 'var(--pk-color-bg-secondary)' : 'var(--pk-color-bg)',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s'
+                            }}
+                        >
+                            <div style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.25rem', fontFamily: 'var(--pk-font-serif)' }}>명조 (Serif)</div>
+                            <div style={{ fontSize: '0.8rem', color: 'var(--pk-color-text-secondary)' }}>전통적이고 가독성이 좋음</div>
+                        </button>
+                    </div>
+                </div>
+
+                <div className="font-size-control">
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', color: 'var(--pk-color-text-secondary)' }}>
                         <span style={{ fontSize: '0.8rem' }}>작게</span>
                         <span style={{ fontSize: '0.8rem' }}>크게</span>
@@ -388,13 +420,14 @@ const Settings = () => {
 
                     <div className="preview-box" style={{
                         marginTop: '1.5rem',
-                        padding: '1rem',
+                        padding: '1.5rem',
                         border: '1px dashed var(--pk-color-border)',
                         borderRadius: 'var(--pk-radius-md)',
-                        backgroundColor: 'var(--pk-color-bg-secondary)'
+                        backgroundColor: 'var(--pk-color-bg-secondary)',
+                        fontFamily: 'var(--pk-font-family)'
                     }}>
-                        <p>미리보기 텍스트입니다. 글자 크기가 이렇게 보입니다.</p>
-                        <p>The quick brown fox jumps over the lazy dog.</p>
+                        <p style={{ marginBottom: '0.5rem' }}>성경은 하나님의 감동으로 된 것으로 교훈과 책망과 바르게 함과 의로 교육하기에 유익하니 (딤후 3:16)</p>
+                        <p style={{ fontSize: '0.85em', opacity: 0.8 }}>All Scripture is God-breathed and is useful for teaching, rebuking, correcting and training in righteousness. (2 Tim 3:16)</p>
                     </div>
                 </div>
             </div>
@@ -474,18 +507,22 @@ const Settings = () => {
                 </h3>
 
                 <div className="license-info" style={{ fontSize: '0.9rem', color: 'var(--pk-color-text-secondary)', lineHeight: '1.6' }}>
-                    <p style={{ marginBottom: '0.5rem' }}><strong>BibleMate v1.4.1</strong></p>
+                    <p style={{ marginBottom: '0.5rem' }}><strong>BibleMate v2.0.0</strong></p>
                     <p style={{ marginBottom: '1rem' }}>개인 묵상과 성경 읽기를 돕기 위해 만든 웹 애플리케이션입니다.</p>
 
                     <h4 style={{ fontSize: '0.95rem', color: 'var(--pk-color-text)', marginBottom: '0.5rem' }}>성경 데이터 저작권</h4>
                     <ul style={{ paddingLeft: '1.2rem', marginBottom: '1rem' }}>
                         <li>
-                            <strong>한국어: 『성경전서 개역한글판』</strong><br />
+                            <strong>한국어: 『성경전서 개역한글판』 (KRV)</strong><br />
                             본 성경전서 개역한글판의 저작권은 재단법인 대한성서공회에 있으며, 본 앱은 해당 저작권을 준수하여 사용합니다. (본문 동일성 유지)
                         </li>
                         <li style={{ marginTop: '0.5rem' }}>
-                            <strong>English: Open English Bible (OEB)</strong><br />
-                            Public Domain (CC0), No copyright reserved.
+                            <strong>English: World English Bible (WEB)</strong><br />
+                            Public Domain. A modern English revision of the ASV (1901).
+                        </li>
+                        <li style={{ marginTop: '0.5rem' }}>
+                            <strong>English: Bible in Basic English (BBE)</strong><br />
+                            Public Domain. Translated by S. H. Hooke using a 1,000-word limited vocabulary.
                         </li>
                     </ul>
 
@@ -506,22 +543,24 @@ const Settings = () => {
             </div>
 
             {/* Only used for non-backup related messages now */}
-            {statusMessage && (
-                <div style={{
-                    position: 'fixed',
-                    bottom: '2rem',
-                    left: '50%',
-                    transform: 'translateX(-50%)',
-                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                    color: 'white',
-                    padding: '1rem 2rem',
-                    borderRadius: 'var(--pk-radius-full)',
-                    zIndex: 1000,
-                    animation: 'fadeIn 0.3s ease-out'
-                }}>
-                    {statusMessage}
-                </div>
-            )}
+            {
+                statusMessage && (
+                    <div style={{
+                        position: 'fixed',
+                        bottom: '2rem',
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        color: 'white',
+                        padding: '1rem 2rem',
+                        borderRadius: 'var(--pk-radius-full)',
+                        zIndex: 1000,
+                        animation: 'fadeIn 0.3s ease-out'
+                    }}>
+                        {statusMessage}
+                    </div>
+                )
+            }
 
             <Modal
                 isOpen={resultModal.isOpen}
@@ -573,7 +612,7 @@ const Settings = () => {
                     </button>
                 </div>
             </Modal>
-        </div>
+        </div >
     );
 };
 

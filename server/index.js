@@ -21,6 +21,10 @@ import noteRoutes from './routes/notes.js';
 import readingRoutes from './routes/reading.js';
 import backupRoutes from './routes/backup.js';
 import authRoutes, { authMiddleware } from './routes/auth.js';
+import verseNoteRoutes from './routes/verse-notes.js';
+import freeNoteRoutes from './routes/free-notes.js';
+import prayerRoutes from './routes/prayers.js';
+import settingsRoutes from './routes/settings.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -72,6 +76,10 @@ app.use('/api/highlights', highlightRoutes);
 app.use('/api/notes', noteRoutes);
 app.use('/api/reading-logs', readingRoutes);
 app.use('/api/backup', backupRoutes);
+app.use('/api/verse-notes', verseNoteRoutes);
+app.use('/api/free-notes', freeNoteRoutes);
+app.use('/api/prayers', prayerRoutes);
+app.use('/api/settings', settingsRoutes);
 
 // Static files (React build) - Production only
 const clientDistPath = path.join(__dirname, '..', 'client', 'dist');

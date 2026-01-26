@@ -8,7 +8,7 @@ router.get('/', (req, res) => {
     try {
         const db = getDB();
         const stmt = db.prepare(`
-      SELECT * FROM notes ORDER BY date DESC
+      SELECT * FROM free_notes ORDER BY date DESC
     `);
 
         const notes = [];
@@ -33,12 +33,16 @@ router.post('/', (req, res) => {
         }
 
         const db = getDB();
+        const now = new Date().toISOString();
         const stmt = db.prepare(`
-      INSERT OR REPLACE INTO notes (date, content, created_at)
-      VALUES (?, ?, CURRENT_TIMESTAMP)
+      INSERT INTO free_notes (date, content, created_at, updated_at)
+      VALUES (?, ?, ?, ?)
+      ON CONFLICT(date) DO UPDATE SET
+        content = excluded.content,
+        updated_at = excluded.updated_at
     `);
 
-        stmt.run([date, content]);
+        stmt.run([date, content, now, now]);
         stmt.free();
 
         saveDB(); // Persist changes
@@ -55,7 +59,7 @@ router.get('/:date', (req, res) => {
         const { date } = req.params;
         const db = getDB();
 
-        const stmt = db.prepare('SELECT * FROM notes WHERE date = ?');
+        const stmt = db.prepare('SELECT * FROM free_notes WHERE date = ?');
         stmt.bind([date]);
 
         let note = null;
@@ -79,7 +83,7 @@ router.delete('/:id', (req, res) => {
         const { id } = req.params;
         const db = getDB();
 
-        const stmt = db.prepare('DELETE FROM notes WHERE id = ?');
+        const stmt = db.prepare('DELETE FROM free_notes WHERE id = ?');
         stmt.run([id]);
         stmt.free();
 
@@ -97,7 +101,7 @@ router.delete('/by-date/:date', (req, res) => {
         const { date } = req.params;
         const db = getDB();
 
-        const stmt = db.prepare('DELETE FROM notes WHERE date = ?');
+        const stmt = db.prepare('DELETE FROM free_notes WHERE date = ?');
         stmt.run([date]);
         stmt.free();
 

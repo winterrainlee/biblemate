@@ -11,13 +11,34 @@
 }
 
 .header-container {
-    max-width: 1600px;
-    margin: 0 auto;
     width: 100%;
-    padding: 0 1rem;
+    height: 100%;
+    padding: 0 1.5rem;
+    /* 성경 읽기 모드와 여백 통일감을 위해 약간 늘림 */
     display: flex;
     justify-content: space-between;
     align-items: center;
+    max-width: 1400px;
+    /* Match content max-width */
+    margin: 0 auto;
+    /* Center header content */
+}
+
+/* Mobile-only chart button */
+.mobile-only-chart-btn {
+    display: none !important;
+}
+
+@media (max-width: 640px) {
+    .mobile-only-chart-btn {
+        display: flex !important;
+    }
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
 }
 
 .header-title {
@@ -29,10 +50,125 @@
     gap: 0.5rem;
 }
 
+/* V2.0: Tab Navigation in Header */
+.header-tabs {
+    display: flex;
+    gap: 0;
+}
+
+.header-tab {
+    padding: 0.5rem 1rem;
+    border: none;
+    background: transparent;
+    color: var(--pk-color-text-secondary);
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    position: relative;
+    transition: color 0.2s;
+    white-space: nowrap;
+}
+
+.header-tab:hover {
+    color: var(--pk-color-text);
+}
+
+.header-tab.active {
+    color: var(--pk-color-primary);
+    font-weight: 600;
+}
+
+.header-tab.active::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--pk-color-primary);
+}
+
+.short-label {
+    display: none;
+}
+
+/* Page titles in tabs */
+.full-label {
+    display: inline;
+}
+
+.logo-icon {
+    display: flex;
+    margin-right: 0.6rem;
+}
+
+/* Mobile: Shorter tab labels and hide font controls */
+@media (max-width: 640px) {
+    .header-left {
+        gap: 0.5rem;
+    }
+
+    .header-title {
+        display: none;
+        /* Hide 'BibleMate' text on small mobile to save space */
+    }
+
+    .logo-icon {
+        display: flex;
+        /* Show icon on mobile instead */
+    }
+
+    .header-logo {
+        padding: 4px;
+        border-radius: var(--pk-radius-md);
+        transition: background-color 0.2s;
+    }
+
+    .header-logo:active {
+        background-color: var(--pk-color-bg-secondary);
+    }
+
+    .full-label {
+        display: none;
+    }
+
+    .short-label {
+        display: inline;
+    }
+
+    .desktop-only {
+        display: none !important;
+    }
+
+    .header-tab {
+        padding: 0.4rem 0.6rem;
+        font-size: 0.95rem;
+        /* Larger for easier tapping */
+        font-weight: 600;
+    }
+
+    .header-tabs {
+        border-radius: var(--pk-radius-md);
+        background-color: var(--pk-color-bg-secondary);
+        padding: 2px;
+    }
+
+    .header-tab.active {
+        background-color: var(--pk-color-bg);
+        border-radius: var(--pk-radius-sm);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .header-tab.active::after {
+        display: none;
+        /* Hide underline on mobile, use background style */
+    }
+}
+
 .header-actions {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.25rem;
 }
 
 .header-action-btn {
@@ -62,5 +198,12 @@
 @media (min-width: 640px) {
     .action-label {
         display: inline-block;
+    }
+}
+
+/* Ensure icons are always visible but text is hidden */
+@media (max-width: 640px) {
+    .header-action-btn {
+        padding: 0.4rem;
     }
 }

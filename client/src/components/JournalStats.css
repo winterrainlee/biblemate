@@ -1,0 +1,88 @@
+.journal-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.stats-section {
+    background: var(--bg-secondary);
+    border-radius: 12px;
+    padding: 1rem;
+}
+
+.stats-section.no-padding {
+    padding: 0;
+    background: transparent;
+}
+
+.stats-title {
+    font-size: 1rem;
+    color: var(--text-primary);
+    text-align: center;
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+}
+
+.stats-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    background: var(--bg-primary);
+    border-radius: 8px;
+    box-shadow: 0 1px 2px var(--pk-color-shadow);
+}
+
+.stats-icon {
+    font-size: 1.2rem;
+}
+
+.stats-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.stats-label {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+}
+
+.stats-value {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--primary-color, #3b82f6);
+}
+
+.top-books-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.top-book-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    padding: 0.25rem 0.5rem;
+}
+
+.book-icon {
+    font-size: 1rem;
+}
+
+.book-name {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.book-count {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}

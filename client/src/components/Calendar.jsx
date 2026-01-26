@@ -82,7 +82,6 @@ const Calendar = ({ readingLogs = [], compact = false, onDateClick, selectedDate
                     </select>
                 </div>
                 <div className="calendar-nav">
-                    <button onClick={handleTodayClick} className="today-btn">오늘</button>
                     <button onClick={nextMonth} className="nav-btn"><ChevronRight size={20} /></button>
                 </div>
             </div>

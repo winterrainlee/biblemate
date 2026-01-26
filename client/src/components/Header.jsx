@@ -1,12 +1,14 @@
 
 import { useNavigate } from 'react-router-dom';
-import { BarChart2, Moon, Sun, Minus, Plus, Settings } from 'lucide-react';
+import { BarChart2, Moon, Sun, Minus, Plus, Settings, Book } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
+import { useTab } from '../contexts/TabContext';
 import './Header.css';
 
 const Header = ({ onTrackerClick }) => {
     const navigate = useNavigate();
     const { theme, setTheme, fontSize, setFontSize } = useTheme();
+    const { activeTab, setActiveTab } = useTab();
     const isDarkMode = theme === 'dark';
     const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark');
 
@@ -31,19 +33,40 @@ const Header = ({ onTrackerClick }) => {
         <header className="main-header">
             <div className="header-container">
                 <div className="header-left">
-                    <h1
-                        className="header-title"
-                        onClick={() => navigate('/')}
-                        style={{ cursor: 'pointer' }}
+                    <div
+                        className="header-logo"
+                        onClick={() => {
+                            window.location.href = '/';
+                        }}
+                        style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}
                         title="메인으로 이동"
                     >
-                        BibleMate
-                    </h1>
+                        <Book className="logo-icon" size={24} color="var(--pk-color-primary)" />
+                        <h1 className="header-title">BibleMate</h1>
+                    </div>
+
+                    {/* V2.0: Tab Navigation in Header */}
+                    <nav className="header-tabs">
+                        <button
+                            className={`header-tab ${activeTab === 'bible' ? 'active' : ''}`}
+                            onClick={() => setActiveTab('bible')}
+                        >
+                            <span className="full-label">📖 성경 읽기</span>
+                            <span className="short-label">성경</span>
+                        </button>
+                        <button
+                            className={`header-tab ${activeTab === 'journal' ? 'active' : ''}`}
+                            onClick={() => setActiveTab('journal')}
+                        >
+                            <span className="full-label">📝 묵상일지</span>
+                            <span className="short-label">묵상</span>
+                        </button>
+                    </nav>
                 </div>
 
                 <div className="header-actions">
                     <button
-                        className="header-action-btn"
+                        className="header-action-btn mobile-only-chart-btn"
                         onClick={() => navigate('/chart')}
                         title="읽기표"
                     >
@@ -51,24 +74,8 @@ const Header = ({ onTrackerClick }) => {
                         <span className="action-label">읽기표</span>
                     </button>
 
-                    <button
-                        className="header-action-btn"
-                        onClick={toggleTheme}
-                        title={isDarkMode ? "라이트 모드" : "다크 모드"}
-                    >
-                        {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
-                    </button>
-
-                    <button
-                        className="header-action-btn"
-                        onClick={() => navigate('/settings')}
-                        title="설정"
-                    >
-                        <Settings size={20} />
-                    </button>
-
-                    {/* Font Control Group */}
-                    <div className="font-controls" style={{
+                    {/* Font Control Group - Hidden on mobile */}
+                    <div className="font-controls desktop-only" style={{
                         display: 'flex',
                         alignItems: 'center',
                         border: '1px solid var(--pk-color-border)',
@@ -83,7 +90,7 @@ const Header = ({ onTrackerClick }) => {
                             title="글자 작게"
                             style={{ border: 'none', padding: '4px' }}
                         >
-                            <Minus size={16} />
+                            <span className="font-icon-wrapper"><Minus size={16} /></span>
                         </button>
 
                         <span style={{
@@ -103,9 +110,25 @@ const Header = ({ onTrackerClick }) => {
                             title="글자 크게"
                             style={{ border: 'none', padding: '4px' }}
                         >
-                            <Plus size={16} />
+                            <span className="font-icon-wrapper"><Plus size={16} /></span>
                         </button>
                     </div>
+
+                    <button
+                        className="header-action-btn"
+                        onClick={toggleTheme}
+                        title={isDarkMode ? "라이트 모드" : "다크 모드"}
+                    >
+                        {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
+                    </button>
+
+                    <button
+                        className="header-action-btn"
+                        onClick={() => navigate('/settings')}
+                        title="설정"
+                    >
+                        <Settings size={20} />
+                    </button>
                 </div>
             </div>
         </header>

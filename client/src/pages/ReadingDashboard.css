@@ -1,20 +1,29 @@
 /* ReadingDashboard.css */
 
+/* Note: Tab styles moved to Header.css in V2.0 */
+
 /* Mobile First: Default to natural flow (Vertical) */
 .dashboard-container {
     display: flex;
     flex-direction: column;
-    min-height: calc(100vh - 60px);
+    height: 100%;
     background-color: var(--pk-color-bg-secondary);
+    overflow: hidden;
 }
 
 .dashboard-sidebar {
-    background-color: var(--pk-color-bg);
-    border-bottom: 1px solid var(--pk-color-border);
-    padding: 1rem;
+    flex: 0 0 300px;
+    border-right: 1px solid var(--pk-color-border);
+    background-color: var(--pk-color-bg-secondary);
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    overflow-y: auto;
+    transition: all 0.3s ease;
+}
+
+/* Hide legacy sidebar when Bible mode 3-column is active */
+.dashboard-container.bible-mode-active .dashboard-sidebar {
+    display: none;
 }
 
 .dashboard-main {
@@ -24,6 +33,8 @@
     /* Mobile: Top-Down */
     position: relative;
     overflow: hidden;
+    padding: 0;
+    /* Removed padding to fix whitespace */
     /* Contain children */
     gap: 0;
     /* v1.4.1: 모바일 공백 버그 수정 */
@@ -36,7 +47,8 @@
     max-width: 1400px;
     margin: 0 auto;
     width: 100%;
-    overflow-y: auto;
+    width: 100%;
+    overflow-y: hidden;
     /* Allow scroll inside wrapper if needed */
 }
 
@@ -89,10 +101,12 @@
     .bible-viewer-wrapper {
         height: 100%;
         /* Fill height */
-        width: var(--split-ratio, 50%);
-        /* Controlled by JS variable */
-        overflow-y: auto;
-        padding: 2rem;
+        width: 100%;
+        /* Takes full width in bible mode, internal 3-columns will handle ratios */
+        overflow-y: hidden;
+        /* Scroll handled by internal panels */
+        padding: 0;
+        /* Full bleed for 3-column layout */
     }
 
     .note-editor-wrapper {

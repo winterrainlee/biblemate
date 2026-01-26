@@ -1,0 +1,455 @@
+/* JournalPage.css */
+
+.journal-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+    width: 100%;
+    flex: 1;
+    /* Force expansion in parent flex container */
+    background-color: var(--pk-color-bg);
+}
+
+.journal-side {
+    display: none;
+    /* Hide on mobile by default */
+    padding: 0;
+    background-color: var(--bg-secondary);
+}
+
+.journal-page {
+    flex: 1;
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 1.5rem;
+    overflow-y: auto;
+}
+
+.journal-inner {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-height: 100%;
+}
+
+/* Tablet/Desktop Layout (3-Column) */
+@media (min-width: 1024px) {
+    .journal-inner {
+        flex-direction: row;
+        width: 100%;
+        height: 100%;
+        padding: 0;
+        /* Full bleed layout */
+    }
+
+    .journal-side {
+        display: block;
+        flex: 0 0 20%;
+        min-width: 280px;
+        max-width: 350px;
+        /* Prevent it from getting too wide on huge screens */
+        overflow-y: auto;
+        background-color: var(--pk-color-bg-secondary);
+        padding: 0;
+    }
+
+    .journal-side-content {
+        padding: 1.5rem;
+    }
+
+    .journal-left {
+        border-right: 1px solid var(--pk-color-border);
+    }
+
+    .journal-right {
+        border-left: 1px solid var(--pk-color-border);
+    }
+
+    .journal-page {
+        flex: 1;
+        /* Takes remaining ~60% */
+        padding: 2rem 2.5rem;
+        background-color: var(--pk-color-bg);
+        overflow-y: auto;
+    }
+}
+
+/* Header Section inside Journal */
+.journal-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.date-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.date-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.journal-date {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.nav-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid transparent;
+    background-color: transparent;
+    color: var(--pk-color-text-secondary);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.nav-btn:hover {
+    background-color: var(--pk-color-bg-secondary);
+    color: var(--pk-color-primary);
+}
+
+.today-badge-static {
+    font-size: 0.75rem;
+    padding: 2px 8px;
+    background: var(--primary-color-light);
+    color: var(--primary-color);
+    border: 1px solid var(--primary-color);
+    border-radius: 9999px;
+    font-weight: 600;
+    cursor: default;
+}
+
+.journal-subtitle {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+/* Loading */
+.journal-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 200px;
+    color: var(--text-secondary);
+}
+
+/* Empty State */
+.journal-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1rem;
+    text-align: center;
+    color: var(--text-secondary);
+}
+
+.journal-empty .empty-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.journal-empty p {
+    margin: 0 0 1.5rem 0;
+    font-size: 1.1rem;
+}
+
+.journal-empty .empty-actions {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.journal-empty .empty-actions button {
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--primary-color, #3b82f6);
+    background: transparent;
+    color: var(--primary-color, #3b82f6);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.journal-empty .empty-actions button:hover {
+    background: var(--primary-color, #3b82f6);
+    color: white;
+}
+
+/* Sections */
+.journal-section {
+    margin-bottom: 1.5rem;
+    padding: 1.25rem;
+    background: var(--bg-secondary);
+    border-radius: 12px;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.section-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 0.75rem 0;
+}
+
+.section-actions {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.section-content {
+    margin: 0;
+    line-height: 1.7;
+    color: var(--text-primary);
+    white-space: pre-wrap;
+}
+
+/* Icon Buttons */
+.icon-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.25rem;
+    font-size: 1rem;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+}
+
+.icon-btn:hover {
+    opacity: 1;
+}
+
+.icon-btn.delete:hover {
+    color: #ef4444;
+}
+
+/* Reading List */
+.reading-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.reading-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    background: var(--bg-primary);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.reading-item:hover {
+    background: var(--primary-color-light, #eff6ff);
+}
+
+.reading-badge {
+    color: var(--success-color, #22c55e);
+    font-weight: bold;
+}
+
+/* Verse Notes */
+.verse-notes-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.verse-note-card {
+    background: var(--bg-primary);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+}
+
+.verse-note-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.verse-ref {
+    font-weight: 600;
+    color: var(--primary-color, #3b82f6);
+    cursor: pointer;
+}
+
+.verse-ref:hover {
+    text-decoration: underline;
+}
+
+.verse-note-content {
+    margin: 0;
+    line-height: 1.6;
+    color: var(--text-primary);
+}
+
+/* Editor Box */
+.editor-box {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.editor-box textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color, #e5e7eb);
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-family: inherit;
+    line-height: 1.6;
+    resize: vertical;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+.editor-box textarea:focus {
+    outline: none;
+    border-color: var(--primary-color, #3b82f6);
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+.editor-actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+}
+
+.btn-save {
+    padding: 0.5rem 1rem;
+    background: var(--primary-color, #3b82f6);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background 0.2s;
+}
+
+.btn-save:hover {
+    background: var(--primary-color-dark, #2563eb);
+}
+
+.btn-cancel {
+    padding: 0.5rem 1rem;
+    background: var(--bg-tertiary, #e5e7eb);
+    color: var(--text-primary);
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background 0.2s;
+}
+
+.btn-cancel:hover {
+    background: var(--border-color, #d1d5db);
+}
+
+.add-btn {
+    display: block;
+    width: 100%;
+    padding: 0.75rem;
+    background: var(--bg-primary, white);
+    border: 1px dashed var(--border-color, #e5e7eb);
+    border-radius: 8px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.add-btn:hover {
+    border-color: var(--primary-color, #3b82f6);
+    color: var(--primary-color, #3b82f6);
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .journal-container {
+        width: 100vw;
+        margin-left: calc(-50vw + 50%);
+        margin-right: calc(-50vw + 50%);
+    }
+
+    .journal-page {
+        padding: 1rem 0.5rem;
+        width: 100%;
+    }
+
+    .journal-header {
+        margin-bottom: 1.5rem;
+        padding: 0 0.5rem 1rem 0.5rem;
+    }
+
+    .journal-date {
+        font-size: 1.25rem;
+    }
+
+    .journal-section {
+        padding: 1.25rem 1rem;
+        margin-left: 1rem;
+        margin-right: 1rem;
+        margin-bottom: 1rem;
+        border-radius: 12px;
+        /* Keep consistent radius */
+    }
+
+    .reading-list {
+        flex-direction: column;
+    }
+
+    .reading-item {
+        width: 100%;
+    }
+}
+
+/* Quoted text style */
+.verse-quote-box {
+    background-color: var(--pk-color-bg-secondary);
+    padding: 0.75rem 1rem;
+    border-radius: var(--pk-radius-md);
+    border-left: 3px solid var(--pk-color-border);
+    margin: 0.5rem 0 1rem 0;
+    font-family: "Nanum Myeongjo", serif;
+    font-size: 0.95rem;
+    font-style: italic;
+    color: var(--pk-color-text-secondary);
+    line-height: 1.6;
+    white-space: pre-wrap;
+    /* Preserve newlines in quote */
+}
+
+.note-date {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    /* Using common variable name from this file context if available, or fallback */
+    margin-top: 0.5rem;
+    text-align: right;
+}
