@@ -85,6 +85,11 @@ app.use('/api/settings', settingsRoutes);
 const clientDistPath = path.join(__dirname, '..', 'client', 'dist');
 app.use(express.static(clientDistPath));
 
+// API fallback - return JSON for unknown API routes
+app.use('/api', (req, res) => {
+  res.status(404).json({ ok: false, error: 'API route not found' });
+});
+
 // SPA fallback - serve index.html for non-API routes
 app.get('*', (req, res) => {
   res.sendFile(path.join(clientDistPath, 'index.html'));
@@ -92,10 +97,11 @@ app.get('*', (req, res) => {
 
 // Initialize DB and start server
 initDB().then(() => {
-  app.listen(PORT, '0.0.0.0', () => {
-    console.log(`🚀 Server running on http://0.0.0.0:${PORT}`);
+  const HOST = process.env.BIND_HOST || (process.env.NODE_ENV === 'production' ? '0.0.0.0' : '127.0.0.1');
+  app.listen(PORT, HOST, () => {
+    console.log(`?? Server running on http://${HOST}:${PORT}`);
     if (process.env.ACCESS_PASSWORD) {
-      console.log('🔒 Access password protection enabled');
+      console.log('?뵏 Access password protection enabled');
     }
   });
 }).catch(err => {

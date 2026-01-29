@@ -4,9 +4,11 @@ import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { PenTool } from 'lucide-react';
 import { getReadingSummary } from '../utils/bibleUtils';
+import { parseDateOnly } from '../utils/dateOnly';
 import './NotePreview.css';
 
 const NotePreview = ({ date, note, readingLogs, books, onClick }) => {
+    const parsedDate = parseDateOnly(date);
     // 읽은 말씀 요약 생성 (유틸리티 사용)
     const getReadingSummaryElements = () => {
         // 읽은 순서(ID순)대로 정렬하여 표시
@@ -26,7 +28,7 @@ const NotePreview = ({ date, note, readingLogs, books, onClick }) => {
             <div className="note-preview-header">
                 <span className="preview-title">
                     <PenTool size={14} />
-                    {format(new Date(date), 'M월 d일 (EEEE)', { locale: ko })} 오늘 읽은 말씀
+                    {parsedDate ? format(parsedDate, 'M월 d일 (EEEE)', { locale: ko }) : ''} 오늘 읽은 말씀
                 </span>
             </div>
 

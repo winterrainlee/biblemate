@@ -1,6 +1,6 @@
 # 차기 작업 Roadmap
-- 최신 배포 버전: v2.0.0
-- 최신 배포일자: 2026년 1월 26일
+- 최신 배포 버전: v2.0.1
+- 최신 배포일자: 2026년 1월 29일
 - 목표 버전: v2.1.0 (TBD)
 - 목표 개발일자: 2026년 2월
 - 플로우 다이어그램: [flow-diagrams.md](flow-diagrams.md)
@@ -66,6 +66,13 @@
 
 ## ✅ Completed
 > 배포 완료된 작업의 히스토리를 버전별로 기록합니다.
+
+### v2.0.1 (2026-01-29) - Stability Hotfix (Phase 0)
+- **SECURITY**: Host 헤더 기반 localhost 인증 예외 제거 (스푸핑 방지)
+- **FEAT**: 개발 환경 세션 TTL 30일 (DEV_SESSION_DAYS 환경변수)
+- **FIX**: 백업 복원 시 verse_range 유실 문제 해결
+- **FIX**: /api 미매칭 GET 요청 JSON 404 반환 (SPA fallback 분리)
+- **FIX**: date-only 파싱 유틸 도입 (타임존 하루 밀림 방지)
 
 ### v2.0.0 (2026-01-26) - Major UI/UX Overhaul & Meditation System
 - **ARCH**: DB Schema V3 전환 (verse_notes, free_notes, prayers, settings 테이블 분리)

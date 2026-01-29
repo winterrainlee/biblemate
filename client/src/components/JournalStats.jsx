@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { format, isSameMonth, startOfMonth, endOfMonth } from 'date-fns';
 import Calendar from './Calendar';
 import './JournalStats.css';
+import { parseDateOnly } from '../utils/dateOnly';
 
 const JournalStats = ({
     date,
@@ -17,18 +18,18 @@ const JournalStats = ({
         const monthEnd = endOfMonth(date);
 
         const logs = readingLogs.filter(log => {
-            const d = new Date(log.date);
-            return d >= monthStart && d <= monthEnd;
+            const d = parseDateOnly(log.date);
+            return d ? d >= monthStart && d <= monthEnd : false;
         });
 
         const vNotes = verseNotes.filter(note => {
-            const d = new Date(note.date);
-            return d >= monthStart && d <= monthEnd;
+            const d = parseDateOnly(note.date);
+            return d ? d >= monthStart && d <= monthEnd : false;
         });
 
         const fNotes = freeNotes.filter(note => {
-            const d = new Date(note.date);
-            return d >= monthStart && d <= monthEnd;
+            const d = parseDateOnly(note.date);
+            return d ? d >= monthStart && d <= monthEnd : false;
         });
 
         return { logs, vNotes, fNotes };

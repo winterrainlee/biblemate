@@ -216,9 +216,9 @@ router.post('/import', (req, res) => {
 
             // 4. Import V2 Data
             if (data.verse_notes) {
-                const stmt = db.prepare('INSERT INTO verse_notes (id, date, book, chapter, verse, content, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
+                const stmt = db.prepare('INSERT INTO verse_notes (id, date, book, chapter, verse, verse_range, content, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)');
                 for (const r of data.verse_notes) {
-                    stmt.bind([r.id, r.date, r.book, r.chapter, r.verse, r.content, r.created_at || now, r.updated_at || now]);
+                    stmt.bind([r.id, r.date, r.book, r.chapter, r.verse, r.verse_range || null, r.content, r.created_at || now, r.updated_at || now]);
                     stmt.step(); stmt.reset();
                 }
                 stmt.free();

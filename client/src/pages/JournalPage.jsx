@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Type, Download, Upload, Eye, EyeOff, LogOut, CheckCircle, AlertCircle, CalendarOff, Edit2, Trash2, ChevronLeft, ChevronRight } from 'lucide-react'; // Ensure Edit2 and Trash2 are imported
 import { format, addDays, subDays, isToday } from 'date-fns';
 import { ko } from 'date-fns/locale';
+import { parseDateInput } from '../utils/dateOnly';
 import Modal from '../components/Modal'; // Import Modal
 import {
     getVerseNotesByDate,
@@ -94,7 +95,8 @@ const JournalPage = ({ date, onDateChange, readingLogs = [], books = [], onNavig
             // The user wants to see notes CREATED on this day, regardless of the assigned reading date.
             const filteredNotes = (allNotesData || []).filter(note => {
                 const createdDate = note.created_at || note.date;
-                return format(new Date(createdDate), 'yyyy-MM-dd') === dateStr;
+                const parsed = parseDateInput(createdDate);
+                return parsed ? format(parsed, 'yyyy-MM-dd') === dateStr : false;
             });
 
             // Sort by Book > Chapter > Verse

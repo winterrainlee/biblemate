@@ -5,6 +5,7 @@ import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { api } from '../services/api';
 import { getReadingSummary } from '../utils/bibleUtils';
+import { parseDateOnly } from '../utils/dateOnly';
 import './NoteEditor.css';
 
 const NoteEditor = forwardRef(({ date, readingLogs, books }, ref) => {
@@ -87,8 +88,10 @@ const NoteEditor = forwardRef(({ date, readingLogs, books }, ref) => {
     };
 
     const handleCopy = () => {
-        const dateObj = new Date(date);
-        const dateHeader = format(dateObj, '[yyyy년 M월 d일 EEEE]', { locale: ko });
+        const dateObj = parseDateOnly(date);
+        const dateHeader = dateObj
+            ? format(dateObj, '[yyyy년 M월 d일 EEEE]', { locale: ko })
+            : `[${date}]`;
         const summaries = getReadingSummary(readingLogs, books);
         const summaryText = summaries.length > 0 ? summaries.join(', ') : '읽은 기록 없음';
 
@@ -127,7 +130,7 @@ const NoteEditor = forwardRef(({ date, readingLogs, books }, ref) => {
     return (
         <div className="note-editor-container">
             <div className="editor-header">
-                <h3>{date ? format(new Date(date), 'yyyy년 M월 d일 EEEE 묵상기록', { locale: ko }) : '묵상기록'}</h3>
+                <h3>{dateObj ? format(dateObj, 'yyyy년 M월 d일 EEEE 묵상기록', { locale: ko }) : '묵상기록'}</h3>
                 <div className="editor-actions">
                     <button onClick={handleApplyForm} className="action-btn primary" title="양식 적용">
                         <FileText size={18} />

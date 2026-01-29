@@ -22,6 +22,21 @@ function getMsUntilMidnight() {
 }
 
 /**
+ * Get session duration based on environment
+ * - production: until next midnight
+ * - development: N days (default 30)
+ */
+function getSessionDurationMs() {
+    if (process.env.NODE_ENV === 'production') {
+        return getMsUntilMidnight();
+    }
+
+    const devDaysRaw = process.env.DEV_SESSION_DAYS;
+    const devDays = Number.isFinite(Number(devDaysRaw)) ? Number(devDaysRaw) : 30;
+    return devDays * 24 * 60 * 60 * 1000;
+}
+
+/**
  * Generate a random session token
  */
 function generateSessionToken() {
@@ -54,12 +69,6 @@ export function isValidSession(token) {
  * Authentication middleware
  */
 export function authMiddleware(req, res, next) {
-    // [NEW] Skip auth for localhost (Local Development)
-    const isLocal = req.hostname === 'localhost' || req.hostname === '127.0.0.1';
-    if (isLocal) {
-        return next();
-    }
-
     // Skip if no password set
     if (!isAuthRequired()) {
         return next();
@@ -94,9 +103,7 @@ export function authMiddleware(req, res, next) {
  * Check if authentication is required and current status
  */
 router.get('/status', (req, res) => {
-    // [NEW] Skip auth for localhost
-    const isLocal = req.hostname === 'localhost' || req.hostname === '127.0.0.1';
-    const authRequired = isLocal ? false : isAuthRequired();
+    const authRequired = isAuthRequired();
 
     const token = req.cookies?.session_token;
     const authenticated = authRequired ? isValidSession(token) : true;
@@ -126,7 +133,7 @@ router.post('/login', express.json(), (req, res) => {
 
     // Create session
     const token = generateSessionToken();
-    const duration = getMsUntilMidnight();
+    const duration = getSessionDurationMs();
     const expiresAt = Date.now() + duration;
 
     sessions.set(token, {
