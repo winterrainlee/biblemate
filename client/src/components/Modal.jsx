@@ -11,7 +11,6 @@ const Modal = ({ isOpen, onClose, title, children }) => {
             left: 0,
             right: 0,
             bottom: 0,
-            bottom: 0,
             backgroundColor: 'var(--pk-color-overlay)',
             display: 'flex',
             alignItems: 'center',

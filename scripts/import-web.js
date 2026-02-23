@@ -1,128 +1,109 @@
 /**
  * WEB (World English Bible) import script
- * Downloads from TehShrike/world-english-bible and imports into SQLite
+ * Parses official plain text files and imports into SQLite
  */
 
 import { initDB, getDB, saveDB, closeDB } from '../server/db/init.js';
-import https from 'https';
+import fs from 'fs';
+import path from 'path';
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
-const osisMapping = require('../server/data/osis-mapping.json');
+const osisMapping = require('../server/config/osis-mapping.json');
 
-// TehShrike WEB repository base URL
-const WEB_BASE_URL = 'https://raw.githubusercontent.com/TehShrike/world-english-bible/master/json/';
+// Source directory for WEB plain text files
+const WEB_SOURCE_DIR = './docs/assets/test-data/engwebu_readaloud/';
 
-// Book filename mapping (TehShrike uses lowercase book names)
-const OSIS_TO_FILENAME = {
-    'Gen': 'genesis', 'Exod': 'exodus', 'Lev': 'leviticus', 'Num': 'numbers', 'Deut': 'deuteronomy',
-    'Josh': 'joshua', 'Judg': 'judges', 'Ruth': 'ruth', '1Sam': '1samuel', '2Sam': '2samuel',
-    '1Kgs': '1kings', '2Kgs': '2kings', '1Chr': '1chronicles', '2Chr': '2chronicles', 'Ezra': 'ezra',
-    'Neh': 'nehemiah', 'Esth': 'esther', 'Job': 'job', 'Ps': 'psalms', 'Prov': 'proverbs',
-    'Eccl': 'ecclesiastes', 'Song': 'songofsolomon', 'Isa': 'isaiah', 'Jer': 'jeremiah', 'Lam': 'lamentations',
-    'Ezek': 'ezekiel', 'Dan': 'daniel', 'Hos': 'hosea', 'Joel': 'joel', 'Amos': 'amos',
-    'Obad': 'obadiah', 'Jonah': 'jonah', 'Mic': 'micah', 'Nah': 'nahum', 'Hab': 'habakkuk',
-    'Zeph': 'zephaniah', 'Hag': 'haggai', 'Zech': 'zechariah', 'Mal': 'malachi',
-    'Matt': 'matthew', 'Mark': 'mark', 'Luke': 'luke', 'John': 'john', 'Acts': 'acts',
-    'Rom': 'romans', '1Cor': '1corinthians', '2Cor': '2corinthians', 'Gal': 'galatians', 'Eph': 'ephesians',
-    'Phil': 'philippians', 'Col': 'colossians', '1Thess': '1thessalonians', '2Thess': '2thessalonians',
-    '1Tim': '1timothy', '2Tim': '2timothy', 'Titus': 'titus', 'Phlm': 'philemon', 'Heb': 'hebrews',
-    'Jas': 'james', '1Pet': '1peter', '2Pet': '2peter', '1John': '1john', '2John': '2john',
-    '3John': '3john', 'Jude': 'jude', 'Rev': 'revelation'
+// Mapping from file abbreviation to OSIS code (Canonical 66 books)
+const ABBR_TO_OSIS = {
+    'GEN': 'Gen', 'EXO': 'Exod', 'LEV': 'Lev', 'NUM': 'Num', 'DEU': 'Deut',
+    'JOS': 'Josh', 'JDG': 'Judg', 'RUT': 'Ruth', '1SA': '1Sam', '2SA': '2Sam',
+    '1KI': '1Kgs', '2KI': '2Kgs', '1CH': '1Chr', '2CH': '2Chr', 'EZR': 'Ezra',
+    'NEH': 'Neh', 'EST': 'Esth', 'JOB': 'Job', 'PSA': 'Ps', 'PRO': 'Prov',
+    'ECC': 'Eccl', 'SNG': 'Song', 'ISA': 'Isa', 'JER': 'Jer', 'LAM': 'Lam',
+    'EZK': 'Ezek', 'DAN': 'Daniel', 'HOS': 'Hos', 'JOL': 'Joel', 'AMO': 'Amos',
+    'OBA': 'Obad', 'JON': 'Jonah', 'MIC': 'Mic', 'NAM': 'Nah', 'HAB': 'Hab',
+    'ZEP': 'Zeph', 'HAG': 'Hag', 'ZEC': 'Zech', 'MAL': 'Mal',
+    'MAT': 'Matt', 'MRK': 'Mark', 'LUK': 'Luke', 'JHN': 'John', 'ACT': 'Acts',
+    'ROM': 'Rom', '1CO': '1Cor', '2CO': '2Cor', 'GAL': 'Gal', 'EPH': 'Eph',
+    'PHP': 'Phil', 'COL': 'Col', '1TH': '1Thess', '2TH': '2Thess',
+    '1TI': '1Tim', '2TI': '2Tim', 'TIT': 'Titus', 'PHM': 'Phlm', 'HEB': 'Heb',
+    'JAS': 'Jas', '1PE': '1Pet', '2PE': '2Pet', '1JN': '1John', '2JN': '2John',
+    '3JN': '3John', 'JUD': 'Jude', 'REV': 'Rev'
 };
 
 /**
- * Fetch JSON from URL
+ * Parse a single plain text file
+ * Skips first 2 lines (Book/Chapter titles), then treats each line as a verse
  */
-function fetchJSON(url) {
-    return new Promise((resolve, reject) => {
-        https.get(url, (res) => {
-            if (res.statusCode !== 200) {
-                reject(new Error(`HTTP ${res.statusCode} for ${url}`));
-                return;
-            }
-            let data = '';
-            res.on('data', chunk => data += chunk);
-            res.on('end', () => {
-                try {
-                    resolve(JSON.parse(data));
-                } catch (e) {
-                    reject(new Error(`Failed to parse JSON from ${url}: ${e.message}`));
-                }
-            });
-        }).on('error', reject);
-    });
-}
-
-/**
- * Parse TehShrike WEB JSON format
- * Their format is an array of objects with type/chapterNumber/verseNumber/value
- */
-function parseWEBBook(bookData) {
+function parsePlainTextFile(filePath) {
+    const content = fs.readFileSync(filePath, 'utf8');
+    const lines = content.split('\n');
     const verses = [];
-    for (const item of bookData) {
-        if (item.type === 'paragraph text' || item.type === 'line text') {
-            if (item.chapterNumber && item.verseNumber && item.value) {
-                // Check if we already have this verse (multiple sections per verse)
-                const existing = verses.find(v =>
-                    v.chapter === item.chapterNumber && v.verse === item.verseNumber
-                );
-                if (existing) {
-                    existing.text += ' ' + item.value.trim();
-                } else {
-                    verses.push({
-                        chapter: item.chapterNumber,
-                        verse: item.verseNumber,
-                        text: item.value.trim()
-                    });
-                }
-            }
+
+    // Skip first 2 lines (0: Book Name, 1: Chapter Name)
+    for (let i = 2; i < lines.length; i++) {
+        const text = lines[i].trim();
+        if (text) {
+            verses.push({
+                verse: i - 1, // Line 2 is Verse 1, Line 3 is Verse 2...
+                text: text
+            });
         }
     }
     return verses;
 }
 
 /**
- * Import WEB (World English Bible)
+ * Import WEB from local plain text files
  */
 async function importWEB(db) {
-    console.log('\n📥 Downloading World English Bible (WEB)...');
+    console.log('📥 Importing World English Bible (WEB) from local files...');
 
     const stmt = db.prepare(`
-        INSERT OR REPLACE INTO bible_verses (book, chapter, verse, version, text) 
+        INSERT INTO bible_verses (book, chapter, verse, version, text) 
         VALUES (?, ?, ?, 'web', ?)
     `);
 
+    // Get all txt files in source directory
+    const files = fs.readdirSync(WEB_SOURCE_DIR).filter(f => f.endsWith('.txt'));
     let totalVerses = 0;
-    let successBooks = 0;
-    const osisKeys = Object.keys(osisMapping);
+    let processedFiles = 0;
+    const booksInDB = new Set();
 
-    for (const osisCode of osisKeys) {
-        const filename = OSIS_TO_FILENAME[osisCode];
-        if (!filename) {
-            console.warn(`⚠️ No filename mapping for ${osisCode}`);
+    // Regex to extract abbreviation and chapter: engwebu_NNN_ABB_CC_read.txt
+    const fileRegex = /^engwebu_\d{3}_([A-Z0-9]{3})_(\d+)_read\.txt$/;
+
+    for (const filename of files) {
+        const match = filename.match(fileRegex);
+        if (!match) continue;
+
+        const [_, abbr, chapterStr] = match;
+        const osisCode = ABBR_TO_OSIS[abbr];
+        const chapter = parseInt(chapterStr);
+
+        if (!osisCode) {
+            // Skip non-canonical books (Apocrypha) silently or with a log
+            // console.log(`  ⏩ Skipping ${abbr} (Not in canonical list)`);
             continue;
         }
 
-        const url = `${WEB_BASE_URL}${filename}.json`;
-
+        const filePath = path.join(WEB_SOURCE_DIR, filename);
         try {
-            const bookData = await fetchJSON(url);
-            const verses = parseWEBBook(bookData);
-
+            const verses = parsePlainTextFile(filePath);
             for (const v of verses) {
-                stmt.run([osisCode, v.chapter, v.verse, v.text]);
+                stmt.run([osisCode, chapter, v.verse, v.text]);
                 totalVerses++;
             }
-
-            successBooks++;
-            process.stdout.write(`\r  ${osisMapping[osisCode]?.ko || osisCode}: ${verses.length} verses imported`);
+            processedFiles++;
+            booksInDB.add(osisCode);
+            process.stdout.write(`\r  📦 Processed ${processedFiles} files... (${osisCode} ${chapter})`);
         } catch (error) {
-            console.warn(`\n  ⚠️ Failed to import ${osisCode}: ${error.message}`);
+            console.error(`\n  ❌ Error processing ${filename}: ${error.message}`);
         }
     }
     stmt.free();
 
-    console.log(`\n✅ WEB imported: ${totalVerses} verses from ${successBooks} books`);
+    console.log(`\n✅ WEB imported: ${totalVerses} verses from ${booksInDB.size} books (${processedFiles} chapters)`);
     return totalVerses;
 }
 
@@ -130,17 +111,17 @@ async function importWEB(db) {
  * Main function
  */
 async function main() {
-    console.log('🚀 Starting WEB Bible import...\n');
+    console.log('🚀 Starting WEB Bible update from local files...\n');
 
     try {
         const db = await initDB();
 
-        // First, remove existing BBE data
-        console.log('🗑️ Removing old BBE data...');
-        const deleteStmt = db.prepare("DELETE FROM bible_verses WHERE version = 'bbe'");
+        // Remove existing WEB data
+        console.log('🗑️ Removing old WEB data...');
+        const deleteStmt = db.prepare("DELETE FROM bible_verses WHERE version = 'web'");
         deleteStmt.run();
         deleteStmt.free();
-        console.log('✅ BBE data removed');
+        console.log('✅ Old WEB data removed');
 
         // Import WEB
         const webCount = await importWEB(db);
@@ -149,14 +130,15 @@ async function main() {
         saveDB();
         closeDB();
 
-        console.log('\n=== Import Summary ===');
+        console.log('\n=== Update Summary ===');
         console.log(`World English Bible (WEB): ${webCount} verses`);
-        console.log('✅ WEB import completed successfully!');
+        console.log('✅ WEB update completed successfully!');
 
     } catch (error) {
-        console.error('❌ Import failed:', error.message);
+        console.error('❌ Update failed:', error.message);
         process.exit(1);
     }
 }
 
 main();
+

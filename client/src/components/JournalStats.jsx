@@ -47,9 +47,19 @@ const JournalStats = ({
             }
         });
 
-        const counts = {};
+        // Count unique chapters per book this month (no duplicates)
+        const bookChapters = {};
         currentMonthData.logs.forEach(log => {
-            counts[log.book] = (counts[log.book] || 0) + 1;
+            if (!bookChapters[log.book]) bookChapters[log.book] = new Set();
+            const start = log.chapter_from || log.chapter;
+            const end = log.chapter_to || log.chapter;
+            for (let c = start; c <= end; c++) {
+                bookChapters[log.book].add(c);
+            }
+        });
+        const counts = {};
+        Object.entries(bookChapters).forEach(([book, chapters]) => {
+            counts[book] = chapters.size;
         });
 
         // 1장이라도 읽은 모든 책 표시

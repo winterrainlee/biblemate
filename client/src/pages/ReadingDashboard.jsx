@@ -7,6 +7,7 @@ import NotePreview from '../components/NotePreview';
 import JournalPage from './JournalPage';
 import { api } from '../services/api';
 import { useTab } from '../contexts/TabContext';
+import { parseDateInput } from '../utils/dateOnly';
 import './ReadingDashboard.css';
 
 const ReadingDashboard = () => {
@@ -359,6 +360,15 @@ const ReadingDashboard = () => {
         setCurrentChapter(chapterId);
     };
 
+    const handleNavigateToJournal = (targetDate = null) => {
+        if (targetDate) {
+            // '오늘' 문자열 처리 또는 YYYY-MM-DD 파싱
+            const d = targetDate === '오늘' ? new Date() : parseDateInput(targetDate);
+            if (d) setCurrentDate(d);
+        }
+        setActiveTab('journal');
+    };
+
     const handleNavigateToBible = (book, chapter) => {
         setCurrentBook(book);
         setCurrentChapter(chapter);
@@ -426,6 +436,7 @@ const ReadingDashboard = () => {
                             onHighlight={handleHighlight}
                             onCopyCitation={handleCopyCitation}
                             onComplete={handleChapterComplete}
+                            onNavigateToJournal={() => handleNavigateToJournal(lastReadDate)}
                             isCompleted={isChapterCompleted}
                             highlightLabels={highlightLabels}
                             isToday={isToday}

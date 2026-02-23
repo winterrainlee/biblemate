@@ -1,6 +1,6 @@
 {
     "name": "biblemate",
-    "version": "2.0.1",
+    "version": "2.1.0",
     "description": "BibleMate - Personal Bible Reading Companion",
     "scripts": {
         "dev": "concurrently \"npm run dev:client\" \"npm run dev:server\"",

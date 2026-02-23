@@ -518,7 +518,9 @@ const Settings = () => {
                         </li>
                         <li style={{ marginTop: '0.5rem' }}>
                             <strong>English: World English Bible (WEB)</strong><br />
-                            Public Domain. A modern English revision of the ASV (1901).
+                            The World English Bible is in the Public Domain (No Copyright).
+                            "World English Bible" is a Trademark of eBible.org.
+                            You may copy and share it freely.
                         </li>
                         <li style={{ marginTop: '0.5rem' }}>
                             <strong>English: Bible in Basic English (BBE)</strong><br />

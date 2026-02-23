@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Type, Download, Upload, Eye, EyeOff, LogOut, CheckCircle, AlertCircle, CalendarOff, Edit2, Trash2, ChevronLeft, ChevronRight } from 'lucide-react'; // Ensure Edit2 and Trash2 are imported
+import { ArrowLeft, Type, Download, Upload, Eye, EyeOff, LogOut, CheckCircle, AlertCircle, CalendarOff, Edit2, Trash2, ChevronLeft, ChevronRight, Copy, Check } from 'lucide-react';
 import { format, addDays, subDays, isToday } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { parseDateInput } from '../utils/dateOnly';
@@ -49,6 +49,9 @@ const JournalPage = ({ date, onDateChange, readingLogs = [], books = [], onNavig
     // Verse Note Edit State
     const [editingVerseNote, setEditingVerseNote] = useState(null); // { note, content }
 
+    // Copy State
+    const [isCopied, setIsCopied] = useState(false);
+
     // Load data when date changes
     useEffect(() => {
         loadJournalData();
@@ -62,20 +65,21 @@ const JournalPage = ({ date, onDateChange, readingLogs = [], books = [], onNavig
 
     const onTouchStart = (e) => {
         setTouchEnd(null);
-        setTouchStart(e.targetTouches[0].clientX);
+        setTouchStart({ x: e.targetTouches[0].clientX, y: e.targetTouches[0].clientY });
     };
 
-    const onTouchMove = (e) => setTouchEnd(e.targetTouches[0].clientX);
+    const onTouchMove = (e) => setTouchEnd({ x: e.targetTouches[0].clientX, y: e.targetTouches[0].clientY });
 
     const onTouchEnd = () => {
         if (!touchStart || !touchEnd) return;
-        const distance = touchStart - touchEnd;
-        const isLeftSwipe = distance > minSwipeDistance;
-        const isRightSwipe = distance < -minSwipeDistance;
+        const distX = touchStart.x - touchEnd.x;
+        const distY = Math.abs(touchStart.y - touchEnd.y);
+        // Ignore if vertical movement is greater (scrolling, not swiping)
+        if (Math.abs(distX) < minSwipeDistance || distY > Math.abs(distX)) return;
 
-        if (isLeftSwipe) {
+        if (distX > 0) {
             handleNextDay();
-        } else if (isRightSwipe) {
+        } else {
             handlePrevDay();
         }
     };
@@ -213,6 +217,72 @@ const JournalPage = ({ date, onDateChange, readingLogs = [], books = [], onNavig
         }
     };
 
+    // Handler: Copy All Meditation
+    const handleCopyAll = async () => {
+        try {
+            const parts = [];
+
+            // Header: ## YYYY-MM-DD 책 장 범위
+            const readingLabel = todayLogs.length > 0
+                ? todayLogs.map(log => {
+                    const name = getBookName(log.book);
+                    const ch = log.chapter_from || log.chapter;
+                    return `${name} ${ch}장`;
+                }).join(', ')
+                : '';
+            parts.push(`## ${dateStr}${readingLabel ? ' ' + readingLabel : ''}`);
+
+            // [발견한 하나님] - 구절별 묵상
+            if (verseNotes.length > 0) {
+                parts.push('');
+                parts.push('[발견한 하나님]');
+                verseNotes.forEach(note => {
+                    const ref = `${getBookName(note.book)} ${note.chapter}:${note.verse_range || note.verse}`;
+                    parts.push(`${note.content} (${ref})`);
+                });
+            }
+
+            // [자유 묵상]
+            if (freeNote?.content) {
+                parts.push('');
+                parts.push('[자유 묵상]');
+                parts.push(freeNote.content);
+            }
+
+            // [오늘의 기도]
+            if (prayer?.content) {
+                parts.push('');
+                parts.push('[오늘의 기도]');
+                parts.push(prayer.content);
+            }
+
+            const text = parts.join('\n');
+
+            // Clipboard API with fallback for mobile Safari
+            if (navigator.clipboard && window.isSecureContext) {
+                await navigator.clipboard.writeText(text);
+            } else {
+                // Fallback: textarea + execCommand
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                textarea.style.position = 'fixed';
+                textarea.style.left = '-9999px';
+                textarea.style.top = '-9999px';
+                document.body.appendChild(textarea);
+                textarea.focus();
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+            }
+
+            setIsCopied(true);
+            setTimeout(() => setIsCopied(false), 2000);
+        } catch (error) {
+            console.error('Failed to copy:', error);
+            alert('복사에 실패했습니다.');
+        }
+    };
+
     // Filter reading logs for selected date and sort by Bible order
     const todayLogs = readingLogs
         .filter(log => log.date === dateStr)
@@ -289,7 +359,21 @@ const JournalPage = ({ date, onDateChange, readingLogs = [], books = [], onNavig
                     {/* Section: 읽은 말씀 */}
                     {todayLogs.length > 0 && (
                         <section className="journal-section">
-                            <h3 className="section-title">📖 읽은 말씀</h3>
+                            <div className="section-header">
+                                <h3 className="section-title">📖 읽은 말씀</h3>
+                                {hasAnyContent && (
+                                    <div className="section-actions">
+                                        <button
+                                            className={`copy-all-btn${isCopied ? ' copied' : ''}`}
+                                            onClick={handleCopyAll}
+                                            title="오늘의 묵상 복사"
+                                        >
+                                            {isCopied ? <Check size={16} /> : <Copy size={16} />}
+                                            <span>{isCopied ? '복사됨' : '묵상 복사'}</span>
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
                             <ul className="reading-list">
                                 {todayLogs.map((log, idx) => (
                                     <li
@@ -352,6 +436,7 @@ const JournalPage = ({ date, onDateChange, readingLogs = [], books = [], onNavig
                                                     />
                                                     <div className="editor-actions">
                                                         <button className="btn-save" onClick={handleSaveVerseNoteEdit}>저장</button>
+                                                        <button className="btn-cancel" onClick={() => setEditingVerseNote(null)}>취소</button>
                                                     </div>
                                                 </div>
                                             ) : (

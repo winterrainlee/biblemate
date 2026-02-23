@@ -20,6 +20,7 @@ const BibleViewer = ({
     chapter = 1,
     onAddNote,
     onCopyCitation,
+    onNavigateToJournal, // [NEW] Link to Journal tab
     completionStatus = 'idle', // idle, loading, success, error
     highlightLabels, // [NEW] Shared labels from dashboard
 
@@ -91,18 +92,19 @@ const BibleViewer = ({
 
     const onTouchStart = (e) => {
         setTouchEnd(null);
-        setTouchStart(e.targetTouches[0].clientX);
+        setTouchStart({ x: e.targetTouches[0].clientX, y: e.targetTouches[0].clientY });
     };
-    const onTouchMove = (e) => setTouchEnd(e.targetTouches[0].clientX);
+    const onTouchMove = (e) => setTouchEnd({ x: e.targetTouches[0].clientX, y: e.targetTouches[0].clientY });
     const onTouchEnd = () => {
         if (!touchStart || !touchEnd) return;
-        const distance = touchStart - touchEnd;
-        const isLeftSwipe = distance > minSwipeDistance;
-        const isRightSwipe = distance < -minSwipeDistance;
+        const distX = touchStart.x - touchEnd.x;
+        const distY = Math.abs(touchStart.y - touchEnd.y);
+        // Ignore if vertical movement is greater (scrolling, not swiping)
+        if (Math.abs(distX) < minSwipeDistance || distY > Math.abs(distX)) return;
 
-        if (isLeftSwipe) {
+        if (distX > 0) {
             handleNextChapter();
-        } else if (isRightSwipe) {
+        } else {
             handlePrevChapter();
         }
     };
@@ -369,6 +371,11 @@ const BibleViewer = ({
     const leftNotes = chapterNotes.filter(n => n.verse <= midVerse);
     const rightNotes = chapterNotes.filter(n => n.verse > midVerse);
 
+    // [⑤] 팝업 헤더용 구절 표시 로직 (다중 선택 및 기존 묵상 범위 대응)
+    const popupVerseRef = popup.verseRange ||
+        (selectedVerses.length > 1 ? formatVerseRange(selectedVerses) :
+            (chapterNotes.find(n => n.verse === popup.verseNum)?.verse_range || popup.verseNum));
+
     // Helper to render note content with optional quote styling
     const renderNoteContent = (content) => {
         // Check if content starts with a quote pattern: "..."\n\n
@@ -500,7 +507,12 @@ const BibleViewer = ({
                         </button>
                     </div>
 
-                    <div className="reading-status-container">
+                    <div
+                        className="reading-status-container"
+                        onClick={() => isCompleted && onNavigateToJournal(lastReadDate)}
+                        style={{ cursor: isCompleted ? 'pointer' : 'default' }}
+                        title={isCompleted ? "해당 날짜 묵상일지로 이동" : ""}
+                    >
                         <span className={`status-label ${isCompleted ? 'completed' : ''}`}>
                             {isCompleted ? '읽음' : '읽지 않음'}
                         </span>
@@ -569,7 +581,20 @@ const BibleViewer = ({
                     </button>
                     {isReadOnCurrentDate && (
                         <p className="chapter-complete-msg">
-                            {isToday ? '오늘 성경 읽기를 완료했습니다. 참 잘하셨습니다!' : '이 날짜의 성경 읽기가 완료되었습니다.'}
+                            {isToday ? '오늘 성경 읽기를 완료했습니다.' : `${lastReadDate}에 성경 읽기가 완료되었습니다.`}
+                            <span
+                                className="journal-link"
+                                onClick={onNavigateToJournal}
+                                style={{
+                                    cursor: 'pointer',
+                                    textDecoration: 'underline',
+                                    color: 'var(--pk-color-primary)',
+                                    marginLeft: '8px',
+                                    fontWeight: '600'
+                                }}
+                            >
+                                기록 보기
+                            </span>
                         </p>
                     )}
                 </div>
@@ -585,7 +610,7 @@ const BibleViewer = ({
                             <div className="popup-menu-v2">
                                 <div className="popup-header">
                                     <span className="popup-title">
-                                        기록된 묵상 ({chapterNotes.filter(n => n.verse === popup.verseNum).length}개)
+                                        {bookName} {chapter}:{popupVerseRef} 묵상 ({chapterNotes.filter(n => n.verse === popup.verseNum).length}개)
                                     </span>
                                     <button
                                         onClick={() => setPopup(prev => ({ ...prev, mode: 'menu' }))}
@@ -595,11 +620,26 @@ const BibleViewer = ({
                                         <ChevronLeft size={18} />
                                     </button>
                                 </div>
+                                {popup.verseText && (
+                                    <div className="view-notes-verse-text">
+                                        &ldquo;{popup.verseText}&rdquo;
+                                    </div>
+                                )}
                                 <div className="popup-notes-list" style={{ maxHeight: '200px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                     {chapterNotes.filter(n => n.verse === popup.verseNum).map(note => (
                                         <div key={note.id} className="verse-note-card-v2" style={{ padding: '0.75rem', fontSize: '0.9rem' }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '4px' }}>
+                                                <div className="note-date">{new Date(note.created_at || note.date).toLocaleDateString()}</div>
+                                                <div style={{ display: 'flex', gap: '8px' }}>
+                                                    <button onClick={() => handleEditNote(note)} style={{ border: 'none', background: 'none', cursor: 'pointer', color: 'var(--pk-color-text-secondary)', padding: '2px' }} title="수정">
+                                                        <Edit2 size={14} />
+                                                    </button>
+                                                    <button onClick={() => handleDeleteNote(note.id)} style={{ border: 'none', background: 'none', cursor: 'pointer', color: 'var(--pk-color-danger)', padding: '2px' }} title="삭제">
+                                                        <Trash2 size={14} />
+                                                    </button>
+                                                </div>
+                                            </div>
                                             {renderNoteContent(note.content)}
-                                            <div className="note-date">{new Date(note.created_at || note.date).toLocaleDateString()}</div>
                                         </div>
                                     ))}
                                 </div>
@@ -608,7 +648,7 @@ const BibleViewer = ({
                             <div className="popup-menu-v2">
                                 <div className="popup-header">
                                     <span className="popup-title">
-                                        {bookName} {chapter}:{popup.verseRange || (selectedVerses.length > 1 ? formatVerseRange(selectedVerses) : popup.verseNum)}
+                                        {bookName} {chapter}:{popupVerseRef}
                                     </span>
                                     <button
                                         onClick={() => {
@@ -694,7 +734,7 @@ const BibleViewer = ({
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', padding: '4px', width: '100%' }}>
                                 <div className="popup-header">
                                     <span className="popup-title">
-                                        {bookName} {chapter}:{popup.verseRange || (selectedVerses.length > 1 ? formatVerseRange(selectedVerses) : popup.verseNum)} 묵상
+                                        {bookName} {chapter}:{popupVerseRef} 묵상
                                     </span>
                                     <button
                                         onClick={() => {
@@ -770,27 +810,49 @@ const BibleViewer = ({
                                         }
                                     }}
                                 />
-                                <button
-                                    onClick={handleMemoSubmit}
-                                    style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        gap: '8px',
-                                        padding: '10px',
-                                        backgroundColor: 'var(--pk-color-primary)',
-                                        color: 'white',
-                                        border: 'none',
-                                        borderRadius: 'var(--pk-radius-md)',
-                                        cursor: 'pointer',
-                                        fontSize: '0.95rem',
-                                        fontWeight: '600',
-                                        transition: 'background-color 0.2s'
-                                    }}
-                                >
-                                    <Send size={16} />
-                                    묵상 저장하기
-                                </button>
+                                <div style={{ display: 'flex', gap: '8px' }}>
+                                    <button
+                                        onClick={handleMemoSubmit}
+                                        style={{
+                                            flex: 1,
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            gap: '8px',
+                                            padding: '10px',
+                                            backgroundColor: 'var(--pk-color-primary)',
+                                            color: 'white',
+                                            border: 'none',
+                                            borderRadius: 'var(--pk-radius-md)',
+                                            cursor: 'pointer',
+                                            fontSize: '0.95rem',
+                                            fontWeight: '600',
+                                            transition: 'background-color 0.2s'
+                                        }}
+                                    >
+                                        <Send size={16} />
+                                        저장
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            setPopup(prev => ({ ...prev, visible: false, editTargetDate: null }));
+                                            setSelectedVerses([]);
+                                        }}
+                                        style={{
+                                            padding: '10px 16px',
+                                            backgroundColor: 'var(--pk-color-bg-secondary)',
+                                            color: 'var(--pk-color-text-secondary)',
+                                            border: '1px solid var(--pk-color-border)',
+                                            borderRadius: 'var(--pk-radius-md)',
+                                            cursor: 'pointer',
+                                            fontSize: '0.95rem',
+                                            fontWeight: '500',
+                                            transition: 'background-color 0.2s'
+                                        }}
+                                    >
+                                        취소
+                                    </button>
+                                </div>
                             </div>
                         )}
                     </div>

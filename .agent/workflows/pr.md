@@ -12,6 +12,73 @@ description: 작업 완료(PR) 자동화 (테스트, PR 초안, 교훈 기록)
    - (이미 실행 중이라면 생략 가능)
    - 만약 에러 로그가 있다면 해결 후 진행해야 함을 알립니다.
 
+## 1.5단계: Sub-agent 코드 리뷰
+PR 작성 전, 아래 스킬들을 참조하여 변경된 코드를 검토합니다:
+
+1. `~/.gemini/antigravity/global_skills/security-dev/SKILL.md` (보안 검토)
+2. `~/.gemini/antigravity/global_skills/qa-engineer/SKILL.md` (QA 검토)
+3. `~/.gemini/antigravity/global_skills/ui-ux-design/SKILL.md` (UI/UX 구현 검토)
+4. `~/.gemini/antigravity/global_skills/interaction-design/SKILL.md` (인터랙션 구현 검토)
+5. `~/.gemini/antigravity/global_skills/backend-dev/SKILL.md` (백엔드 구현 검토)
+
+### 검토 절차
+1. 각 스킬의 **코드 리뷰 체크리스트**를 기반으로 변경된 파일들을 검토합니다.
+2. UI/UX 및 인터랙션 검토 시, **구현 계획(implementation_plan.md)의 Agent Review**와 비교하여 계획대로 구현되었는지 확인합니다.
+3. 발견된 이슈가 있으면:
+   - 🔴 **Critical**: PR 진행 전 반드시 수정 필요 → 사용자에게 알림
+   - 🟡 **Warning**: 수정 권장 → PR 초안에 기록
+   - 🟢 **Info**: 참고 사항 → PR 초안에 기록
+4. PR 초안에 **## Agent Review** 섹션을 추가합니다.
+
+### 검토 결과 템플릿
+PR 초안의 Review Point 섹션 아래에 다음을 추가합니다:
+```markdown
+## 4. Agent Review
+
+### 🔐 Security Review
+(보안 검토 결과)
+
+### 🧪 QA Review
+(QA 검토 결과)
+
+### 🎨 UI/UX Implementation Review
+(계획 대비 구현 일치 여부)
+
+### ✨ Interaction Implementation Review
+(계획 대비 구현 일치 여부)
+
+### 🔧 Backend Implementation Review
+(계획 대비 구현 일치 여부)
+```
+
+### ⚠️ Agent 의견 충돌 시
+Agent들의 의견이 충돌하면, 다음 형식으로 **3가지 수정안**을 제시합니다:
+
+```markdown
+## 🔀 의견 충돌 해결
+
+**충돌 내용**: (예: 보안 vs 성능)
+
+### 옵션 A: (보안 우선)
+- **이유**: ...
+- **장점**: ...
+- **단점**: ...
+
+### 옵션 B: (성능 우선)
+- **이유**: ...
+- **장점**: ...
+- **단점**: ...
+
+### 옵션 C: (절충안)
+- **이유**: ...
+- **장점**: ...
+- **단점**: ...
+
+**권장**: 옵션 X (이유 설명)
+```
+
+사용자가 옵션을 선택하면 해당 방향으로 진행합니다.
+
 ## 2단계: PR 초안 파일 생성
 1. 현재 날짜와 기능명을 포함한 파일명으로 PR 초안을 생성합니다.
    - 경로: `docs/03-logs/pr/pr-vX.Y-{기능명}.md`

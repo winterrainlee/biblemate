@@ -9,7 +9,6 @@ trigger: always_on
 |------|------|
 | Major (x.0) | 아키텍처 변경, 핵심 UX 변경 |
 | Minor (x.y) | 신규 기능, UI/UX 개선 |
-| Minor (x.y) | 신규 기능, UI/UX 개선 |
 | Patch (x.y.z) | 핫픽스, 오타, 보안 패치 |
 
 ### 작업 전 확인 사항
@@ -21,6 +20,7 @@ trigger: always_on
 - 작업 완료 (Done): 구현 및 검증 완료 → `/pr` workflow 실행
 - 긴급 수정: 마지막 릴리즈 태그에서 분기
 - 배포: `/deploy` workflow 실행
+- 리팩터링: Major 업데이트 후 → `/refactoring` workflow 실행
 
 ### 문서 규칙
 **버전별 필수 문서**:
@@ -37,6 +37,29 @@ trigger: always_on
 - `/feature` 실행 시: 해당 버전의 dev-log 파일 생성/확인
 - 기능 구현 완료 시: 변경 내역 추가
 - `/pr` 실행 전: dev-log 최종 업데이트 확인
+
+---
+
+## Sub-agent 시스템
+
+### Sub-agent 목록
+| Agent | 스킬 경로 | `/feature` | `/pr` |
+|-------|----------|:----------:|:-----:|
+| 🧪 QA 엔지니어 | `qa-engineer/SKILL.md` | ✅ | ✅ |
+| 🔐 보안 개발자 | `security-dev/SKILL.md` | - | ✅ |
+| 🎨 UI/UX 디자이너 | `ui-ux-design/SKILL.md` | ✅ | ✅ |
+| ✨ 인터렉션 디자이너 | `interaction-design/SKILL.md` | ✅ | ✅ |
+| 💻 프론트엔드 개발자 | `frontend-dev/SKILL.md` | ✅ | - |
+| 🔧 백엔드 개발자 | `backend-dev/SKILL.md` | ✅ | ✅ |
+
+> 스킬 경로: `~/.gemini/antigravity/global_skills/`
+
+### 적용 시점
+- **`/feature`**: 구현 계획 작성 후 → 5개 Agent가 계획 검토
+- **`/pr`**: PR 작성 전 → 5개 Agent가 코드 리뷰
+
+### 의견 충돌 해결
+Agent 의견 충돌 시, **3가지 수정안**을 이유/장단점과 함께 제시 → 사용자 결정
 
 ---
 
@@ -81,4 +104,3 @@ React/Next.js 코드 작성 시 아래 글로벌 스킬을 참조하라:
 1. **AAA 패턴** - Arrange → Act → Assert 순서
 2. **테스트 격리** - 각 테스트는 독립적으로 실행 가능
 3. **명확한 명명** - `should [행동] when [조건]` 형식
-

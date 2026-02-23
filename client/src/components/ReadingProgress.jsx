@@ -15,7 +15,13 @@ const ReadingProgress = ({ books = [], readingLogs = [] }) => {
         const readChapters = new Set(
             readingLogs
                 .filter(log => log.book === bookId)
-                .map(log => log.chapter)
+                .flatMap(log => {
+                    const from = log.chapter_from || log.chapter;
+                    const to = log.chapter_to || log.chapter;
+                    const chs = [];
+                    for (let c = from; c <= to; c++) chs.push(c);
+                    return chs;
+                })
         ).size;
 
         const percent = totalChapters > 0 ? Math.round((readChapters / totalChapters) * 100) : 0;
@@ -31,7 +37,13 @@ const ReadingProgress = ({ books = [], readingLogs = [] }) => {
         const readCount = new Set(
             readingLogs
                 .filter(log => bookIds.includes(log.book))
-                .map(log => `${log.book}-${log.chapter}`)
+                .flatMap(log => {
+                    const from = log.chapter_from || log.chapter;
+                    const to = log.chapter_to || log.chapter;
+                    const chs = [];
+                    for (let c = from; c <= to; c++) chs.push(`${log.book}-${c}`);
+                    return chs;
+                })
         ).size;
 
         return totalChapters > 0 ? ((readCount / totalChapters) * 100).toFixed(1) : 0;

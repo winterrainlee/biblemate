@@ -38,6 +38,66 @@ description: 기능 작업(Feature) 시작 자동화 (브랜치 생성, 구현 �
    ```
 2. 생성된 `implementation_plan.md`를 에디터로 엽니다 (`view_file`).
 
+## 2.5단계: Sub-agent 계획 검토
+구현 계획이 작성된 후, 아래 스킬들을 순서대로 참조하여 검토 피드백을 생성합니다:
+
+1. `~/.gemini/antigravity/global_skills/qa-engineer/SKILL.md` (QA 관점)
+2. `~/.gemini/antigravity/global_skills/ui-ux-design/SKILL.md` (UI/UX 관점)
+3. `~/.gemini/antigravity/global_skills/interaction-design/SKILL.md` (인터랙션 관점)
+4. `~/.gemini/antigravity/global_skills/frontend-dev/SKILL.md` (프론트엔드 관점)
+5. `~/.gemini/antigravity/global_skills/backend-dev/SKILL.md` (백엔드 관점)
+
+각 스킬의 **계획 검토 체크리스트**를 기반으로 검토하고, `implementation_plan.md` 하단에 다음 형식으로 피드백을 추가합니다:
+
+```markdown
+---
+
+## Agent Review
+
+### 🧪 QA Engineer Review
+(QA 관점 피드백)
+
+### 🎨 UI/UX Review
+(UI/UX 관점 피드백)
+
+### ✨ Interaction Design Review
+(인터랙션 관점 피드백)
+
+### 💻 Frontend Review
+(프론트엔드 관점 피드백)
+
+### 🔧 Backend Review
+(백엔드 관점 피드백)
+```
+
+### ⚠️ Agent 의견 충돌 시
+Agent들의 의견이 충돌하면, 다음 형식으로 **3가지 수정안**을 제시합니다:
+
+```markdown
+## 🔀 의견 충돌 해결
+
+**충돌 내용**: (예: 보안 vs UX)
+
+### 옵션 A: (보안 우선)
+- **이유**: ...
+- **장점**: ...
+- **단점**: ...
+
+### 옵션 B: (UX 우선)
+- **이유**: ...
+- **장점**: ...
+- **단점**: ...
+
+### 옵션 C: (절충안)
+- **이유**: ...
+- **장점**: ...
+- **단점**: ...
+
+**권장**: 옵션 X (이유 설명)
+```
+
+사용자가 옵션을 선택하면 해당 방향으로 진행합니다.
+
 ## 3단계: 태스크 초기화
 1. `task.md`를 작업에 맞게 초기화합니다.
    ```markdown

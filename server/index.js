@@ -13,11 +13,10 @@ if (process.loadEnvFile) {
     // Fallback or ignore if .env doesn't exist
   }
 }
-import { initDB } from './db/init.js';
+import { initDB, saveDB } from './db/init.js';
 
 import bibleRoutes from './routes/bible.js';
 import highlightRoutes from './routes/highlights.js';
-import noteRoutes from './routes/notes.js';
 import readingRoutes from './routes/reading.js';
 import backupRoutes from './routes/backup.js';
 import authRoutes, { authMiddleware } from './routes/auth.js';
@@ -73,7 +72,7 @@ app.use('/api', authMiddleware);
 // API Routes
 app.use('/api/bible', bibleRoutes);
 app.use('/api/highlights', highlightRoutes);
-app.use('/api/notes', noteRoutes);
+// Legacy /api/notes removed in v2.1 — use /api/free-notes instead
 app.use('/api/reading-logs', readingRoutes);
 app.use('/api/backup', backupRoutes);
 app.use('/api/verse-notes', verseNoteRoutes);
@@ -98,12 +97,24 @@ app.get('*', (req, res) => {
 // Initialize DB and start server
 initDB().then(() => {
   const HOST = process.env.BIND_HOST || (process.env.NODE_ENV === 'production' ? '0.0.0.0' : '127.0.0.1');
-  app.listen(PORT, HOST, () => {
-    console.log(`?? Server running on http://${HOST}:${PORT}`);
+  const server = app.listen(PORT, HOST, () => {
+    console.log(`Server running on http://${HOST}:${PORT}`);
     if (process.env.ACCESS_PASSWORD) {
-      console.log('?뵏 Access password protection enabled');
+      console.log('Access password protection enabled');
     }
   });
+
+  // Graceful shutdown
+  const shutdown = (signal) => {
+    console.log(`\n${signal} received. Saving database...`);
+    saveDB();
+    server.close(() => {
+      console.log('Server closed.');
+      process.exit(0);
+    });
+  };
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
+  process.on('SIGINT', () => shutdown('SIGINT'));
 }).catch(err => {
   console.error('Failed to initialize database:', err);
   process.exit(1);

@@ -375,6 +375,22 @@
     margin: 0;
 }
 
+/* view-notes 모드: 구절 본문 인용 스타일 */
+.view-notes-verse-text {
+    font-size: 0.88rem;
+    font-style: italic;
+    font-family: 'Nanum Myeongjo', serif;
+    color: var(--pk-color-text-secondary);
+    padding: 8px 10px;
+    background-color: var(--pk-color-bg-secondary);
+    border-radius: 6px;
+    border-left: 3px solid var(--pk-color-primary-light, #e0e7ff);
+    line-height: 1.5;
+    max-height: 80px;
+    overflow-y: auto;
+    word-break: keep-all;
+}
+
 /* Verse Popup Menu */
 .verse-popup {
     position: fixed;
