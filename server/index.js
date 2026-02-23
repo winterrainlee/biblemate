@@ -106,10 +106,18 @@ initDB().then(() => {
 
   // Graceful shutdown
   const shutdown = (signal) => {
-    console.log(`\n${signal} received. Saving database...`);
-    saveDB();
+    console.log(`\n${signal} received. Closing server...`);
+
+    // Force exit after 10 seconds to prevent hanging
+    const timer = setTimeout(() => {
+      console.warn('Graceful shutdown timed out, forcing exit.');
+      process.exit(1);
+    }, 10000);
+    timer.unref(); // Don't keep the event loop alive just for the timeout
+
     server.close(() => {
-      console.log('Server closed.');
+      clearTimeout(timer);
+      console.log('Server closed successfully.');
       process.exit(0);
     });
   };

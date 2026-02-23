@@ -98,8 +98,3 @@ export function closeDB() {
 process.on('exit', () => {
     if (db) saveDB();
 });
-
-process.on('SIGINT', () => {
-    closeDB();
-    process.exit(0);
-});
