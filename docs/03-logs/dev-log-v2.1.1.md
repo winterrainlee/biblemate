@@ -20,3 +20,20 @@
 
 ## 비고
 - 이번 작업은 긴급 핫픽스이므로 전체 성경 데이터를 다시 임포트하지 않고 `bible-corrections.json` 기반의 부분 업데이트로 진행함.
+
+---
+
+## 배포 오류 수정 (Post-Release)
+
+### 1차 오류: Docker 빌드 중 네트워크 접근 실패
+- **오류**: `process "/bin/sh -c node scripts/import-bible.js" did not complete successfully: exit code: 1`
+- **원인**: `import-bible.js`가 Docker 빌드 단계에서 GitHub 외부 URL에서 성경 데이터를 다운로드하는데, Fly.io 빌드 환경에서는 외부 네트워크 접근이 차단됨.
+- **해결**:
+    1. `.gitignore`에서 `server/data/bible.db` 및 `*.db` 추적 제외 규칙 해제.
+    2. `bible.db`를 레포에 직접 포함하여 네트워크 의존성 제거.
+    3. `Dockerfile`에서 `db-builder` 스테이지 제거 및 `server/data/bible.db`를 `db-seed/`로 이동 후 entrypoint에서 볼륨에 복사하는 방식으로 변경. (`fly.toml`의 볼륨 마운트 설정과 호환되도록 유지)
+
+### 2차 오류: Depot 원격 빌더 타임아웃
+- **오류**: `==> Building image / Waiting for depot builder...` (무한 대기)
+- **원인**: `flyctl deploy --remote-only` 옵션이 Fly.io Depot 원격 빌더를 사용하도록 강제하는데, 해당 서비스가 응답하지 않음.
+- **해결**: `.github/workflows/deploy.yml`에서 `--remote-only` → `--local-only`로 변경하여 GitHub Actions 러너에서 직접 Docker 빌드를 수행하도록 전환.
