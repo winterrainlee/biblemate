@@ -50,6 +50,7 @@
 ---
 
 ## 📦 04. Releases (배포 노트)
+- [v2.1.2](04-releases/release-notes-v2.1.2.md): 데이터 핫픽스 (2026-03-09)
 - [v2.0.1](04-releases/release-notes-v2.0.1.md): Phase0 안정화 핫픽스 (2026-01-29)
 - [v2.0.0](04-releases/release-notes-v2.0.0.md): 대규모 UI/UX 개편 (2026-01-26)
 - [v1.4.1](04-releases/release-notes-v1.4.1.md): 버그 수정 (2026-01-12)

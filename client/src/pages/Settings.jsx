@@ -507,7 +507,7 @@ const Settings = () => {
                 </h3>
 
                 <div className="license-info" style={{ fontSize: '0.9rem', color: 'var(--pk-color-text-secondary)', lineHeight: '1.6' }}>
-                    <p style={{ marginBottom: '0.5rem' }}><strong>BibleMate v2.1.1</strong></p>
+                    <p style={{ marginBottom: '0.5rem' }}><strong>BibleMate v2.1.2</strong></p>
                     <p style={{ marginBottom: '1rem' }}>개인 묵상과 성경 읽기를 돕기 위해 만든 웹 애플리케이션입니다.</p>
 
                     <h4 style={{ fontSize: '0.95rem', color: 'var(--pk-color-text)', marginBottom: '0.5rem' }}>성경 데이터 저작권</h4>
