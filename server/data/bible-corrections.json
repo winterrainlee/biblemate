@@ -4134,6 +4134,8 @@
         {
             "book": "Job",
             "chapter": 42,
+            "verse": 17,
+            "version": "krv",
             "corrected": "늙어서 나이 차서 죽었더라",
             "note": "욥기 42장 원문 복원 (구조 오류 수정)"
         },

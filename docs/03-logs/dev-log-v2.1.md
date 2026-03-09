@@ -102,3 +102,28 @@
 - **하단 클릭 영역**: 기존 성공 메시지는 간결하게 유지하고 별도의 "(기록 보기)" 링크를 추가하여 버튼과 분리된 CTA 제공
 - **날짜 동기화**: `targetDate`가 '오늘'인 경우 `new Date()`를, 그 외에는 `parseDateInput`을 사용하여 타임존 오차 없이 해당 날짜의 묵상일지가 로드되도록 처리
 - **UX**: 읽지 않은 상태(`isCompleted === false`)에서는 상단 헤더 클릭을 비활성화하여 오동작 방지
+
+---
+
+## Feature ⑦ 에스겔 HAN 추출 안정화 + 66권 재임포트 (2026-03-09)
+
+### 변경 내역
+
+| 파일 | 변경 | 설명 |
+|------|------|------|
+| `server/scripts/fix_ezekiel.js` | 전면 리팩터링 | HAN 고정, 파서 보강, 트랜잭션/검증/옵션 추가 |
+| `server/data/bible-corrections.json` | 수정 | 욥기 42장 correction 누락 필드 보완 |
+| `server/data/bible.db` | 갱신 | 66권 재임포트 + 에스겔 1~48장 재반영 결과 |
+| `docs/01-planning/implementation-plans/implementation-plan-v2.1.3-ezekiel-han-extractor-hardening.md` | 신규 | 2.1.3 구현 계획 문서 |
+| `docs/03-logs/walkthroughs/walkthrough-v2.1.3-ezekiel-han-extractor-hardening.md` | 신규 | 실행/검증 기록 |
+| `docs/03-logs/pr/pr-v2.1.3-ezekiel-han-extractor-hardening.md` | 신규 | PR 초안 |
+| `docs/04-releases/release-notes-v2.1.3.md` | 신규 | 2.1.3 릴리즈 노트 |
+
+### 주요 결정
+- 대한성서공회 소스 역본을 `version=HAN`으로 고정해 기준 불일치를 제거.
+- 절 번호 marker 기반 파싱으로 HTML 구조 의존도를 낮춤.
+- 마지막 절(장 끝)에서 하단 UI 텍스트가 섞이지 않도록 경계 절단 로직 추가.
+- 장별 연속 절/빈 텍스트/오염 패턴 검증 실패 시 즉시 중단 및 롤백.
+- `24:4-5`, `25:2-3` 같은 범위 표기는 절 누락 방지 우선 원칙으로 동일 본문을 각 절에 확장 반영.
+- 전체 성경 재임포트 중 발견된 욥기 42장 correction 스키마 누락(`verse`, `version`)을 즉시 보정해 파이프라인을 정상화.
+- 최종적으로 KRV/BBE 66권 재임포트 후 에스겔 1~48장 전체 반영과 샘플 검증까지 완료.

@@ -1,6 +1,6 @@
 # 📚 Documentation Index
 
-> BibleMate 프로젝트 문서 목차입니다. (최초 생성일: 2026-01-05 | 최신 수정일: 2026-01-29)
+> BibleMate 프로젝트 문서 목차입니다. (최초 생성일: 2026-01-05 | 최신 수정일: 2026-03-10)
 
 ---
 
@@ -23,6 +23,7 @@
 ## 📝 03. Logs (개발/검증 로그)
 
 ### Development Logs
+- [Dev Log v2.1](03-logs/dev-log-v2.1.md): v2.1 UX 개선 및 데이터 핫픽스
 - [Dev Log v2.0.1](03-logs/dev-log-v2.0.1.md): v2.0.1 Phase0 안정화
 - [Dev Log v2.0](03-logs/dev-log-v2.0.md): v2.0 메이저 업데이트
 - [Dev Log v1.4.1](03-logs/dev-log-v1.4.1.md): v1.4.1 핫픽스
@@ -50,6 +51,7 @@
 ---
 
 ## 📦 04. Releases (배포 노트)
+- [v2.1.3](04-releases/release-notes-v2.1.3.md): 에스겔 HAN 추출 안정화 및 재임포트 (2026-03-09)
 - [v2.1.2](04-releases/release-notes-v2.1.2.md): 데이터 핫픽스 (2026-03-09)
 - [v2.0.1](04-releases/release-notes-v2.0.1.md): Phase0 안정화 핫픽스 (2026-01-29)
 - [v2.0.0](04-releases/release-notes-v2.0.0.md): 대규모 UI/UX 개편 (2026-01-26)

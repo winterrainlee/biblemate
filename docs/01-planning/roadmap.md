@@ -1,5 +1,5 @@
 # 차기 작업 Roadmap
-- 최신 배포 버전: v2.1.2
+- 최신 배포 버전: v2.1.3
 - 최신 배포일자: 2026년 3월 9일
 - 목표 버전: v2.2.0
 - 목표 개발일자: 2026년 3월
@@ -104,6 +104,13 @@
 - **STABILITY**: 서버 종료 시(SIGTERM/SIGINT) DB 자동 저장 로직 구현
 - **CLEANUP**: 레거시 `/api/notes` 엔드포인트 제거 및 `/api/free-notes` 통합
 - **DOCS**: `lessons.md` 인코딩 복구 및 메타데이터 최신화
+
+### v2.1.3 (2026-03-09) - Ezekiel Data Hotfix
+- **DATA**: 대한성서공회 `HAN` 기준으로 에스겔 추출 스크립트 전면 보강
+- **DATA**: 에스겔 1~48장 전체 재반영 및 27장 본문 병합 오염 제거
+- **DATA**: KRV/BBE 66권 전체 재임포트 및 corrections 547건 재적용
+- **FIX**: `bible-corrections.json` 욥기 42장 correction 누락 필드 보완
+- **DOCS**: 구현 계획서, walkthrough, PR 초안, 릴리즈 노트, dev-log, lessons 업데이트
 
 ### v2.0.1 (2026-01-29) - Stability Hotfix (Phase 0)
 - **SECURITY**: Host 헤더 기반 localhost 인증 예외 제거 (스푸핑 방지)
