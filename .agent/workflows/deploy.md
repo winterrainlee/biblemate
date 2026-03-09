@@ -10,6 +10,10 @@ description: 배포 전 체크리스트 및 배포 절차 실행
 1. `git status`를 실행하여 커밋되지 않은 변경 사항이 없는지 확인합니다.
 2. 현재 `feature/vX.Y` 통합 브랜치에 있는지 확인합니다.
 3. 테스트(`npm run dev`)는 통과했습니까?
+4. **성경 DB(`server/data/bible.db`) 변경 포함 여부**를 확인합니다.
+   - 포함된 경우: `fly deploy`만으로 운영 볼륨 DB는 갱신되지 않습니다.
+   - 이유: entrypoint는 `/app/server/data/bible.db`가 **없을 때만** seed DB를 복사합니다.
+   - 따라서 배포 후 별도로 **운영 볼륨 DB 교체 절차**를 수행해야 합니다.
 
 ## 1단계: 버전 업데이트 (Version Bump)
 사용자에게 이번 **배포 버전(vX.Y.Z)**을 물어보고, 다음 파일들의 버전을 일괄 업데이트합니다.
@@ -39,6 +43,12 @@ description: 배포 전 체크리스트 및 배포 절차 실행
 1. `git push origin master`
 2. `git push origin vX.Y.Z`
 3. Fly.io 배포라면 `fly deploy` 명령어를 실행할지 물어봅니다. (현재는 github action에 Deploy to Fly.io가 등록되어 있습니다.)
+4. 이번 배포에 `server/data/bible.db` 변경이 포함되면 아래를 추가 수행합니다.
+   - `fly deploy` 완료 후 앱을 중지합니다.
+   - 현재 운영 볼륨 DB를 백업합니다.
+   - 로컬에서 검증한 `server/data/bible.db`를 운영 볼륨의 `/app/server/data/bible.db`로 교체합니다.
+   - 앱 재기동 후 `/api/health`와 샘플 성경 API/DB 조회로 본문 반영 여부를 검증합니다.
+   - 사용자 데이터가 있는 운영 DB라면 전체 교체 대신 본문 테이블 패치 스크립트를 우선 검토합니다.
 
 ## 6단계: 마무리
 1. 배포가 성공하면 사용자에게 축하 메시지를 전합니다! 🎉

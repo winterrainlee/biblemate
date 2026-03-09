@@ -163,6 +163,71 @@ RUN echo 'if [ ! -f /app/server/data/bible.db ]; then' >> /entrypoint.sh && \
 & "$env:USERPROFILE\.fly\bin\flyctl.exe" deploy
 ```
 
+> [!WARNING]
+> **성경 DB 수정 배포 주의**
+> `server/data/bible.db`가 바뀐 배포는 `fly deploy`만으로 운영 데이터가 바뀌지 않습니다.
+> 현재 entrypoint는 `/app/server/data/bible.db`가 없을 때만 시드 DB를 복사하므로, 이미 볼륨 DB가 있으면 기존 운영 DB가 그대로 유지됩니다.
+> 또한 `sql.js` 기반 서버는 메모리 DB를 종료 시 파일로 저장할 수 있으므로, 운영 DB 교체는 반드시 **앱 중지 상태**에서 수행해야 합니다.
+
+### 성경 DB 교체 배포 절차
+
+성경 본문 교정, 재임포트, `bible-corrections.json` 반영처럼 `server/data/bible.db` 자체가 바뀐 경우에는 아래 절차를 따릅니다.
+
+1. 로컬에서 최종 `server/data/bible.db`를 생성하고 검증합니다.
+   - 예: 책 수/총 절 수 확인, 샘플 구절 대조, 교정 반영 확인
+2. 일반 배포를 먼저 수행합니다.
+   - `& "$env:USERPROFILE\.fly\bin\flyctl.exe" deploy`
+3. 운영 앱을 중지합니다.
+```powershell
+& "$env:USERPROFILE\.fly\bin\flyctl.exe" scale count 0 -a biblemate --yes
+```
+4. 운영 볼륨 ID를 확인합니다.
+```powershell
+& "$env:USERPROFILE\.fly\bin\flyctl.exe" volumes list -a biblemate
+```
+5. 운영 볼륨을 붙인 유지보수 머신을 띄웁니다.
+   - 운영 앱이 꺼진 상태에서 같은 볼륨에 접근하기 위한 임시 머신입니다.
+6. 기존 운영 DB를 백업합니다.
+   - 예: `/app/server/data/bible.db.bak-YYYYMMDD-HHMMSS`
+7. 검증된 로컬 `server/data/bible.db`를 운영 볼륨의 `/app/server/data/bible.db`로 교체합니다.
+   - 파일이 크면 `fly ssh sftp put` 또는 유지보수 머신 경유 업로드를 사용합니다.
+8. 유지보수 머신을 제거하고 서비스 머신을 다시 시작합니다.
+```powershell
+& "$env:USERPROFILE\.fly\bin\flyctl.exe" scale count 1 -a biblemate --yes
+```
+9. 재기동 후 운영 검증을 수행합니다.
+```powershell
+& "$env:USERPROFILE\.fly\bin\flyctl.exe" status -a biblemate
+curl https://biblemate.fly.dev/api/health
+```
+   - 필요 시 운영 머신 안에서 `bible.db`를 직접 조회해 샘플 구절을 확인합니다.
+
+### DB 교체 체크리스트
+
+- 앱 중지 전: 사용자 데이터 백업 여부 확인
+- 교체 전: 운영 DB 백업 파일 생성
+- 교체 후: `/api/health` 확인
+- 교체 후: 본문 샘플 검증
+  - 예: `겔 27:36`, `겔 16:63`, `창 1:1`
+- 교체 후: 서비스 머신이 기대한 볼륨 ID를 다시 사용 중인지 확인
+
+### 롤백
+
+운영 DB 교체 후 문제가 생기면 아래 순서로 즉시 복구합니다.
+
+1. 앱 중지
+2. 유지보수 머신으로 볼륨 재접속
+3. 백업본을 원래 이름으로 복원
+4. 앱 재기동
+
+예시:
+```powershell
+& "$env:USERPROFILE\.fly\bin\flyctl.exe" scale count 0 -a biblemate --yes
+# 유지보수 머신에서:
+# cp /app/server/data/bible.db.bak-YYYYMMDD-HHMMSS /app/server/data/bible.db
+& "$env:USERPROFILE\.fly\bin\flyctl.exe" scale count 1 -a biblemate --yes
+```
+
 ### SSH 접속
 
 ```powershell
@@ -211,6 +276,15 @@ RUN echo 'if [ ! -f /app/server/data/bible.db ]; then' >> /entrypoint.sh && \
 - sql.js는 메모리 DB이므로 앱 실행 중 파일 업로드해도 반영 안 됨
 - 해결: 앱 중지 → 파일 업로드 → 앱 시작
 - 또는: 시드 DB 방식 사용 (Dockerfile에 포함)
+
+### 문제: `fly deploy` 후에도 성경 본문이 예전 상태로 보임
+
+- 원인: 운영 볼륨의 기존 `bible.db`가 유지되고, 새 이미지에 포함된 seed DB는 복사되지 않음
+- 확인:
+  - `fly volumes list -a biblemate`
+  - 운영 머신에서 `/app/server/data/bible.db` 타임스탬프/샘플 구절 직접 조회
+- 해결:
+  - 본 가이드의 `성경 DB 교체 배포 절차`대로 운영 볼륨 DB를 직접 교체
 
 ### 문제: SFTP 연결 안 됨
 
