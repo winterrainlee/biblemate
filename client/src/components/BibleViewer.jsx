@@ -70,6 +70,7 @@ const BibleViewer = ({
     const [chapterNotes, setChapterNotes] = useState([]);
     const [isLoadingNotes, setIsLoadingNotes] = useState(false);
     const [selectedVerses, setSelectedVerses] = useState([]);
+    const [copiedNoteId, setCopiedNoteId] = useState(null);
     const [popup, setPopup] = useState({
         visible: false,
         x: 0,
@@ -83,6 +84,7 @@ const BibleViewer = ({
         editTargetDate: null // [NEW] Track original date for edits
     });
     const popupRef = useRef(null);
+    const copyTimeoutRef = useRef(null);
     const dragRef = useRef({ isDragging: false, startX: 0, startY: 0, initialLeft: 0, initialTop: 0 });
 
     // [NEW] Swipe handlers for mobile chapter navigation
@@ -169,6 +171,14 @@ const BibleViewer = ({
         }
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, [popup.visible]);
+
+    useEffect(() => {
+        return () => {
+            if (copyTimeoutRef.current) {
+                clearTimeout(copyTimeoutRef.current);
+            }
+        };
+    }, []);
 
     // Check if a verse has a highlight
     const getHighlightStyle = (verseNum) => {
@@ -257,6 +267,41 @@ const BibleViewer = ({
     const handleCopyClick = () => {
         onCopyCitation(popup.verseNum, popup.verseText);
         setPopup(prev => ({ ...prev, visible: false }));
+    };
+
+    const copyTextToClipboard = async (text) => {
+        if (navigator.clipboard && window.isSecureContext) {
+            await navigator.clipboard.writeText(text);
+            return;
+        }
+
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed';
+        textarea.style.left = '-9999px';
+        textarea.style.top = '-9999px';
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+    };
+
+    const handleCopyNote = async (note) => {
+        try {
+            await copyTextToClipboard(note.content);
+            if (copyTimeoutRef.current) {
+                clearTimeout(copyTimeoutRef.current);
+            }
+            setCopiedNoteId(note.id);
+            copyTimeoutRef.current = setTimeout(() => {
+                setCopiedNoteId(null);
+                copyTimeoutRef.current = null;
+            }, 2000);
+        } catch (error) {
+            console.error('Failed to copy verse note:', error);
+            alert('복사에 실패했습니다.');
+        }
     };
 
     const handleMemoSubmit = async () => {
@@ -407,6 +452,28 @@ const BibleViewer = ({
         return <p className="note-text">{content}</p>;
     };
 
+    const renderNoteActions = (note) => {
+        const isCopied = copiedNoteId === note.id;
+
+        return (
+            <div style={{ display: 'flex', gap: '8px' }}>
+                <button
+                    onClick={() => handleCopyNote(note)}
+                    style={{ border: 'none', background: 'none', cursor: 'pointer', color: isCopied ? '#22c55e' : 'var(--pk-color-text-secondary)', padding: '2px' }}
+                    title={isCopied ? '복사됨' : '복사'}
+                >
+                    {isCopied ? <Check size={14} /> : <Copy size={14} />}
+                </button>
+                <button onClick={() => handleEditNote(note)} style={{ border: 'none', background: 'none', cursor: 'pointer', color: 'var(--pk-color-text-secondary)', padding: '2px' }} title="수정">
+                    <Edit2 size={14} />
+                </button>
+                <button onClick={() => handleDeleteNote(note.id)} style={{ border: 'none', background: 'none', cursor: 'pointer', color: 'var(--pk-color-danger)', padding: '2px' }} title="삭제">
+                    <Trash2 size={14} />
+                </button>
+            </div>
+        );
+    };
+
     return (
         <div
             className="bible-viewer-container"
@@ -421,14 +488,7 @@ const BibleViewer = ({
                         <div key={n.id} className="verse-note-card-v2" style={{ position: 'relative' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                                 <div className="note-ref">{bookName} {chapter}:{n.verse_range || n.verse}</div>
-                                <div style={{ display: 'flex', gap: '8px' }}>
-                                    <button onClick={() => handleEditNote(n)} style={{ border: 'none', background: 'none', cursor: 'pointer', color: 'var(--pk-color-text-secondary)', padding: '2px' }} title="수정">
-                                        <Edit2 size={14} />
-                                    </button>
-                                    <button onClick={() => handleDeleteNote(n.id)} style={{ border: 'none', background: 'none', cursor: 'pointer', color: 'var(--pk-color-danger)', padding: '2px' }} title="삭제">
-                                        <Trash2 size={14} />
-                                    </button>
-                                </div>
+                                {renderNoteActions(n)}
                             </div>
 
                             {renderNoteContent(n.content)}
@@ -630,14 +690,7 @@ const BibleViewer = ({
                                         <div key={note.id} className="verse-note-card-v2" style={{ padding: '0.75rem', fontSize: '0.9rem' }}>
                                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '4px' }}>
                                                 <div className="note-date">{new Date(note.created_at || note.date).toLocaleDateString()}</div>
-                                                <div style={{ display: 'flex', gap: '8px' }}>
-                                                    <button onClick={() => handleEditNote(note)} style={{ border: 'none', background: 'none', cursor: 'pointer', color: 'var(--pk-color-text-secondary)', padding: '2px' }} title="수정">
-                                                        <Edit2 size={14} />
-                                                    </button>
-                                                    <button onClick={() => handleDeleteNote(note.id)} style={{ border: 'none', background: 'none', cursor: 'pointer', color: 'var(--pk-color-danger)', padding: '2px' }} title="삭제">
-                                                        <Trash2 size={14} />
-                                                    </button>
-                                                </div>
+                                                {renderNoteActions(note)}
                                             </div>
                                             {renderNoteContent(note.content)}
                                         </div>
@@ -867,14 +920,7 @@ const BibleViewer = ({
                         <div key={n.id} className="verse-note-card-v2" style={{ position: 'relative' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                                 <div className="note-ref">{bookName} {chapter}:{n.verse_range || n.verse}</div>
-                                <div style={{ display: 'flex', gap: '8px' }}>
-                                    <button onClick={() => handleEditNote(n)} style={{ border: 'none', background: 'none', cursor: 'pointer', color: 'var(--pk-color-text-secondary)', padding: '2px' }} title="수정">
-                                        <Edit2 size={14} />
-                                    </button>
-                                    <button onClick={() => handleDeleteNote(n.id)} style={{ border: 'none', background: 'none', cursor: 'pointer', color: 'var(--pk-color-danger)', padding: '2px' }} title="삭제">
-                                        <Trash2 size={14} />
-                                    </button>
-                                </div>
+                                {renderNoteActions(n)}
                             </div>
 
                             {renderNoteContent(n.content)}

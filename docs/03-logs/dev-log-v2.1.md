@@ -136,8 +136,9 @@
 
 | 파일 | 변경 | 설명 |
 |------|------|------|
-| `JournalPage.jsx` | UI/로직 추가 | 구절별 묵상 카드에 개별 복사 버튼 추가, 클립보드 헬퍼 공용화 |
+| `JournalPage.jsx` | UI/로직 추가 | 묵상일지 구절별 묵상 카드에 개별 복사 버튼 추가, 클립보드 헬퍼 공용화 |
 | `JournalPage.css` | 스타일 추가 | 카드 액션 정렬 및 복사 성공 상태 스타일 추가 |
+| `BibleViewer.jsx` | UI/로직 추가 | 성경읽기 모드 구절별 묵상 카드와 모바일 묵상 보기 팝업에 동일 복사 액션 추가 |
 | `docs/01-planning/implementation-plans/implementation-plan-v2.1.4-individual-verse-note-copy.md` | 신규 | 2.1.4 구현 계획 문서 |
 | `docs/03-logs/walkthroughs/walkthrough-v2.1.4-individual-verse-note-copy.md` | 신규 | 검증 기록 |
 | `docs/03-logs/pr/pr-v2.1.4-individual-verse-note-copy.md` | 신규 | PR 초안 |
@@ -145,6 +146,6 @@
 
 ### 주요 결정
 - 개별 복사 포맷은 사용자 선택에 따라 구절/날짜 없이 묵상 내용만 복사.
-- 카드 액션 순서는 `복사 → 수정 → 삭제`로 통일.
+- 묵상일지와 성경읽기 모드 모두 카드 액션 순서는 `복사 → 수정 → 삭제`로 통일.
 - 복사 성공 피드백은 전체 복사 버튼과 동일하게 2초간 표시하되, 클릭한 카드에만 적용.
 - 백엔드 API, DB 스키마, 저장 데이터 포맷은 변경하지 않음.
