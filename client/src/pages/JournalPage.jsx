@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, Type, Download, Upload, Eye, EyeOff, LogOut, CheckCircle, AlertCircle, CalendarOff, Edit2, Trash2, ChevronLeft, ChevronRight, Copy, Check } from 'lucide-react';
 import { format, addDays, subDays, isToday } from 'date-fns';
 import { ko } from 'date-fns/locale';
@@ -51,11 +51,21 @@ const JournalPage = ({ date, onDateChange, readingLogs = [], books = [], onNavig
 
     // Copy State
     const [isCopied, setIsCopied] = useState(false);
+    const [copiedVerseNoteId, setCopiedVerseNoteId] = useState(null);
+    const verseNoteCopyTimeoutRef = useRef(null);
 
     // Load data when date changes
     useEffect(() => {
         loadJournalData();
     }, [dateStr]);
+
+    useEffect(() => {
+        return () => {
+            if (verseNoteCopyTimeoutRef.current) {
+                clearTimeout(verseNoteCopyTimeoutRef.current);
+            }
+        };
+    }, []);
 
     // Swipe handlers for mobile
     const [touchStart, setTouchStart] = useState(null);
@@ -217,6 +227,24 @@ const JournalPage = ({ date, onDateChange, readingLogs = [], books = [], onNavig
         }
     };
 
+    const copyTextToClipboard = async (text) => {
+        if (navigator.clipboard && window.isSecureContext) {
+            await navigator.clipboard.writeText(text);
+            return;
+        }
+
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed';
+        textarea.style.left = '-9999px';
+        textarea.style.top = '-9999px';
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+    };
+
     // Handler: Copy All Meditation
     const handleCopyAll = async () => {
         try {
@@ -257,28 +285,30 @@ const JournalPage = ({ date, onDateChange, readingLogs = [], books = [], onNavig
             }
 
             const text = parts.join('\n');
-
-            // Clipboard API with fallback for mobile Safari
-            if (navigator.clipboard && window.isSecureContext) {
-                await navigator.clipboard.writeText(text);
-            } else {
-                // Fallback: textarea + execCommand
-                const textarea = document.createElement('textarea');
-                textarea.value = text;
-                textarea.style.position = 'fixed';
-                textarea.style.left = '-9999px';
-                textarea.style.top = '-9999px';
-                document.body.appendChild(textarea);
-                textarea.focus();
-                textarea.select();
-                document.execCommand('copy');
-                document.body.removeChild(textarea);
-            }
+            await copyTextToClipboard(text);
 
             setIsCopied(true);
             setTimeout(() => setIsCopied(false), 2000);
         } catch (error) {
             console.error('Failed to copy:', error);
+            alert('복사에 실패했습니다.');
+        }
+    };
+
+    // Handler: Copy Single Verse Note
+    const handleCopyVerseNote = async (note) => {
+        try {
+            await copyTextToClipboard(note.content);
+            if (verseNoteCopyTimeoutRef.current) {
+                clearTimeout(verseNoteCopyTimeoutRef.current);
+            }
+            setCopiedVerseNoteId(note.id);
+            verseNoteCopyTimeoutRef.current = setTimeout(() => {
+                setCopiedVerseNoteId(null);
+                verseNoteCopyTimeoutRef.current = null;
+            }, 2000);
+        } catch (error) {
+            console.error('Failed to copy verse note:', error);
             alert('복사에 실패했습니다.');
         }
     };
@@ -396,6 +426,7 @@ const JournalPage = ({ date, onDateChange, readingLogs = [], books = [], onNavig
                             <div className="verse-notes-list">
                                 {verseNotes.map(note => {
                                     const isEditing = editingVerseNote?.note.id === note.id;
+                                    const isVerseNoteCopied = copiedVerseNoteId === note.id;
 
                                     return (
                                         <div key={note.id} className="verse-note-card">
@@ -408,6 +439,13 @@ const JournalPage = ({ date, onDateChange, readingLogs = [], books = [], onNavig
                                                 </span>
                                                 {!isEditing && (
                                                     <div className="note-actions">
+                                                        <button
+                                                            className={`icon-btn${isVerseNoteCopied ? ' copied' : ''}`}
+                                                            onClick={() => handleCopyVerseNote(note)}
+                                                            title={isVerseNoteCopied ? '복사됨' : '복사'}
+                                                        >
+                                                            {isVerseNoteCopied ? <Check size={16} /> : <Copy size={16} />}
+                                                        </button>
                                                         <button
                                                             className="icon-btn"
                                                             onClick={() => setEditingVerseNote({ note, content: note.content })}
