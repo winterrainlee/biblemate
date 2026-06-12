@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
-import { ArrowLeft, Type, Download, Upload, Eye, EyeOff, LogOut, CheckCircle, AlertCircle, CalendarOff } from 'lucide-react';
+import { ArrowLeft, Type, Download, Upload, LogOut, CheckCircle, AlertCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { api } from '../services/api';
 import Modal from '../components/Modal';
@@ -20,7 +20,7 @@ const Settings = () => {
                 'blue': '3',
                 'red': '4'
             };
-        } catch (e) {
+        } catch {
             return {
                 'yellow': '1',
                 'green': '2',
@@ -54,7 +54,6 @@ const Settings = () => {
         }
     };
 
-    const [statusMessage, setStatusMessage] = useState('');
     const [resultModal, setResultModal] = useState({
         isOpen: false,
         type: 'success', // 'success' | 'error'
@@ -89,7 +88,7 @@ const Settings = () => {
                 }
             })
             .catch(err => console.error('Failed to load settings from server', err));
-    }, []);
+    }, [setFontFamily]);
 
     // Handle logout
     const handleLogout = async () => {
@@ -158,7 +157,7 @@ const Settings = () => {
             let data;
             try {
                 data = JSON.parse(text);
-            } catch (parseError) {
+            } catch {
                 setResultModal({
                     isOpen: true,
                     type: 'error',
@@ -507,7 +506,7 @@ const Settings = () => {
                 </h3>
 
                 <div className="license-info" style={{ fontSize: '0.9rem', color: 'var(--pk-color-text-secondary)', lineHeight: '1.6' }}>
-                    <p style={{ marginBottom: '0.5rem' }}><strong>BibleMate v2.1.3</strong></p>
+                    <p style={{ marginBottom: '0.5rem' }}><strong>BibleMate v2.2.0</strong></p>
                     <p style={{ marginBottom: '1rem' }}>개인 묵상과 성경 읽기를 돕기 위해 만든 웹 애플리케이션입니다.</p>
 
                     <h4 style={{ fontSize: '0.95rem', color: 'var(--pk-color-text)', marginBottom: '0.5rem' }}>성경 데이터 저작권</h4>
@@ -543,26 +542,6 @@ const Settings = () => {
                     </div>
                 </div>
             </div>
-
-            {/* Only used for non-backup related messages now */}
-            {
-                statusMessage && (
-                    <div style={{
-                        position: 'fixed',
-                        bottom: '2rem',
-                        left: '50%',
-                        transform: 'translateX(-50%)',
-                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                        color: 'white',
-                        padding: '1rem 2rem',
-                        borderRadius: 'var(--pk-radius-full)',
-                        zIndex: 1000,
-                        animation: 'fadeIn 0.3s ease-out'
-                    }}>
-                        {statusMessage}
-                    </div>
-                )
-            }
 
             <Modal
                 isOpen={resultModal.isOpen}

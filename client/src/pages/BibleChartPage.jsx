@@ -72,6 +72,16 @@ const BibleChartPage = () => {
     }
 
     const displayProgress = displayTotal > 0 ? Math.round((displayRead / displayTotal) * 100) : 0;
+    const findNextUnread = (bookList = books) => {
+        for (const book of bookList) {
+            for (let chapter = 1; chapter <= book.chapters; chapter++) {
+                if (!readChapters.has(`${book.id}:${chapter}`)) {
+                    return { book: book.id, chapter };
+                }
+            }
+        }
+        return null;
+    };
 
     // Filter Books
     const filteredBooks = books.filter((book, idx) => {
@@ -81,6 +91,12 @@ const BibleChartPage = () => {
         if (filter === 'ot') return !isNT;
         return true;
     });
+    const nextUnread = findNextUnread(filteredBooks);
+
+    const navigateToBible = (book, chapter) => {
+        localStorage.setItem('pendingBibleLocation', JSON.stringify({ book, chapter }));
+        navigate('/');
+    };
 
     if (loading) {
         return (
@@ -139,6 +155,11 @@ const BibleChartPage = () => {
                                 </div>
                                 <span className="progress-text">{displayProgress}%</span>
                             </div>
+                            {nextUnread && (
+                                <button className="next-unread-btn" onClick={() => navigateToBible(nextUnread.book, nextUnread.chapter)}>
+                                    다음 안 읽은 장 읽기
+                                </button>
+                            )}
                         </div>
 
                         {filter === 'all' && (
@@ -167,7 +188,14 @@ const BibleChartPage = () => {
                         const bookDone = readInBook === book.chapters;
 
                         return (
-                            <div key={book.id} className={`book-row ${bookDone ? 'complete' : ''}`}>
+                            <button
+                                key={book.id}
+                                className={`book-row ${bookDone ? 'complete' : ''}`}
+                                onClick={() => {
+                                    const nextInBook = findNextUnread([book]);
+                                    navigateToBible(book.id, nextInBook?.chapter || 1);
+                                }}
+                            >
                                 <span className="book-name" title={book.name}>
                                     {book.name}
                                 </span>
@@ -181,7 +209,7 @@ const BibleChartPage = () => {
                                     ))}
                                 </div>
                                 <span className="book-progress">{readInBook}/{book.chapters}</span>
-                            </div>
+                            </button>
                         );
                     })}
                 </div>

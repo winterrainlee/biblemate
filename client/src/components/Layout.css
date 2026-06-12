@@ -3,6 +3,11 @@
 .layout-container {
     display: flex;
     height: 100vh;
+    height: var(--pk-viewport-height);
+    min-height: 100svh;
+    padding-top: var(--pk-safe-area-top);
+    padding-right: var(--pk-safe-area-right);
+    padding-left: var(--pk-safe-area-left);
     background-color: var(--pk-color-bg-secondary);
     overflow: hidden;
 }

@@ -50,7 +50,7 @@ function App() {
         authRequired: data.authRequired,
         authenticated: data.authenticated
       });
-    } catch (err) {
+    } catch {
       // If auth check fails, assume auth is required to be safe
       setAuthState({
         loading: false,

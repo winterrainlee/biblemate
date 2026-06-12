@@ -57,6 +57,7 @@
 }
 
 .header-tab {
+    min-height: 44px;
     padding: 0.5rem 1rem;
     border: none;
     background: transparent;
@@ -141,6 +142,8 @@
     }
 
     .header-tab {
+        min-width: 44px;
+        min-height: 44px;
         padding: 0.4rem 0.6rem;
         font-size: 0.95rem;
         /* Larger for easier tapping */
@@ -172,6 +175,8 @@
 }
 
 .header-action-btn {
+    min-width: 44px;
+    min-height: 44px;
     background: transparent;
     border: none;
     border-radius: var(--pk-radius-md);
@@ -205,5 +210,8 @@
 @media (max-width: 640px) {
     .header-action-btn {
         padding: 0.4rem;
+        width: 44px;
+        height: 44px;
+        justify-content: center;
     }
 }

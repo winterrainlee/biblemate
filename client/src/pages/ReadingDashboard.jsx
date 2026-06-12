@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { format } from 'date-fns';
 import Calendar from '../components/Calendar';
 import BibleSelector from '../components/BibleSelector';
@@ -25,64 +25,9 @@ const ReadingDashboard = () => {
     const [verses, setVerses] = useState([]);
     const [highlights, setHighlights] = useState([]);
 
-    // Loading State
-    const [isLoading, setIsLoading] = useState(true);
-
     // UI State
     const [completionStatus, setCompletionStatus] = useState('idle'); // idle, loading, success, error
     const [toast, setToast] = useState({ visible: false, message: '', type: 'info' });
-
-
-
-    // Split Screen State (R4) - Lazy state initialization for performance
-    const [splitRatio, setSplitRatio] = useState(() => {
-        const saved = localStorage.getItem('bibleSplitRatio');
-        const parsed = parseFloat(saved);
-        return (!isNaN(parsed) && parsed >= 20 && parsed <= 80) ? parsed : 50;
-    });
-    const [isDragging, setIsDragging] = useState(false);
-    const dashboardMainRef = useRef(null);
-
-    // Drag Handlers
-    const handleDragStart = useCallback((e) => {
-        e.preventDefault();
-        setIsDragging(true);
-    }, []);
-
-    const handleDragMove = useCallback((e) => {
-        if (!isDragging || !dashboardMainRef.current) return;
-
-        const containerRect = dashboardMainRef.current.getBoundingClientRect();
-        // Calculate percentage relative to container width
-        // Mouse X relative to container left
-        const relativeX = e.clientX - containerRect.left;
-        const newRatio = (relativeX / containerRect.width) * 100;
-
-        // Constrain between 20% and 80%
-        const constrained = Math.min(Math.max(newRatio, 20), 80);
-        setSplitRatio(constrained);
-    }, [isDragging]);
-
-    const handleDragEnd = useCallback(() => {
-        setIsDragging(false);
-        localStorage.setItem('bibleSplitRatio', splitRatio.toString());
-    }, [splitRatio]);
-
-    // Global Drag Listeners
-    useEffect(() => {
-        if (isDragging) {
-            window.addEventListener('mousemove', handleDragMove);
-            window.addEventListener('mouseup', handleDragEnd);
-        } else {
-            window.removeEventListener('mousemove', handleDragMove);
-            window.removeEventListener('mouseup', handleDragEnd);
-        }
-        return () => {
-            window.removeEventListener('mousemove', handleDragMove);
-            window.removeEventListener('mouseup', handleDragEnd);
-        };
-    }, [isDragging, handleDragMove, handleDragEnd]);
-
 
     // Show Toast Helper
     const showToast = (message, type = 'info') => {
@@ -100,7 +45,7 @@ const ReadingDashboard = () => {
                 'blue': '3',
                 'red': '4'
             };
-        } catch (e) {
+        } catch {
             return {
                 'yellow': '1',
                 'green': '2',
@@ -136,7 +81,9 @@ const ReadingDashboard = () => {
                 if (saved) {
                     try {
                         setHighlightLabels(JSON.parse(saved));
-                    } catch (pe) { }
+                    } catch {
+                        console.warn('Invalid highlight label settings in localStorage');
+                    }
                 }
             }
         };
@@ -162,6 +109,99 @@ const ReadingDashboard = () => {
     const allLogs = readingLogs.filter(l => l.book === currentBook && l.chapter == currentChapter);
     let lastReadDate = allLogs.length > 0 ? allLogs[0].date : null;
     if (lastReadDate === todayStr) lastReadDate = '오늘';
+
+    // --- API Calls ---
+    const loadBooks = useCallback(async () => {
+        try {
+            const data = await api.getBooks();
+            setBooks(data);
+            return data;
+        } catch (e) {
+            console.error(e);
+            return [];
+        }
+    }, []);
+
+    const hasInitialMovedRef = useRef(false);
+
+    const loadReadingLogs = useCallback(async (shouldMove = false, booksData = []) => {
+        try {
+            const logs = await api.getReadingLogs();
+            // [Fix] Ensure chapter numbers are actually numbers to prevent sync issues
+            const sanitizedLogs = logs.map(log => ({
+                ...log,
+                chapter: Number(log.chapter),
+                chapter_from: Number(log.chapter_from), // Keep original if exists
+                chapter_to: Number(log.chapter_to)
+            }));
+            setReadingLogs(sanitizedLogs);
+
+            if (shouldMove && !hasInitialMovedRef.current) {
+                const targetBooks = booksData;
+                if (!targetBooks || targetBooks.length === 0) return;
+
+                const todayStr = format(new Date(), 'yyyy-MM-dd');
+                const todayLogs = logs.filter(l => l.date === todayStr);
+
+                if (todayLogs.length > 0) {
+                    const firstLog = todayLogs[0];
+                    setCurrentBook(firstLog.book);
+                    setCurrentChapter(firstLog.chapter_from || firstLog.chapter || 1);
+                } else if (logs.length > 0) {
+                    const sortedLogs = [...logs].sort((a, b) => {
+                        if (b.date !== a.date) return b.date.localeCompare(a.date);
+                        return b.id - a.id;
+                    });
+                    const lastLog = sortedLogs[0];
+                    const bookMeta = targetBooks.find(b => b.id === lastLog.book);
+
+                    if (bookMeta && lastLog.chapter < bookMeta.chapters) {
+                        setCurrentBook(lastLog.book);
+                        setCurrentChapter(lastLog.chapter + 1);
+                    } else {
+                        const bookIndex = targetBooks.findIndex(b => b.id === lastLog.book);
+                        if (bookIndex !== -1 && bookIndex < targetBooks.length - 1) {
+                            setCurrentBook(targetBooks[bookIndex + 1].id);
+                            setCurrentChapter(1);
+                        } else {
+                            setCurrentBook(targetBooks[0].id);
+                            setCurrentChapter(1);
+                        }
+                    }
+                } else {
+                    setCurrentBook('Gen');
+                    setCurrentChapter(1);
+                }
+                hasInitialMovedRef.current = true;
+            }
+        } catch (e) { console.error(e); }
+    }, []);
+
+    const loadNoteForDate = useCallback(async (date) => {
+        const dateStr = format(date, 'yyyy-MM-dd');
+        try {
+            const note = await api.getNote(dateStr);
+            setCurrentNote(note);
+        } catch (e) {
+            console.error(e);
+            setCurrentNote(null);
+        }
+    }, []);
+
+    const loadChapter = useCallback(async () => {
+        try {
+            const data = await api.getChapter(currentBook, currentChapter, currentVersion);
+            setVerses(data.verses);
+        } catch (e) { console.error(e); }
+    }, [currentBook, currentChapter, currentVersion]);
+
+    const loadHighlights = useCallback(async () => {
+        try {
+            const all = await api.getHighlights();
+            const filtered = all.filter(h => h.book === currentBook && h.chapter === currentChapter && h.style);
+            setHighlights(filtered);
+        } catch (e) { console.error(e); }
+    }, [currentBook, currentChapter]);
 
     const handleChapterComplete = async () => {
         const dateStr = format(currentDate, 'yyyy-MM-dd');
@@ -209,14 +249,30 @@ const ReadingDashboard = () => {
         const init = async () => {
             const booksData = await loadBooks();
             await loadReadingLogs(true, booksData);
+
+            const pendingLocation = localStorage.getItem('pendingBibleLocation');
+            if (pendingLocation) {
+                try {
+                    const parsed = JSON.parse(pendingLocation);
+                    if (parsed?.book && parsed?.chapter) {
+                        setCurrentBook(parsed.book);
+                        setCurrentChapter(Number(parsed.chapter));
+                        setActiveTab('bible');
+                    }
+                } catch {
+                    console.warn('Invalid pending Bible location');
+                } finally {
+                    localStorage.removeItem('pendingBibleLocation');
+                }
+            }
         };
         init();
-    }, []);
+    }, [loadBooks, loadReadingLogs, setActiveTab]);
 
     // Load Note and Logs when Date Changes
     useEffect(() => {
         loadNoteForDate(currentDate);
-    }, [currentDate]);
+    }, [currentDate, loadNoteForDate]);
 
     // Load Bible Content when Location Changes
     useEffect(() => {
@@ -224,102 +280,7 @@ const ReadingDashboard = () => {
             loadChapter();
             loadHighlights();
         }
-    }, [currentBook, currentChapter, currentVersion]);
-
-    // --- API Calls ---
-    const loadBooks = async () => {
-        try {
-            const data = await api.getBooks();
-            setBooks(data);
-            return data;
-        } catch (e) {
-            console.error(e);
-            return [];
-        }
-    };
-
-    const [hasInitialMoved, setHasInitialMoved] = useState(false);
-
-    const loadReadingLogs = async (shouldMove = false, booksData = null) => {
-        try {
-            const logs = await api.getReadingLogs();
-            // [Fix] Ensure chapter numbers are actually numbers to prevent sync issues
-            const sanitizedLogs = logs.map(log => ({
-                ...log,
-                chapter: Number(log.chapter),
-                chapter_from: Number(log.chapter_from), // Keep original if exists
-                chapter_to: Number(log.chapter_to)
-            }));
-            setReadingLogs(sanitizedLogs);
-
-            if (shouldMove && !hasInitialMoved) {
-                const targetBooks = booksData || books;
-                if (!targetBooks || targetBooks.length === 0) return;
-
-                const todayStr = format(new Date(), 'yyyy-MM-dd');
-                const todayLogs = logs.filter(l => l.date === todayStr);
-
-                if (todayLogs.length > 0) {
-                    const firstLog = todayLogs[0];
-                    setCurrentBook(firstLog.book);
-                    setCurrentChapter(firstLog.chapter_from || firstLog.chapter || 1);
-                } else if (logs.length > 0) {
-                    const sortedLogs = [...logs].sort((a, b) => {
-                        if (b.date !== a.date) return b.date.localeCompare(a.date);
-                        return b.id - a.id;
-                    });
-                    const lastLog = sortedLogs[0];
-                    const bookMeta = targetBooks.find(b => b.id === lastLog.book);
-
-                    if (bookMeta && lastLog.chapter < bookMeta.chapters) {
-                        setCurrentBook(lastLog.book);
-                        setCurrentChapter(lastLog.chapter + 1);
-                    } else {
-                        const bookIndex = targetBooks.findIndex(b => b.id === lastLog.book);
-                        if (bookIndex !== -1 && bookIndex < targetBooks.length - 1) {
-                            setCurrentBook(targetBooks[bookIndex + 1].id);
-                            setCurrentChapter(1);
-                        } else {
-                            setCurrentBook(targetBooks[0].id);
-                            setCurrentChapter(1);
-                        }
-                    }
-                } else {
-                    setCurrentBook('Gen');
-                    setCurrentChapter(1);
-                }
-                setHasInitialMoved(true);
-            }
-        } catch (e) { console.error(e); }
-    };
-
-    const loadNoteForDate = async (date) => {
-        const dateStr = format(date, 'yyyy-MM-dd');
-        try {
-            const note = await api.getNote(dateStr);
-            setCurrentNote(note);
-        } catch (e) {
-            console.error(e);
-            setCurrentNote(null);
-        }
-    };
-
-    const loadChapter = async () => {
-        setIsLoading(true);
-        try {
-            const data = await api.getChapter(currentBook, currentChapter, currentVersion);
-            setVerses(data.verses);
-        } catch (e) { console.error(e); }
-        finally { setIsLoading(false); }
-    };
-
-    const loadHighlights = async () => {
-        try {
-            const all = await api.getHighlights();
-            const filtered = all.filter(h => h.book === currentBook && h.chapter === currentChapter && h.style);
-            setHighlights(filtered);
-        } catch (e) { console.error(e); }
-    };
+    }, [currentBook, currentChapter, loadChapter, loadHighlights]);
 
     const handleHighlight = async (verseNum, color = '#fef08a') => {
         const existing = highlights.find(h => h.book === currentBook && h.verse === verseNum);
@@ -345,9 +306,30 @@ const ReadingDashboard = () => {
 
     const handleCopyCitation = (verseNum, verseText) => {
         const citation = `[${currentBookName} ${currentChapter}:${verseNum}] ${verseText}`;
-        navigator.clipboard.writeText(citation).then(() => {
-            // alert('구절이 복사되었습니다.'); 
-        });
+        const copyText = async () => {
+            if (navigator.clipboard && window.isSecureContext) {
+                await navigator.clipboard.writeText(citation);
+                return;
+            }
+
+            const textarea = document.createElement('textarea');
+            textarea.value = citation;
+            textarea.style.position = 'fixed';
+            textarea.style.left = '-9999px';
+            textarea.style.top = '-9999px';
+            document.body.appendChild(textarea);
+            textarea.focus();
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+        };
+
+        copyText()
+            .then(() => showToast('구절을 복사했습니다.', 'success'))
+            .catch((error) => {
+                console.error('Failed to copy verse:', error);
+                showToast('복사에 실패했습니다.', 'error');
+            });
     };
 
     const handleNotePreviewClick = () => {
@@ -422,11 +404,7 @@ const ReadingDashboard = () => {
             )}
 
             {/* Main Content */}
-            <main
-                className="dashboard-main"
-                ref={dashboardMainRef}
-                style={{ '--split-ratio': `${splitRatio}%` }}
-            >
+            <main className="dashboard-main">
                 {/* V2.0: Conditional rendering based on active tab */}
                 {activeTab === 'bible' ? (
                     <div className="bible-viewer-wrapper" style={{ width: '100%' }}>
@@ -435,6 +413,7 @@ const ReadingDashboard = () => {
                             highlights={highlights}
                             onHighlight={handleHighlight}
                             onCopyCitation={handleCopyCitation}
+                            onToast={showToast}
                             onComplete={handleChapterComplete}
                             onNavigateToJournal={() => handleNavigateToJournal(lastReadDate)}
                             isCompleted={isChapterCompleted}
@@ -470,7 +449,7 @@ const ReadingDashboard = () => {
             {toast.visible && (
                 <div style={{
                     position: 'fixed',
-                    bottom: '24px',
+                    bottom: 'calc(24px + var(--pk-safe-area-bottom))',
                     left: '50%',
                     transform: 'translateX(-50%)',
                     backgroundColor: toast.type === 'error' ? '#ef4444' : toast.type === 'warning' ? '#eab308' : '#3b82f6',

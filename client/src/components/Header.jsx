@@ -5,7 +5,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import { useTab } from '../contexts/TabContext';
 import './Header.css';
 
-const Header = ({ onTrackerClick }) => {
+const Header = () => {
     const navigate = useNavigate();
     const { theme, setTheme, fontSize, setFontSize } = useTheme();
     const { activeTab, setActiveTab } = useTab();
@@ -69,6 +69,7 @@ const Header = ({ onTrackerClick }) => {
                         className="header-action-btn mobile-only-chart-btn"
                         onClick={() => navigate('/chart')}
                         title="읽기표"
+                        aria-label="읽기표"
                     >
                         <BarChart2 size={20} />
                         <span className="action-label">읽기표</span>
@@ -88,6 +89,7 @@ const Header = ({ onTrackerClick }) => {
                             onClick={decreaseFont}
                             disabled={fontSize <= FONT_SIZES[0]}
                             title="글자 작게"
+                            aria-label="글자 작게"
                             style={{ border: 'none', padding: '4px' }}
                         >
                             <span className="font-icon-wrapper"><Minus size={16} /></span>
@@ -108,6 +110,7 @@ const Header = ({ onTrackerClick }) => {
                             onClick={increaseFont}
                             disabled={fontSize >= FONT_SIZES[FONT_SIZES.length - 1]}
                             title="글자 크게"
+                            aria-label="글자 크게"
                             style={{ border: 'none', padding: '4px' }}
                         >
                             <span className="font-icon-wrapper"><Plus size={16} /></span>
@@ -118,6 +121,7 @@ const Header = ({ onTrackerClick }) => {
                         className="header-action-btn"
                         onClick={toggleTheme}
                         title={isDarkMode ? "라이트 모드" : "다크 모드"}
+                        aria-label={isDarkMode ? "라이트 모드" : "다크 모드"}
                     >
                         {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
                     </button>
@@ -126,6 +130,7 @@ const Header = ({ onTrackerClick }) => {
                         className="header-action-btn"
                         onClick={() => navigate('/settings')}
                         title="설정"
+                        aria-label="설정"
                     >
                         <Settings size={20} />
                     </button>

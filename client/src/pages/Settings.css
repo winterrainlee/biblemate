@@ -1,5 +1,6 @@
 .page-settings {
     height: 100%;
+    min-height: 0;
     overflow-y: auto;
     padding: var(--pk-spacing-6);
     background-color: var(--pk-color-bg);

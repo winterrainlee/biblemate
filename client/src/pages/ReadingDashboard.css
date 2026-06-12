@@ -80,7 +80,7 @@
 @media (min-width: 768px) {
     .dashboard-container {
         flex-direction: row;
-        height: calc(100vh - 60px);
+        height: 100%;
         overflow: hidden;
     }
 

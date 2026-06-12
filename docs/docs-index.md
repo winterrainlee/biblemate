@@ -1,12 +1,13 @@
 # 📚 Documentation Index
 
-> BibleMate 프로젝트 문서 목차입니다. (최초 생성일: 2026-01-05 | 최신 수정일: 2026-03-10)
+> BibleMate 프로젝트 문서 목차입니다. (최초 생성일: 2026-01-05 | 최신 수정일: 2026-06-12)
 
 ---
 
 ## 🚀 01. Planning (기획)
 - [Roadmap](01-planning/roadmap.md): 차기 버전 로드맵 및 기능 목록
 - [Implementation Plans](01-planning/implementation-plans/): 버전별 구현 계획서
+  - [Implementation Plan v2.2.0 Mobile UX](01-planning/implementation-plans/implementation-plan-v2.2.0-mobile-ux.md): 모바일 UX 재설계 구현 계획
 
 ---
 
@@ -14,6 +15,7 @@
 - [Project Spec v2.0](02-specs/spec-v2.0.md): v2.0 명세서 (최신)
 - [System Architecture](02-specs/architecture.md): 시스템 구조 및 설계 철학
 - [Layout Plan v2.0](02-specs/layout-v2.0.md): UI/UX 레이아웃 설계
+- [Mobile UX Final Adjustment v2](02-specs/mobile-ux-final-adjustment-v2.md): v2.2 모바일 UX 최종 조정안 및 수용 기준
 
 ### Archive (구버전)
 - [Archived Specs](02-specs/archive/): v1.0~v1.4 구버전 명세서
@@ -23,6 +25,7 @@
 ## 📝 03. Logs (개발/검증 로그)
 
 ### Development Logs
+- [Dev Log v2.2](03-logs/dev-log-v2.2.md): v2.2 모바일 UX 재설계
 - [Dev Log v2.1](03-logs/dev-log-v2.1.md): v2.1 UX 개선 및 데이터 핫픽스
 - [Dev Log v2.0.1](03-logs/dev-log-v2.0.1.md): v2.0.1 Phase0 안정화
 - [Dev Log v2.0](03-logs/dev-log-v2.0.md): v2.0 메이저 업데이트
@@ -36,12 +39,19 @@
 
 ### Pull Requests
 - [PR Drafts](03-logs/pr/): 버전별 PR 초안
+  - [PR Draft v2.2 Mobile Foundation](03-logs/pr/pr-v2.2-mobile-foundation.md): 모바일 안정화 기반 PR 초안
+  - [PR Draft v2.2 Mobile Bible Flow](03-logs/pr/pr-v2.2-mobile-bible-flow.md): 모바일 성경 읽기 흐름 PR 초안
+  - [PR Draft v2.2 Mobile Journal & Chart](03-logs/pr/pr-v2.2-mobile-journal-chart.md): 모바일 일지·읽기표·가독성 흐름 PR 초안
+  - [PR Draft v2.2 Mobile UX](03-logs/pr/pr-v2.2-mobile-ux.md): v2.2 모바일 UX 통합 PR 초안
 
 ### Reviews
 - [Reviews](03-logs/reviews/): 코드 리뷰 (GPT Codex 등)
 
 ### Walkthroughs
 - [Walkthroughs](03-logs/walkthroughs/): 구현/검증 과정 기록
+  - [Walkthrough v2.2.0 Mobile Foundation](03-logs/walkthroughs/walkthrough-v2.2.0-mobile-foundation.md): 모바일 안정화 기반 구현/검증 기록
+  - [Walkthrough v2.2.0 Mobile Bible Flow](03-logs/walkthroughs/walkthrough-v2.2.0-mobile-bible-flow.md): 모바일 성경 읽기 흐름 구현/검증 기록
+  - [Walkthrough v2.2.0 Mobile Journal & Chart](03-logs/walkthroughs/walkthrough-v2.2.0-mobile-journal-chart.md): 모바일 일지·읽기표·가독성 흐름 구현/검증 기록
 
 ### Verification
 - [Verification v2.0](03-logs/verification-v2.0.md): v2.0 검증 로그
@@ -51,6 +61,7 @@
 ---
 
 ## 📦 04. Releases (배포 노트)
+- [v2.2.0](04-releases/release-notes-v2.2.0.md): 모바일 UX 재설계 (준비 중)
 - [v2.1.3](04-releases/release-notes-v2.1.3.md): 에스겔 HAN 추출 안정화 및 재임포트 (2026-03-09)
 - [v2.1.2](04-releases/release-notes-v2.1.2.md): 데이터 핫픽스 (2026-03-09)
 - [v2.0.1](04-releases/release-notes-v2.0.1.md): Phase0 안정화 핫픽스 (2026-01-29)

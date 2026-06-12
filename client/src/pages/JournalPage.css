@@ -104,6 +104,40 @@
     margin: 0;
 }
 
+.journal-date-button {
+    border: none;
+    background: transparent;
+    color: var(--text-primary);
+    font: inherit;
+    font-size: 1.5rem;
+    font-weight: 700;
+    cursor: pointer;
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--pk-radius-md);
+}
+
+.journal-date-button:hover {
+    background-color: var(--pk-color-bg-secondary);
+}
+
+.journal-today-btn {
+    min-height: 36px;
+    padding: 0 0.9rem;
+    border: 1px solid var(--pk-color-border);
+    border-radius: 999px;
+    background-color: var(--pk-color-bg);
+    color: var(--pk-color-primary);
+    font: inherit;
+    font-size: 0.85rem;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.mobile-journal-summary,
+.journal-date-sheet-backdrop {
+    display: none;
+}
+
 .nav-btn {
     display: flex;
     align-items: center;
@@ -454,6 +488,164 @@
 
     .journal-date {
         font-size: 1.25rem;
+    }
+
+    .journal-date-button {
+        min-height: 44px;
+        font-size: 1.18rem;
+    }
+
+    .journal-today-btn {
+        min-height: 44px;
+        margin-top: 0.5rem;
+    }
+
+    .nav-btn {
+        width: 44px;
+        height: 44px;
+    }
+
+    .mobile-journal-summary {
+        display: grid;
+        grid-template-columns: 1fr 1fr auto;
+        align-items: center;
+        gap: 0.75rem;
+        margin: 0 1rem 1rem;
+        padding: 0.85rem;
+        border: 1px solid var(--pk-color-border);
+        border-radius: var(--pk-radius-md);
+        background-color: var(--pk-color-bg-secondary);
+    }
+
+    .mobile-journal-summary>div {
+        display: grid;
+        gap: 0.15rem;
+    }
+
+    .summary-value {
+        font-size: 1.1rem;
+        font-weight: 800;
+        color: var(--pk-color-primary);
+    }
+
+    .summary-label {
+        font-size: 0.78rem;
+        color: var(--pk-color-text-secondary);
+    }
+
+    .mobile-journal-summary button {
+        min-height: 44px;
+        padding: 0 0.75rem;
+        border: none;
+        border-radius: var(--pk-radius-md);
+        background-color: var(--pk-color-primary);
+        color: white;
+        font: inherit;
+        font-size: 0.82rem;
+        font-weight: 800;
+    }
+
+    .journal-date-sheet-backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 1300;
+        display: flex;
+        align-items: flex-end;
+        background-color: rgba(15, 23, 42, 0.36);
+    }
+
+    .journal-date-sheet {
+        width: 100%;
+        max-height: calc(var(--pk-viewport-height) - var(--pk-safe-area-top) - 32px);
+        padding: 0.5rem 1rem calc(1rem + var(--pk-safe-area-bottom));
+        border-radius: 18px 18px 0 0;
+        background-color: var(--pk-color-bg);
+        box-shadow: 0 -16px 40px rgba(15, 23, 42, 0.22);
+    }
+
+    .date-sheet-handle {
+        width: 42px;
+        height: 4px;
+        margin: 0.25rem auto 0.85rem;
+        border-radius: 999px;
+        background-color: var(--pk-color-border);
+    }
+
+    .date-sheet-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .date-sheet-title {
+        font-size: 1rem;
+        font-weight: 800;
+        color: var(--pk-color-text);
+    }
+
+    .date-sheet-subtitle {
+        margin-top: 0.2rem;
+        font-size: 0.84rem;
+        color: var(--pk-color-text-secondary);
+    }
+
+    .date-sheet-close,
+    .date-sheet-actions button,
+    .recent-date-list button {
+        min-height: 44px;
+        border-radius: var(--pk-radius-md);
+        font: inherit;
+        font-weight: 700;
+    }
+
+    .date-sheet-close {
+        border: 0;
+        padding: 0 0.9rem;
+        background-color: var(--pk-color-bg-secondary);
+        color: var(--pk-color-text-secondary);
+    }
+
+    .date-sheet-input {
+        width: 100%;
+        min-height: 48px;
+        padding: 0 0.75rem;
+        border: 1px solid var(--pk-color-border);
+        border-radius: var(--pk-radius-md);
+        background-color: var(--pk-color-bg);
+        color: var(--pk-color-text);
+        font: inherit;
+    }
+
+    .date-sheet-actions {
+        margin: 0.75rem 0 1rem;
+    }
+
+    .date-sheet-actions button {
+        width: 100%;
+        border: none;
+        background-color: var(--pk-color-primary);
+        color: white;
+    }
+
+    .recent-date-list {
+        display: grid;
+        gap: 0.5rem;
+    }
+
+    .recent-date-title {
+        font-size: 0.82rem;
+        font-weight: 800;
+        color: var(--pk-color-text-secondary);
+    }
+
+    .recent-date-list button {
+        border: 1px solid var(--pk-color-border);
+        background-color: var(--pk-color-bg);
+        color: var(--pk-color-text);
+        text-align: left;
+        padding: 0 0.75rem;
     }
 
     .journal-section {

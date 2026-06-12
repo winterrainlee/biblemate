@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { ArrowLeft, Type, Download, Upload, Eye, EyeOff, LogOut, CheckCircle, AlertCircle, CalendarOff, Edit2, Trash2, ChevronLeft, ChevronRight, Copy, Check } from 'lucide-react';
 import { format, addDays, subDays, isToday } from 'date-fns';
 import { ko } from 'date-fns/locale';
@@ -30,8 +30,6 @@ const JournalPage = ({ date, onDateChange, readingLogs = [], books = [], onNavig
     // Date navigation handlers
     const handlePrevDay = () => onDateChange?.(subDays(date, 1));
     const handleNextDay = () => onDateChange?.(addDays(date, 1));
-    const handleToday = () => onDateChange?.(new Date());
-
     // Data States
     const [verseNotes, setVerseNotes] = useState([]);
     const [allVerseNotes, setAllVerseNotes] = useState([]); // stats 용
@@ -45,6 +43,7 @@ const JournalPage = ({ date, onDateChange, readingLogs = [], books = [], onNavig
     const [editingPrayer, setEditingPrayer] = useState(false);
     const [freeNoteContent, setFreeNoteContent] = useState('');
     const [prayerContent, setPrayerContent] = useState('');
+    const [isDateSheetOpen, setIsDateSheetOpen] = useState(false);
 
     // Verse Note Edit State
     const [editingVerseNote, setEditingVerseNote] = useState(null); // { note, content }
@@ -53,11 +52,6 @@ const JournalPage = ({ date, onDateChange, readingLogs = [], books = [], onNavig
     const [isCopied, setIsCopied] = useState(false);
     const [copiedVerseNoteId, setCopiedVerseNoteId] = useState(null);
     const verseNoteCopyTimeoutRef = useRef(null);
-
-    // Load data when date changes
-    useEffect(() => {
-        loadJournalData();
-    }, [dateStr]);
 
     useEffect(() => {
         return () => {
@@ -72,8 +66,19 @@ const JournalPage = ({ date, onDateChange, readingLogs = [], books = [], onNavig
     const [touchEnd, setTouchEnd] = useState(null);
 
     const minSwipeDistance = 50;
+    const isEditing = editingFreeNote || editingPrayer || Boolean(editingVerseNote);
+    const isInteractiveTouchTarget = (target) => {
+        return Boolean(target?.closest?.(
+            'button, input, textarea, select, a, [contenteditable="true"]'
+        ));
+    };
 
     const onTouchStart = (e) => {
+        if (isEditing || isInteractiveTouchTarget(e.target)) {
+            setTouchStart(null);
+            setTouchEnd(null);
+            return;
+        }
         setTouchEnd(null);
         setTouchStart({ x: e.targetTouches[0].clientX, y: e.targetTouches[0].clientY });
     };
@@ -94,10 +99,10 @@ const JournalPage = ({ date, onDateChange, readingLogs = [], books = [], onNavig
         }
     };
 
-    const loadJournalData = async () => {
+    const loadJournalData = useCallback(async () => {
         setIsLoading(true);
         try {
-            const [notesData, allNotesData, freeNotesData, freeNoteData, prayerData] = await Promise.all([
+            const [, allNotesData, freeNotesData, freeNoteData, prayerData] = await Promise.all([
                 getVerseNotesByDate(dateStr),
                 getAllVerseNotes(),
                 getAllFreeNotes(),
@@ -134,7 +139,12 @@ const JournalPage = ({ date, onDateChange, readingLogs = [], books = [], onNavig
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [books, dateStr]);
+
+    // Load data when date changes
+    useEffect(() => {
+        loadJournalData();
+    }, [loadJournalData]);
 
     // Get book name helper
     const getBookName = (bookId) => {
@@ -325,6 +335,42 @@ const JournalPage = ({ date, onDateChange, readingLogs = [], books = [], onNavig
             const startB = b.chapter_from || b.chapter || 0;
             return startA - startB;
         });
+    const monthKey = format(date, 'yyyy-MM');
+    const monthlyReadDays = new Set(readingLogs.filter(log => log.date?.startsWith(monthKey)).map(log => log.date));
+    const monthlyNoteDays = new Set([
+        ...allFreeNotes
+            .filter(note => note.date?.startsWith(monthKey))
+            .map(note => note.date),
+        ...allVerseNotes
+            .map(note => parseDateInput(note.created_at || note.date))
+            .filter(Boolean)
+            .map(parsed => format(parsed, 'yyyy-MM-dd'))
+            .filter(noteDate => noteDate.startsWith(monthKey))
+    ]);
+    const recentActivityDates = Array.from(new Set([
+        ...readingLogs.map(log => log.date).filter(Boolean),
+        ...allFreeNotes.map(note => note.date).filter(Boolean),
+        ...allVerseNotes
+            .map(note => parseDateInput(note.created_at || note.date))
+            .filter(Boolean)
+            .map(parsed => format(parsed, 'yyyy-MM-dd'))
+    ]))
+        .sort((a, b) => b.localeCompare(a))
+        .slice(0, 6);
+
+    const goToday = () => onDateChange?.(new Date());
+    const handleDateInputChange = (event) => {
+        const parsed = parseDateInput(event.target.value);
+        if (parsed) {
+            onDateChange?.(parsed);
+            setIsDateSheetOpen(false);
+        }
+    };
+
+    const startTodayMeditation = () => {
+        setEditingFreeNote(true);
+        setEditingPrayer(false);
+    };
 
     if (isLoading) {
         return (
@@ -365,14 +411,74 @@ const JournalPage = ({ date, onDateChange, readingLogs = [], books = [], onNavig
                                 <ChevronLeft size={24} />
                             </button>
                             <div className="date-info">
-                                <h2 className="journal-date">{format(date, 'yyyy년 M월 d일 (E)', { locale: ko })}</h2>
+                                <button className="journal-date-button" onClick={() => setIsDateSheetOpen(true)}>
+                                    {format(date, 'yyyy년 M월 d일 (E)', { locale: ko })}
+                                </button>
                                 {isToday(date) && <span className="today-badge-static">오늘</span>}
                             </div>
                             <button className="nav-btn" onClick={handleNextDay} title="다음 날짜">
                                 <ChevronRight size={24} />
                             </button>
                         </div>
+                        {!isToday(date) && (
+                            <button className="journal-today-btn" onClick={goToday}>
+                                오늘
+                            </button>
+                        )}
                     </header>
+
+                    <section className="mobile-journal-summary" aria-label="이번 달 묵상 요약">
+                        <div>
+                            <span className="summary-value">{monthlyReadDays.size}</span>
+                            <span className="summary-label">읽은 날</span>
+                        </div>
+                        <div>
+                            <span className="summary-value">{monthlyNoteDays.size}</span>
+                            <span className="summary-label">묵상한 날</span>
+                        </div>
+                        <button onClick={() => setIsDateSheetOpen(true)}>날짜 이동</button>
+                    </section>
+
+                    {isDateSheetOpen && (
+                        <div className="journal-date-sheet-backdrop" onClick={() => setIsDateSheetOpen(false)}>
+                            <section className="journal-date-sheet" onClick={(e) => e.stopPropagation()} aria-label="날짜 선택">
+                                <div className="date-sheet-handle" />
+                                <div className="date-sheet-header">
+                                    <div>
+                                        <div className="date-sheet-title">날짜 선택</div>
+                                        <div className="date-sheet-subtitle">{format(date, 'yyyy년 M월', { locale: ko })}</div>
+                                    </div>
+                                    <button className="date-sheet-close" onClick={() => setIsDateSheetOpen(false)}>닫기</button>
+                                </div>
+                                <input
+                                    className="date-sheet-input"
+                                    type="date"
+                                    value={dateStr}
+                                    onChange={handleDateInputChange}
+                                />
+                                <div className="date-sheet-actions">
+                                    <button onClick={goToday}>오늘로 이동</button>
+                                </div>
+                                {recentActivityDates.length > 0 && (
+                                    <div className="recent-date-list">
+                                        <div className="recent-date-title">최근 기록</div>
+                                        {recentActivityDates.map(activityDate => (
+                                            <button
+                                                key={activityDate}
+                                                onClick={() => {
+                                                    const parsed = parseDateInput(activityDate);
+                                                    if (parsed) onDateChange?.(parsed);
+                                                    setIsDateSheetOpen(false);
+                                                }}
+                                            >
+                                                {format(parseDateInput(activityDate), 'M월 d일 EEEE', { locale: ko })}
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+                            </section>
+                        </div>
+                    )}
 
                     {/* Empty State */}
                     {!hasAnyContent && !editingFreeNote && !editingPrayer && (
@@ -380,8 +486,7 @@ const JournalPage = ({ date, onDateChange, readingLogs = [], books = [], onNavig
                             <span className="empty-icon">📝</span>
                             <p>작성된 묵상이 없습니다</p>
                             <div className="empty-actions">
-                                <button onClick={() => setEditingFreeNote(true)}>자유 묵상 작성</button>
-                                <button onClick={() => setEditingPrayer(true)}>기도 작성</button>
+                                <button onClick={startTodayMeditation}>오늘 묵상 시작하기</button>
                             </div>
                         </div>
                     )}

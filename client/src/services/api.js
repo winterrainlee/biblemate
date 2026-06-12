@@ -19,7 +19,9 @@ async function request(method, endpoint, body = null) {
         const response = await fetch(`${API_BASE_URL}${endpoint}`, options);
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({}));
-            throw new Error(errorData.error || `API Error: ${response.status}`);
+            const error = new Error(errorData.error || `API Error: ${response.status}`);
+            error.status = response.status;
+            throw error;
         }
         return await response.json();
     } catch (error) {
@@ -40,19 +42,19 @@ export const api = {
     removeHighlight: (id) => request('DELETE', `/highlights/${id}`),
 
     // Notes
-    getNotes: () => request('GET', '/notes'),
+    getNotes: () => request('GET', '/free-notes'),
     getNote: async (date) => {
         try {
-            return await request('GET', `/notes/${date}`);
+            return await request('GET', `/free-notes/${date}`);
         } catch (error) {
-            if (error.message.includes('404')) return null;
+            if (error.status === 404) return null;
             throw error;
         }
     },
-    saveNote: (data) => request('POST', '/notes', data), // upsert by date { date, content }
-    addNote: (data) => request('POST', '/notes', data), // alias for saveNote
-    updateNote: (id, data) => request('PUT', `/notes/${id}`, data),
-    deleteNote: (date) => request('DELETE', `/notes/by-date/${date}`),
+    saveNote: (data) => request('POST', '/free-notes', data), // upsert by date { date, content }
+    addNote: (data) => request('POST', '/free-notes', data), // alias for saveNote
+    updateNote: (_id, data) => request('POST', '/free-notes', data),
+    deleteNote: (date) => request('DELETE', `/free-notes/${date}`),
 
     // Reading Logs
     getReadingLogs: () => request('GET', '/reading-logs'),

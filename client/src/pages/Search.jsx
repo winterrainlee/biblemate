@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { api } from '../services/api';
 import { Search as SearchIcon, BookOpen } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
 
 const Search = () => {
     const [query, setQuery] = useState('');
@@ -9,7 +8,6 @@ const Search = () => {
     const [results, setResults] = useState([]);
     const [loading, setLoading] = useState(false);
     const [hasSearched, setHasSearched] = useState(false);
-    const navigate = useNavigate();
 
     const handleSearch = async (e) => {
         e.preventDefault();
@@ -29,13 +27,6 @@ const Search = () => {
         } finally {
             setLoading(false);
         }
-    };
-
-    const handleCreateNote = (verse) => {
-        // Navigate to notes with pre-filled verse? 
-        // Current Note implementation doesn't support query params for pre-fill yet, 
-        // but we can just copy to clipboard or implement it later.
-        // For now, let's just let user navigate to Bible viewer.
     };
 
     return (

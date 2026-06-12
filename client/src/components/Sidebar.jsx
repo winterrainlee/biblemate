@@ -1,7 +1,7 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { BookOpen, PenTool, Home, Search, Settings as SettingsIcon, Menu, X } from 'lucide-react';
+import { BookOpen, PenTool, Home, Search, Settings as SettingsIcon, X } from 'lucide-react';
 import './Sidebar.css';
 
 const Sidebar = ({ isOpen, onClose }) => {

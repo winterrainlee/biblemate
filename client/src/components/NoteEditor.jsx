@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useCallback, useImperativeHandle, forwardRef, useRef } from 'react';
+import React, { useState, useEffect, useImperativeHandle, forwardRef, useRef, useCallback } from 'react';
 import { Save, Copy, Loader, Trash2, FileText } from 'lucide-react';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
@@ -39,14 +39,7 @@ const NoteEditor = forwardRef(({ date, readingLogs, books }, ref) => {
         }
     }));
 
-    // Load note when date changes
-    useEffect(() => {
-        if (date) {
-            loadNote();
-        }
-    }, [date]);
-
-    const loadNote = async () => {
+    const loadNote = useCallback(async () => {
         setIsLoading(true);
         try {
             const note = await api.getNote(date);
@@ -58,7 +51,27 @@ const NoteEditor = forwardRef(({ date, readingLogs, books }, ref) => {
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [date]);
+
+    const handleSave = useCallback(async () => {
+        if (!date) return;
+        setIsSaving(true);
+        try {
+            await api.saveNote({ date, content });
+            setLastSaved(new Date().toISOString());
+        } catch (error) {
+            console.error('Failed to save note', error);
+        } finally {
+            setIsSaving(false);
+        }
+    }, [content, date]);
+
+    // Load note when date changes
+    useEffect(() => {
+        if (date) {
+            loadNote();
+        }
+    }, [date, loadNote]);
 
     // Auto-save logic
     useEffect(() => {
@@ -72,20 +85,7 @@ const NoteEditor = forwardRef(({ date, readingLogs, books }, ref) => {
         }, 3000); // 3 seconds debounce
 
         return () => clearTimeout(timer);
-    }, [content, date]);
-
-    const handleSave = async () => {
-        if (!date) return;
-        setIsSaving(true);
-        try {
-            await api.saveNote({ date, content });
-            setLastSaved(new Date().toISOString());
-        } catch (error) {
-            console.error('Failed to save note', error);
-        } finally {
-            setIsSaving(false);
-        }
-    };
+    }, [content, date, handleSave]);
 
     const handleCopy = () => {
         const dateObj = parseDateOnly(date);
@@ -126,6 +126,8 @@ const NoteEditor = forwardRef(({ date, readingLogs, books }, ref) => {
 `;
         setContent(prev => form + prev);
     };
+
+    const dateObj = parseDateOnly(date);
 
     return (
         <div className="note-editor-container">

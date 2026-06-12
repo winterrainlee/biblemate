@@ -26,7 +26,7 @@ function LoginPage({ onLogin }) {
             } else {
                 setError(data.error || '로그인에 실패했습니다.');
             }
-        } catch (err) {
+        } catch {
             setError('서버 연결에 실패했습니다.');
         } finally {
             setLoading(false);

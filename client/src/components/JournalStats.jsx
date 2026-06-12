@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { format, isSameMonth, startOfMonth, endOfMonth } from 'date-fns';
+import { startOfMonth, endOfMonth } from 'date-fns';
 import Calendar from './Calendar';
 import './JournalStats.css';
 import { parseDateOnly } from '../utils/dateOnly';

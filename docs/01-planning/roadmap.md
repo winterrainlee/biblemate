@@ -1,8 +1,8 @@
 # 차기 작업 Roadmap
-- 최신 배포 버전: v2.1.3
-- 최신 배포일자: 2026년 3월 9일
+- 최신 배포 버전: v2.2.0
+- 최신 배포일자: 2026년 6월 12일
 - 목표 버전: v2.2.0
-- 목표 개발일자: 2026년 3월
+- 목표 개발일자: 2026년 6월
 - 플로우 다이어그램: [flow-diagrams.md](flow-diagrams.md)
 
 > ℹ️ **작업 절차 및 버전 관리 기준**은 [개발 방법론](dev-method.md) 문서를 참고하세요.
@@ -23,6 +23,35 @@
 |:---:|---|
 | `🔗 의존: [항목명]` | 선행 작업이 완료되어야 시작 가능 |
 | `⚠️ 리스크` | 기술적 불확실성, 외부 요인(라이선스, API 비용), 큰 변경 범위 |
+
+---
+
+## 🎯 v2.2.0 — Mobile UX Redesign (2026년 6월)
+
+### 기준 문서
+- [Mobile UX Final Adjustment v2](../02-specs/mobile-ux-final-adjustment-v2.md)
+- [Implementation Plan v2.2.0 Mobile UX](implementation-plans/implementation-plan-v2.2.0-mobile-ux.md)
+
+### P0 — 모바일 안정화 기반
+- [x] `🔴 Hard` **viewport/safe-area/키보드 안정화**: iOS Safari, PWA standalone, Android Chrome에서 하단 잘림과 저장 버튼 가림 방지
+- [x] `🟡 Medium` **입력 중 전환 보호**: 묵상 작성 중 스와이프, 날짜 변경, 장 변경, 탭 전환으로 인한 내용 유실 방지
+- [x] `🟡 Medium` **모바일 접근성 기본 정리**: 주요 아이콘 버튼 `aria-label`, 44px 터치 타깃, 오터치 방지
+
+### P1 — 성경 읽기 핵심 흐름
+- [x] `🔴 Hard` **모바일 성경 상단 압축**: 책/장/역본 선택을 compact context bar와 바텀시트로 재구성
+- [x] `🔴 Hard` **구절 액션 바텀시트 + 묵상 작성 전체 화면**: 묵상하기 우선, 키보드 안전 저장, 다중 구절 선택 명시화
+- [x] `🟡 Medium` **현재 장 묵상 모바일 복구**: `이 장의 묵상 n개` 진입점과 묵상 목록 시트 제공
+- [x] `🟡 Medium` **하단 읽기 액션 바**: 이전 장, 오늘 읽음 표시, 다음 장, 묵상일지 이동을 safe-area 위에 배치
+
+### P2 — 묵상일지/읽기표/가독성
+- [x] `🟡 Medium` **묵상일지 날짜 선택 시트**: 날짜 탭 → 달력 시트, 오늘 복귀, 과거 묵상 회고 동선 복구
+- [x] `🟢 Easy` **빈 상태 CTA 정리**: 자유 묵상/기도 작성 버튼 반복 제거
+- [x] `🟡 Medium` **본문 전용 가독성 설정**: 앱 전체 root font-size와 성경 본문 표시 설정 분리
+- [x] `🟡 Medium` **읽기표 진입점화**: `다음 안 읽은 장 읽기`와 책 row 기반 이동 제공
+
+### P3 — 유지보수 기반
+- [x] `🟡 Medium` **탭 상태/URL 유지 전략**: 최소 localStorage 유지, 라우트 분리는 후속 결정
+- [x] `🟡 Medium` **죽은 코드와 lint 정리**: 모바일 개선 대상 컴포넌트 혼선을 줄이고 기존 lint 오류 처리
 
 ---
 
@@ -94,6 +123,17 @@
 
 ## ✅ Completed
 > 배포 완료된 작업의 히스토리를 버전별로 기록합니다.
+
+### v2.2.0 (2026-06-12) - Mobile UX Redesign
+- **MOBILE**: viewport/safe-area/dynamic viewport 기반 정리 및 입력 중 스와이프 guard 보강
+- **UX**: 모바일 성경 상단 compact context bar와 본문 선택 바텀시트 추가
+- **UX**: 구절 액션을 묵상 우선 바텀시트로 재구성하고, 묵상 작성 전체 화면 오버레이 제공
+- **UX**: 선택한 말씀 본문을 묵상 작성 화면 상단에 항상 표시
+- **UX**: 현재 장 묵상 목록 바텀시트와 하단 읽기 action bar 추가
+- **JOURNAL**: 묵상일지 날짜 선택 시트, 오늘 복귀, 최근 기록, 모바일 월간 요약 추가
+- **TRACKING**: 읽기표에서 `다음 안 읽은 장 읽기`와 책 row 기반 이동 제공
+- **READABILITY**: 성경 본문 전용 `Aa` 글자 크기 조절 추가
+- **DOCS**: v2.2 모바일 UX 명세, 구현 계획, walkthrough, PR 초안, dev-log, release notes 업데이트
 
 ### v2.1.0 (2026-02-23) - UX Improvements & Backend Cleanup
 - **UX**: 구절별 묵상 수정 취소 버튼 추가 (팝업 memo/view-notes 모드)

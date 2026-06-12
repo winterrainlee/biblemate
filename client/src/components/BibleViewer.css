@@ -176,14 +176,21 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
     border: 1px solid transparent;
     background-color: transparent;
     color: var(--pk-color-text-secondary);
     cursor: pointer;
     transition: all 0.2s;
+}
+
+.bible-nav-header .nav-btn {
+    min-width: 44px;
+    min-height: 44px;
+    width: 44px;
+    height: 44px;
 }
 
 .nav-btn:hover:not(:disabled) {
@@ -238,6 +245,13 @@
     gap: 0.5rem;
     font-size: 0.9rem;
     color: var(--pk-color-text-secondary);
+}
+
+.mobile-context-trigger,
+.mobile-chapter-notes-btn,
+.mobile-reading-settings-btn,
+.mobile-reading-action-bar {
+    display: none;
 }
 
 .status-label {
@@ -303,7 +317,7 @@
 }
 
 .verse-content {
-    font-size: 1.05rem;
+    font-size: calc(1.05rem * var(--bible-text-scale, 1));
     color: var(--pk-color-text);
     transition: text-decoration 0.2s;
 }
@@ -318,7 +332,14 @@
 /* 📝 아이콘 스타일 */
 .note-indicator {
     display: inline-flex;
+    align-items: center;
+    justify-content: center;
     margin-left: 4px;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 0;
+    background: transparent;
     font-size: 0.8rem;
     cursor: pointer;
     opacity: 0.7;
@@ -375,6 +396,33 @@
     margin: 0;
 }
 
+.note-action-row {
+    display: flex;
+    gap: 8px;
+}
+
+.note-action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border: none;
+    border-radius: 999px;
+    background: none;
+    color: var(--pk-color-text-secondary);
+    cursor: pointer;
+}
+
+.note-action-btn.copied {
+    color: #22c55e;
+}
+
+.note-action-btn.danger {
+    color: var(--pk-color-danger);
+}
+
 /* view-notes 모드: 구절 본문 인용 스타일 */
 .view-notes-verse-text {
     font-size: 0.88rem;
@@ -412,13 +460,68 @@
     /* Slightly slower for smoother feel */
 }
 
-/* 모바일에서는 팝업을 화면 중앙에 고정 */
+/* Mobile verse actions use bottom sheet/full-screen composer */
 @media (max-width: 768px) {
     .verse-popup {
-        top: 50% !important;
-        left: 50% !important;
-        transform: translate(-50%, -50%) !important;
-        margin: 0 !important;
+        top: auto !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        width: 100%;
+        max-height: calc(var(--pk-viewport-height) - var(--pk-safe-area-top) - 24px);
+        padding: 1rem 1rem calc(1rem + var(--pk-safe-area-bottom));
+        border-radius: 18px 18px 0 0;
+        border-right: none;
+        border-left: none;
+        border-bottom: none;
+        cursor: default !important;
+        animation: mobileSheetUp 0.18s ease-out;
+    }
+
+    .verse-popup--memo {
+        top: var(--pk-safe-area-top) !important;
+        height: calc(var(--pk-viewport-height) - var(--pk-safe-area-top));
+        max-height: none;
+        border-radius: 0;
+        padding: 0;
+        animation: fadeIn 0.12s ease-out;
+    }
+
+    .verse-popup--memo .memo-composer {
+        height: 100%;
+        padding: calc(0.75rem + var(--pk-safe-area-top)) 1rem calc(0.75rem + var(--pk-safe-area-bottom));
+        gap: 0.75rem;
+    }
+
+    .verse-popup--memo .popup-header {
+        margin-bottom: 0;
+        align-items: center;
+    }
+
+    .verse-popup--memo .composer-selected-verse {
+        flex-shrink: 0;
+        max-height: 28%;
+        overflow: hidden;
+    }
+
+    .verse-popup--memo .memo-textarea {
+        flex: 1;
+        min-height: 220px;
+        resize: none;
+        font-size: 1rem;
+    }
+
+    .verse-popup--memo .quote-textarea {
+        max-height: 96px;
+        resize: none;
+    }
+
+    .verse-popup--memo .memo-composer-actions {
+        position: sticky;
+        bottom: 0;
+        flex-shrink: 0;
+        padding-top: 0.25rem;
+        background-color: var(--pk-color-bg);
     }
 }
 
@@ -523,6 +626,133 @@
     color: var(--pk-color-primary);
 }
 
+.verse-popup button.primary-action {
+    background-color: var(--pk-color-primary);
+    color: white;
+    justify-content: center;
+    font-weight: 700;
+}
+
+.verse-popup button.primary-action:hover {
+    background-color: var(--pk-color-primary-hover, var(--pk-color-primary));
+    color: white;
+}
+
+.memo-composer {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 4px;
+    width: 100%;
+}
+
+.composer-selected-verse {
+    padding: 0.75rem;
+    background-color: var(--pk-color-bg-secondary);
+    border-left: 3px solid var(--pk-color-primary);
+    border-radius: var(--pk-radius-md);
+}
+
+.composer-selected-ref {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--pk-color-primary);
+    margin-bottom: 0.35rem;
+}
+
+.composer-selected-text {
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 0.92rem;
+    line-height: 1.6;
+    color: var(--pk-color-text-secondary);
+    max-height: 7rem;
+    overflow-y: auto;
+}
+
+.quote-toggle-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+.quote-toggle-row input {
+    accent-color: var(--pk-color-primary);
+    cursor: pointer;
+}
+
+.quote-toggle-row label {
+    font-size: 0.9rem;
+    color: var(--pk-color-text);
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.quote-textarea,
+.memo-textarea {
+    width: 100%;
+    border: 1px solid var(--pk-color-border);
+    border-radius: var(--pk-radius-md);
+    background-color: var(--pk-color-bg);
+    color: var(--pk-color-text);
+    line-height: 1.5;
+    font-family: inherit;
+}
+
+.quote-textarea {
+    min-height: 60px;
+    padding: 8px;
+    font-size: 0.9rem;
+    font-style: italic;
+    font-family: 'Nanum Myeongjo', serif;
+    color: var(--pk-color-text-secondary);
+    background-color: var(--pk-color-bg-secondary);
+    border-left: 3px solid var(--pk-color-primary-light, #e0e7ff);
+    resize: vertical;
+    outline: none;
+    margin-bottom: 4px;
+}
+
+.memo-textarea {
+    min-height: 120px;
+    padding: 10px;
+    font-size: 0.95rem;
+    resize: vertical;
+}
+
+.memo-composer-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.memo-save-btn,
+.memo-cancel-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border-radius: var(--pk-radius-md);
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 600;
+    transition: background-color 0.2s;
+}
+
+.memo-save-btn {
+    flex: 1;
+    padding: 10px;
+    background-color: var(--pk-color-primary);
+    color: white;
+    border: none;
+}
+
+.memo-cancel-btn {
+    padding: 10px 16px;
+    background-color: var(--pk-color-bg-secondary);
+    color: var(--pk-color-text-secondary);
+    border: 1px solid var(--pk-color-border);
+}
+
 @keyframes fadeIn {
     from {
         opacity: 0;
@@ -533,6 +763,94 @@
         opacity: 1;
         transform: scale(1);
     }
+}
+
+@keyframes mobileSheetUp {
+    from {
+        opacity: 0;
+        transform: translateY(24px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.mobile-sheet-backdrop {
+    display: none;
+}
+
+.mobile-selector-fields {
+    display: grid;
+    gap: 0.75rem;
+}
+
+.mobile-selector-fields label {
+    display: grid;
+    gap: 0.35rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--pk-color-text-secondary);
+}
+
+.mobile-selector-fields select {
+    min-height: 44px;
+    width: 100%;
+    border: 1px solid var(--pk-color-border);
+    border-radius: var(--pk-radius-md);
+    background-color: var(--pk-color-bg);
+    color: var(--pk-color-text);
+    font: inherit;
+    padding: 0 0.75rem;
+}
+
+.reading-setting-control {
+    display: grid;
+    gap: 0.75rem;
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: var(--pk-color-text);
+}
+
+.reading-setting-control input {
+    width: 100%;
+    accent-color: var(--pk-color-primary);
+}
+
+.chapter-notes-list-mobile {
+    display: grid;
+    gap: 0.75rem;
+    overflow-y: auto;
+    max-height: min(60vh, 520px);
+    padding-right: 0.1rem;
+}
+
+.mobile-note-card {
+    box-shadow: none;
+    border: 1px solid var(--pk-color-border);
+    border-left: 4px solid var(--pk-color-primary);
+}
+
+.mobile-note-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 0.75rem;
+}
+
+.mobile-note-ref {
+    border: 0;
+    background: transparent;
+    padding: 0;
+    text-align: left;
+    cursor: pointer;
+}
+
+.mobile-empty-note {
+    color: var(--pk-color-text-secondary);
+    text-align: center;
+    padding: 2rem 1rem;
 }
 
 /* Chapter Completion Button */
@@ -633,5 +951,227 @@
     .nav-select {
         font-size: 1.1rem;
         /* Smaller font on mobile */
+    }
+}
+
+@media (max-width: 768px) {
+    .bible-viewer-container {
+        position: relative;
+        height: 100%;
+    }
+
+    .bible-main-content {
+        padding: 0 1rem calc(5.75rem + var(--pk-safe-area-bottom)) 1rem;
+    }
+
+    .bible-nav-header {
+        align-items: stretch;
+        gap: 0.45rem;
+        padding: 0.65rem 0 0.55rem;
+    }
+
+    .mobile-context-trigger {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        min-height: 44px;
+        width: 100%;
+        padding: 0.55rem 0.75rem;
+        border: 1px solid var(--pk-color-border);
+        border-radius: var(--pk-radius-md);
+        background-color: var(--pk-color-bg-secondary);
+        color: var(--pk-color-text);
+        font: inherit;
+        text-align: left;
+    }
+
+    .mobile-context-primary {
+        min-width: 0;
+        font-weight: 800;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .mobile-context-secondary {
+        flex-shrink: 0;
+        font-size: 0.82rem;
+        font-weight: 700;
+        color: var(--pk-color-primary);
+    }
+
+    .bible-nav-header .nav-controls-container {
+        display: none;
+    }
+
+    .reading-status-container {
+        justify-content: center;
+        font-size: 0.82rem;
+    }
+
+    .mobile-chapter-notes-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 40px;
+        border: 1px solid var(--pk-color-border);
+        border-radius: var(--pk-radius-md);
+        background-color: var(--pk-color-bg);
+        color: var(--pk-color-primary);
+        font: inherit;
+        font-size: 0.9rem;
+        font-weight: 700;
+    }
+
+    .mobile-reading-settings-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        align-self: center;
+        min-width: 48px;
+        min-height: 40px;
+        border: 1px solid var(--pk-color-border);
+        border-radius: var(--pk-radius-md);
+        background-color: var(--pk-color-bg);
+        color: var(--pk-color-text);
+        font: inherit;
+        font-weight: 900;
+    }
+
+    .mobile-chapter-notes-btn:disabled {
+        color: var(--pk-color-text-tertiary);
+        opacity: 0.75;
+    }
+
+    .mobile-sheet-backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 1200;
+        display: flex;
+        align-items: flex-end;
+        background-color: rgba(15, 23, 42, 0.36);
+    }
+
+    .mobile-sheet {
+        width: 100%;
+        max-height: calc(var(--pk-viewport-height) - var(--pk-safe-area-top) - 32px);
+        padding: 0.5rem 1rem calc(1rem + var(--pk-safe-area-bottom));
+        border-radius: 18px 18px 0 0;
+        background-color: var(--pk-color-bg);
+        box-shadow: 0 -16px 40px rgba(15, 23, 42, 0.22);
+        animation: mobileSheetUp 0.18s ease-out;
+    }
+
+    .mobile-sheet-handle {
+        width: 42px;
+        height: 4px;
+        margin: 0.25rem auto 0.85rem;
+        border-radius: 999px;
+        background-color: var(--pk-color-border);
+    }
+
+    .mobile-sheet-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .mobile-sheet-title {
+        font-size: 1rem;
+        font-weight: 800;
+        color: var(--pk-color-text);
+    }
+
+    .mobile-sheet-subtitle {
+        margin-top: 0.2rem;
+        font-size: 0.84rem;
+        color: var(--pk-color-text-secondary);
+    }
+
+    .mobile-sheet-close {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 44px;
+        min-height: 44px;
+        border: 0;
+        border-radius: 999px;
+        background-color: var(--pk-color-bg-secondary);
+        color: var(--pk-color-text-secondary);
+    }
+
+    .mobile-reading-action-bar {
+        position: fixed;
+        left: var(--pk-safe-area-left);
+        right: var(--pk-safe-area-right);
+        bottom: 0;
+        z-index: 45;
+        display: grid;
+        grid-template-columns: 0.8fr 1.4fr 0.8fr;
+        gap: 0.5rem;
+        padding: 0.55rem 0.75rem calc(0.55rem + var(--pk-safe-area-bottom));
+        border-top: 1px solid var(--pk-color-border);
+        background-color: var(--pk-color-bg);
+        backdrop-filter: blur(14px);
+        box-shadow: 0 -8px 24px rgba(15, 23, 42, 0.08);
+    }
+
+    .mobile-reading-action-bar button {
+        min-height: 44px;
+        border-radius: var(--pk-radius-md);
+        font: inherit;
+        font-size: 0.88rem;
+        font-weight: 800;
+    }
+
+    .mobile-reading-nav-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.2rem;
+        border: 1px solid var(--pk-color-border);
+        background-color: var(--pk-color-bg);
+        color: var(--pk-color-text-secondary);
+    }
+
+    .mobile-reading-primary-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.35rem;
+        border: 0;
+        background-color: var(--pk-color-primary);
+        color: white;
+    }
+
+    .mobile-reading-primary-btn.completed {
+        background-color: var(--pk-color-success, #22c55e);
+    }
+
+    .mobile-reading-action-bar button:disabled {
+        opacity: 0.45;
+    }
+
+    .chapter-complete-section {
+        display: none;
+    }
+
+    .verse-row {
+        scroll-margin-top: 9rem;
+    }
+
+    .verse-popup .popup-close-btn,
+    .verse-popup button.action-btn,
+    .palette-color-btn {
+        min-height: 44px;
+    }
+
+    .verse-popup .note-action-btn,
+    .mobile-sheet .note-action-btn {
+        width: 44px;
+        height: 44px;
     }
 }

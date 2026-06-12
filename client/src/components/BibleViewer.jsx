@@ -1,12 +1,11 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Check, Highlighter, MessageSquare, Copy, X, Send, Loader, ChevronLeft, ChevronRight, Settings, Trash2, Edit2, Eraser } from 'lucide-react';
+import { Check, MessageSquare, Copy, X, Send, Loader, ChevronLeft, ChevronRight, Trash2, Edit2, Eraser, BookOpen } from 'lucide-react';
 import { getVerseNotesByChapter, saveVerseNote, deleteVerseNote } from '../services/journalApi';
 import { format } from 'date-fns';
 import './BibleViewer.css';
 
 const BibleViewer = ({
-    item, // Optional object including book/chapter
     verses = [],
     highlights = [],
     onHighlight,
@@ -18,8 +17,8 @@ const BibleViewer = ({
     book = '',
     bookName = '',
     chapter = 1,
-    onAddNote,
     onCopyCitation,
+    onToast,
     onNavigateToJournal, // [NEW] Link to Journal tab
     completionStatus = 'idle', // idle, loading, success, error
     highlightLabels, // [NEW] Shared labels from dashboard
@@ -39,6 +38,12 @@ const BibleViewer = ({
     const selectedBookObj = books.find(b => b.id === currentBook);
     const totalChapters = selectedBookObj ? selectedBookObj.chapters : 0;
     const chapters = Array.from({ length: totalChapters }, (_, i) => i + 1);
+    const versionLabels = {
+        krv: '개역한글',
+        web: 'WEB',
+        bbe: 'BBE'
+    };
+    const currentVersionLabel = versionLabels[currentVersion] || currentVersion;
 
     // Navigation Handlers
     const handlePrevChapter = () => {
@@ -71,6 +76,13 @@ const BibleViewer = ({
     const [isLoadingNotes, setIsLoadingNotes] = useState(false);
     const [selectedVerses, setSelectedVerses] = useState([]);
     const [copiedNoteId, setCopiedNoteId] = useState(null);
+    const [isMobileSelectorOpen, setIsMobileSelectorOpen] = useState(false);
+    const [isChapterNotesOpen, setIsChapterNotesOpen] = useState(false);
+    const [isReadingSettingsOpen, setIsReadingSettingsOpen] = useState(false);
+    const [bibleTextScale, setBibleTextScale] = useState(() => {
+        const saved = localStorage.getItem('bibleTextScale');
+        return saved ? Number(saved) : 100;
+    });
     const [popup, setPopup] = useState({
         visible: false,
         x: 0,
@@ -86,13 +98,27 @@ const BibleViewer = ({
     const popupRef = useRef(null);
     const copyTimeoutRef = useRef(null);
     const dragRef = useRef({ isDragging: false, startX: 0, startY: 0, initialLeft: 0, initialTop: 0 });
+    const closeVersePopup = () => {
+        setPopup(prev => ({ ...prev, visible: false, verseRange: null, editTargetDate: null }));
+        setSelectedVerses([]);
+    };
 
     // [NEW] Swipe handlers for mobile chapter navigation
     const [touchStart, setTouchStart] = useState(null);
     const [touchEnd, setTouchEnd] = useState(null);
     const minSwipeDistance = 50;
+    const isInteractiveTouchTarget = (target) => {
+        return Boolean(target?.closest?.(
+            'button, input, textarea, select, a, [contenteditable="true"], .verse-popup, .mobile-sheet, .mobile-reading-action-bar'
+        ));
+    };
 
     const onTouchStart = (e) => {
+        if (popup.visible || isInteractiveTouchTarget(e.target)) {
+            setTouchStart(null);
+            setTouchEnd(null);
+            return;
+        }
         setTouchEnd(null);
         setTouchStart({ x: e.targetTouches[0].clientX, y: e.targetTouches[0].clientY });
     };
@@ -180,6 +206,10 @@ const BibleViewer = ({
         };
     }, []);
 
+    useEffect(() => {
+        localStorage.setItem('bibleTextScale', String(bibleTextScale));
+    }, [bibleTextScale]);
+
     // Check if a verse has a highlight
     const getHighlightStyle = (verseNum) => {
         const hl = highlights.find(h => h.verse === verseNum);
@@ -246,7 +276,7 @@ const BibleViewer = ({
                 verseText: selectedText,
                 mode: 'menu',
                 memoInput: '',
-                quoteEnabled: false,
+                quoteEnabled: true,
                 quoteText: selectedText
             });
         } else {
@@ -254,14 +284,10 @@ const BibleViewer = ({
             setPopup(prev => ({
                 ...prev,
                 verseNum: primaryVerseNum,
+                verseText: selectedText,
                 quoteText: selectedText
             }));
         }
-    };
-
-    const handleHighlightClick = () => {
-        onHighlight(popup.verseNum);
-        setPopup(prev => ({ ...prev, visible: false }));
     };
 
     const handleCopyClick = () => {
@@ -336,6 +362,7 @@ const BibleViewer = ({
             const targetBook = book || currentBook; // Consistent with noteData
             const notes = await getVerseNotesByChapter(targetBook, chapter || currentChapter);
             setChapterNotes(notes);
+            onToast?.('묵상을 저장했습니다.', 'success');
 
             // Optional: alert or toast success
         } catch (error) {
@@ -410,6 +437,48 @@ const BibleViewer = ({
         });
     };
 
+    const getNotesForVerse = (verseNum) => chapterNotes.filter(n => n.verse === verseNum);
+
+    const openVerseNotes = (verse, event = null) => {
+        event?.stopPropagation();
+        const verseText = verse?.text || verse?.content || popup.verseText || '';
+        setSelectedVerses([verse.verse]);
+        setPopup({
+            visible: true,
+            x: Math.max(20, window.innerWidth / 2 - 210),
+            y: Math.max(20, window.innerHeight / 2 - 180),
+            verseNum: verse.verse,
+            verseText,
+            mode: 'view-notes',
+            memoInput: '',
+            quoteEnabled: true,
+            quoteText: verseText,
+            editTargetDate: null
+        });
+    };
+
+    const openMemoComposer = () => {
+        setPopup(prev => ({ ...prev, mode: 'memo', quoteEnabled: true }));
+    };
+
+    const closeComposer = () => {
+        if (popup.mode === 'memo' && popup.memoInput.trim()) {
+            const shouldClose = window.confirm('작성 중인 묵상이 있습니다. 닫으시겠습니까?');
+            if (!shouldClose) return;
+        }
+        closeVersePopup();
+    };
+
+    const scrollToVerse = (verseNum) => {
+        setIsChapterNotesOpen(false);
+        window.requestAnimationFrame(() => {
+            document.getElementById(`verse-${verseNum}`)?.scrollIntoView({
+                behavior: 'smooth',
+                block: 'center'
+            });
+        });
+    };
+
     // Split notes for left/right sidebars
     // Use floor to favor putting the middle item on the right (except for length 1)
     const midVerse = verses.length > 0 ? verses[Math.max(0, Math.floor(verses.length / 2) - 1)]?.verse : 0;
@@ -456,18 +525,19 @@ const BibleViewer = ({
         const isCopied = copiedNoteId === note.id;
 
         return (
-            <div style={{ display: 'flex', gap: '8px' }}>
+            <div className="note-action-row">
                 <button
                     onClick={() => handleCopyNote(note)}
-                    style={{ border: 'none', background: 'none', cursor: 'pointer', color: isCopied ? '#22c55e' : 'var(--pk-color-text-secondary)', padding: '2px' }}
+                    className={`note-action-btn ${isCopied ? 'copied' : ''}`}
                     title={isCopied ? '복사됨' : '복사'}
+                    aria-label={isCopied ? '묵상 복사됨' : '묵상 복사'}
                 >
                     {isCopied ? <Check size={14} /> : <Copy size={14} />}
                 </button>
-                <button onClick={() => handleEditNote(note)} style={{ border: 'none', background: 'none', cursor: 'pointer', color: 'var(--pk-color-text-secondary)', padding: '2px' }} title="수정">
+                <button onClick={() => handleEditNote(note)} className="note-action-btn" title="수정" aria-label="묵상 수정">
                     <Edit2 size={14} />
                 </button>
-                <button onClick={() => handleDeleteNote(note.id)} style={{ border: 'none', background: 'none', cursor: 'pointer', color: 'var(--pk-color-danger)', padding: '2px' }} title="삭제">
+                <button onClick={() => handleDeleteNote(note.id)} className="note-action-btn danger" title="삭제" aria-label="묵상 삭제">
                     <Trash2 size={14} />
                 </button>
             </div>
@@ -502,8 +572,16 @@ const BibleViewer = ({
             </aside>
 
             {/* 중앙 본문 영역 */}
-            <main className="bible-main-content">
+            <main className="bible-main-content" style={{ '--bible-text-scale': bibleTextScale / 100 }}>
                 <header className="bible-nav-header">
+                    <button
+                        className="mobile-context-trigger"
+                        onClick={() => setIsMobileSelectorOpen(true)}
+                        aria-label={`${bookName} ${chapter}장, ${currentVersionLabel} 선택`}
+                    >
+                        <span className="mobile-context-primary">오늘 이어 읽기 · {bookName} {chapter}장</span>
+                        <span className="mobile-context-secondary">{currentVersionLabel} ▼</span>
+                    </button>
                     <div className="nav-controls-container">
                         {/* Previous Chapter Button */}
                         <button
@@ -511,6 +589,7 @@ const BibleViewer = ({
                             onClick={handlePrevChapter}
                             disabled={!currentBook || (currentBook === books[0]?.id && currentChapter === 1)}
                             title="이전 장"
+                            aria-label="이전 장"
                         >
                             <ChevronLeft size={24} />
                         </button>
@@ -562,6 +641,7 @@ const BibleViewer = ({
                             onClick={handleNextChapter}
                             disabled={!currentBook || (currentBook === books[books.length - 1]?.id && currentChapter === totalChapters)}
                             title="다음 장"
+                            aria-label="다음 장"
                         >
                             <ChevronRight size={24} />
                         </button>
@@ -582,7 +662,123 @@ const BibleViewer = ({
                             </span>
                         )}
                     </div>
+                    <button
+                        className="mobile-chapter-notes-btn"
+                        onClick={() => setIsChapterNotesOpen(true)}
+                        disabled={chapterNotes.length === 0}
+                    >
+                        이 장의 묵상 {chapterNotes.length}개 보기
+                    </button>
+                    <button
+                        className="mobile-reading-settings-btn"
+                        onClick={() => setIsReadingSettingsOpen(true)}
+                    >
+                        Aa
+                    </button>
                 </header>
+
+                {isMobileSelectorOpen && (
+                    <div className="mobile-sheet-backdrop" onClick={() => setIsMobileSelectorOpen(false)}>
+                        <section className="mobile-sheet" onClick={(e) => e.stopPropagation()} aria-label="본문 선택">
+                            <div className="mobile-sheet-handle" />
+                            <div className="mobile-sheet-header">
+                                <div>
+                                    <div className="mobile-sheet-title">본문 선택</div>
+                                    <div className="mobile-sheet-subtitle">{bookName} {chapter}장 · {currentVersionLabel}</div>
+                                </div>
+                                <button className="mobile-sheet-close" onClick={() => setIsMobileSelectorOpen(false)} aria-label="닫기">
+                                    <X size={20} />
+                                </button>
+                            </div>
+                            <div className="mobile-selector-fields">
+                                <label>
+                                    <span>역본</span>
+                                    <select value={currentVersion} onChange={(e) => onVersionChange(e.target.value)}>
+                                        <option value="krv">개역한글</option>
+                                        <option value="web">WEB</option>
+                                        <option value="bbe">BBE</option>
+                                    </select>
+                                </label>
+                                <label>
+                                    <span>성경</span>
+                                    <select value={currentBook} onChange={(e) => onBookChange(e.target.value)}>
+                                        {books.map(b => (
+                                            <option key={b.id} value={b.id}>{b.name}</option>
+                                        ))}
+                                    </select>
+                                </label>
+                                <label>
+                                    <span>장</span>
+                                    <select value={currentChapter} onChange={(e) => onChapterChange(Number(e.target.value))}>
+                                        {chapters.map(ch => (
+                                            <option key={ch} value={ch}>{ch}장</option>
+                                        ))}
+                                    </select>
+                                </label>
+                            </div>
+                        </section>
+                    </div>
+                )}
+
+                {isChapterNotesOpen && (
+                    <div className="mobile-sheet-backdrop" onClick={() => setIsChapterNotesOpen(false)}>
+                        <section className="mobile-sheet chapter-notes-sheet" onClick={(e) => e.stopPropagation()} aria-label="이 장의 묵상">
+                            <div className="mobile-sheet-handle" />
+                            <div className="mobile-sheet-header">
+                                <div>
+                                    <div className="mobile-sheet-title">{bookName} {chapter}장 묵상</div>
+                                    <div className="mobile-sheet-subtitle">이 장의 묵상 {chapterNotes.length}개</div>
+                                </div>
+                                <button className="mobile-sheet-close" onClick={() => setIsChapterNotesOpen(false)} aria-label="닫기">
+                                    <X size={20} />
+                                </button>
+                            </div>
+                            <div className="chapter-notes-list-mobile">
+                                {chapterNotes.length > 0 ? chapterNotes.map(note => (
+                                    <article key={note.id} className="verse-note-card-v2 mobile-note-card">
+                                        <div className="mobile-note-card-header">
+                                            <button className="note-ref mobile-note-ref" onClick={() => scrollToVerse(note.verse)}>
+                                                {bookName} {chapter}:{note.verse_range || note.verse}
+                                            </button>
+                                            {renderNoteActions(note)}
+                                        </div>
+                                        {renderNoteContent(note.content)}
+                                    </article>
+                                )) : (
+                                    <p className="mobile-empty-note">이 장에 작성된 묵상이 없습니다.</p>
+                                )}
+                            </div>
+                        </section>
+                    </div>
+                )}
+
+                {isReadingSettingsOpen && (
+                    <div className="mobile-sheet-backdrop" onClick={() => setIsReadingSettingsOpen(false)}>
+                        <section className="mobile-sheet" onClick={(e) => e.stopPropagation()} aria-label="본문 가독성 설정">
+                            <div className="mobile-sheet-handle" />
+                            <div className="mobile-sheet-header">
+                                <div>
+                                    <div className="mobile-sheet-title">본문 가독성</div>
+                                    <div className="mobile-sheet-subtitle">성경 본문에만 적용됩니다</div>
+                                </div>
+                                <button className="mobile-sheet-close" onClick={() => setIsReadingSettingsOpen(false)} aria-label="닫기">
+                                    <X size={20} />
+                                </button>
+                            </div>
+                            <label className="reading-setting-control">
+                                <span>본문 크기 {bibleTextScale}%</span>
+                                <input
+                                    type="range"
+                                    min="90"
+                                    max="125"
+                                    step="5"
+                                    value={bibleTextScale}
+                                    onChange={(e) => setBibleTextScale(Number(e.target.value))}
+                                />
+                            </label>
+                        </section>
+                    </div>
+                )}
 
 
 
@@ -594,6 +790,7 @@ const BibleViewer = ({
                             const isSelected = selectedVerses.includes(v.verse);
                             return (
                                 <div
+                                    id={`verse-${v.verse}`}
                                     key={v.verse}
                                     className={`verse-row ${hlColor ? 'has-highlight' : ''}`}
                                     style={{
@@ -609,7 +806,15 @@ const BibleViewer = ({
                                     <span className="verse-num">{v.verse}</span>
                                     <span className={`verse-content ${hasNote ? 'has-note' : ''}`}>
                                         {v.text || v.content || ''}
-                                        {hasNote && <span className="note-indicator">📝</span>}
+                                        {hasNote && (
+                                            <button
+                                                className="note-indicator"
+                                                onClick={(e) => openVerseNotes(v, e)}
+                                                aria-label={`${bookName} ${chapter}:${v.verse} 묵상 보기`}
+                                            >
+                                                📝
+                                            </button>
+                                        )}
                                     </span>
                                 </div>
                             );
@@ -662,7 +867,7 @@ const BibleViewer = ({
                 {popup.visible && (
                     <div
                         ref={popupRef}
-                        className="verse-popup"
+                        className={`verse-popup verse-popup--${popup.mode}`}
                         style={{ left: popup.x, top: popup.y, cursor: 'move' }}
                         onMouseDown={handleMouseDown}
                     >
@@ -670,12 +875,13 @@ const BibleViewer = ({
                             <div className="popup-menu-v2">
                                 <div className="popup-header">
                                     <span className="popup-title">
-                                        {bookName} {chapter}:{popupVerseRef} 묵상 ({chapterNotes.filter(n => n.verse === popup.verseNum).length}개)
+                                        {bookName} {chapter}:{popupVerseRef} 묵상 ({getNotesForVerse(popup.verseNum).length}개)
                                     </span>
                                     <button
                                         onClick={() => setPopup(prev => ({ ...prev, mode: 'menu' }))}
                                         className="popup-close-btn"
                                         title="뒤로가기"
+                                        aria-label="구절 메뉴로 돌아가기"
                                     >
                                         <ChevronLeft size={18} />
                                     </button>
@@ -686,7 +892,7 @@ const BibleViewer = ({
                                     </div>
                                 )}
                                 <div className="popup-notes-list" style={{ maxHeight: '200px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                    {chapterNotes.filter(n => n.verse === popup.verseNum).map(note => (
+                                    {getNotesForVerse(popup.verseNum).map(note => (
                                         <div key={note.id} className="verse-note-card-v2" style={{ padding: '0.75rem', fontSize: '0.9rem' }}>
                                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '4px' }}>
                                                 <div className="note-date">{new Date(note.created_at || note.date).toLocaleDateString()}</div>
@@ -701,18 +907,31 @@ const BibleViewer = ({
                             <div className="popup-menu-v2">
                                 <div className="popup-header">
                                     <span className="popup-title">
-                                        {bookName} {chapter}:{popupVerseRef}
+                                        {selectedVerses.length > 1 ? `${selectedVerses.length}개 구절 선택됨` : `${bookName} ${chapter}:${popupVerseRef}`}
                                     </span>
                                     <button
                                         onClick={() => {
-                                            setPopup(prev => ({ ...prev, visible: false }));
-                                            setSelectedVerses([]);
+                                            closeVersePopup();
                                         }}
                                         className="popup-close-btn"
+                                        aria-label="닫기"
                                     >
                                         <X size={18} />
                                     </button>
                                 </div>
+                                {popup.verseText && (
+                                    <div className="view-notes-verse-text">
+                                        &ldquo;{popup.verseText}&rdquo;
+                                    </div>
+                                )}
+                                <button className="action-btn primary-action" onClick={openMemoComposer}>
+                                    <MessageSquare size={16} /> 묵상하기
+                                </button>
+                                {getNotesForVerse(popup.verseNum).length > 0 && (
+                                    <button className="action-btn" onClick={() => setPopup(prev => ({ ...prev, mode: 'view-notes' }))}>
+                                        <BookOpen size={16} /> 묵상 보기 ({getNotesForVerse(popup.verseNum).length})
+                                    </button>
+                                )}
                                 <div className="highlight-palette">
                                     {[
                                         { key: 'yellow', color: 'var(--pk-highlight-yellow)' },
@@ -730,8 +949,7 @@ const BibleViewer = ({
                                                     } else {
                                                         onHighlight(popup.verseNum, item.color);
                                                     }
-                                                    setPopup(prev => ({ ...prev, visible: false }));
-                                                    setSelectedVerses([]);
+                                                    closeVersePopup();
                                                 }}
                                                 title={highlightLabels?.[item.key] || item.key}
                                             />
@@ -764,8 +982,7 @@ const BibleViewer = ({
                                                             onHighlight(v, existing.style);
                                                         }
                                                     });
-                                                    setPopup(prev => ({ ...prev, visible: false }));
-                                                    setSelectedVerses([]);
+                                                    closeVersePopup();
                                                 }}
                                                 title="하이라이트 지우기"
                                             >
@@ -775,133 +992,71 @@ const BibleViewer = ({
                                         </div>
                                     )}
                                 </div>
-                                {chapterNotes.some(n => n.verse === popup.verseNum) && (
-                                    <button className="action-btn" onClick={() => setPopup(prev => ({ ...prev, mode: 'view-notes' }))}>
-                                        <BookOpenIcon size={16} /> 묵상 보기 ({chapterNotes.filter(n => n.verse === popup.verseNum).length})
-                                    </button>
-                                )}
-                                <button className="action-btn" onClick={() => setPopup(prev => ({ ...prev, mode: 'memo' }))}><MessageSquare size={16} /> 묵상하기</button>
                                 <button className="action-btn" onClick={handleCopyClick}><Copy size={16} /> 구절 복사</button>
                             </div>
                         ) : (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', padding: '4px', width: '100%' }}>
+                            <div className="memo-composer">
                                 <div className="popup-header">
                                     <span className="popup-title">
                                         {bookName} {chapter}:{popupVerseRef} 묵상
                                     </span>
                                     <button
-                                        onClick={() => {
-                                            setPopup(prev => ({ ...prev, mode: 'menu' }));
-                                            if (popup.visible) {
-                                                setPopup(prev => ({ ...prev, visible: false }));
-                                                setSelectedVerses([]);
-                                            }
-                                        }}
+                                        onClick={closeComposer}
                                         className="popup-close-btn"
+                                        aria-label="작성 닫기"
                                     >
                                         <X size={18} />
                                     </button>
                                 </div>
+                                <div className="composer-selected-verse">
+                                    <div className="composer-selected-ref">{bookName} {chapter}:{popupVerseRef}</div>
+                                    <div className="composer-selected-text">&ldquo;{popup.quoteText || popup.verseText}&rdquo;</div>
+                                </div>
                                 {
                                     /* v2.1: Quote Checkbox & Editable Area */
                                 }
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                                <div className="quote-toggle-row">
                                     <input
                                         type="checkbox"
                                         id="quote-check"
                                         checked={popup.quoteEnabled}
                                         onChange={(e) => setPopup(prev => ({ ...prev, quoteEnabled: e.target.checked }))}
-                                        style={{ accentColor: 'var(--pk-color-primary)', cursor: 'pointer' }}
                                     />
-                                    <label htmlFor="quote-check" style={{ fontSize: '0.9rem', color: 'var(--pk-color-text)', cursor: 'pointer', fontWeight: '500' }}>
+                                    <label htmlFor="quote-check">
                                         말씀 인용
                                     </label>
                                 </div>
 
                                 {popup.quoteEnabled && (
                                     <textarea
+                                        className="quote-textarea"
                                         value={popup.quoteText}
                                         onChange={(e) => setPopup(prev => ({ ...prev, quoteText: e.target.value }))}
-                                        style={{
-                                            width: '100%',
-                                            minHeight: '60px',
-                                            padding: '8px',
-                                            fontSize: '0.9rem',
-                                            fontStyle: 'italic',
-                                            fontFamily: 'Nanum Myeongjo, serif',
-                                            color: 'var(--pk-color-text-secondary)',
-                                            backgroundColor: 'var(--pk-color-bg-secondary)',
-                                            borderRadius: '4px',
-                                            border: '1px solid var(--pk-color-border)',
-                                            borderLeft: '3px solid var(--pk-color-primary-light, #e0e7ff)',
-                                            resize: 'vertical',
-                                            outline: 'none',
-                                            marginBottom: '4px'
-                                        }}
                                     />
                                 )}
                                 <textarea
+                                    className="memo-textarea"
                                     autoFocus
                                     value={popup.memoInput}
                                     onChange={(e) => setPopup(prev => ({ ...prev, memoInput: e.target.value }))}
                                     placeholder="이 구절을 통해 주신 마음을 적어보세요..."
-                                    style={{
-                                        width: '100%',
-                                        minHeight: '100px',
-                                        padding: '10px',
-                                        borderRadius: 'var(--pk-radius-md)',
-                                        border: '1px solid var(--pk-color-border)',
-                                        fontSize: '0.95rem',
-                                        backgroundColor: 'var(--pk-color-bg)',
-                                        color: 'var(--pk-color-text)',
-                                        resize: 'none',
-                                        lineHeight: '1.5'
-                                    }}
                                     onKeyDown={(e) => {
                                         if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
                                             handleMemoSubmit();
                                         }
                                     }}
                                 />
-                                <div style={{ display: 'flex', gap: '8px' }}>
+                                <div className="memo-composer-actions">
                                     <button
                                         onClick={handleMemoSubmit}
-                                        style={{
-                                            flex: 1,
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            gap: '8px',
-                                            padding: '10px',
-                                            backgroundColor: 'var(--pk-color-primary)',
-                                            color: 'white',
-                                            border: 'none',
-                                            borderRadius: 'var(--pk-radius-md)',
-                                            cursor: 'pointer',
-                                            fontSize: '0.95rem',
-                                            fontWeight: '600',
-                                            transition: 'background-color 0.2s'
-                                        }}
+                                        className="memo-save-btn"
                                     >
                                         <Send size={16} />
                                         저장
                                     </button>
                                     <button
-                                        onClick={() => {
-                                            setPopup(prev => ({ ...prev, visible: false, editTargetDate: null }));
-                                            setSelectedVerses([]);
-                                        }}
-                                        style={{
-                                            padding: '10px 16px',
-                                            backgroundColor: 'var(--pk-color-bg-secondary)',
-                                            color: 'var(--pk-color-text-secondary)',
-                                            border: '1px solid var(--pk-color-border)',
-                                            borderRadius: 'var(--pk-radius-md)',
-                                            cursor: 'pointer',
-                                            fontSize: '0.95rem',
-                                            fontWeight: '500',
-                                            transition: 'background-color 0.2s'
-                                        }}
+                                        onClick={closeComposer}
+                                        className="memo-cancel-btn"
                                     >
                                         취소
                                     </button>
@@ -910,6 +1065,36 @@ const BibleViewer = ({
                         )}
                     </div>
                 )}
+
+                <nav className="mobile-reading-action-bar" aria-label="성경 읽기 작업">
+                    <button
+                        className="mobile-reading-nav-btn"
+                        onClick={handlePrevChapter}
+                        disabled={!currentBook || (currentBook === books[0]?.id && currentChapter === 1)}
+                    >
+                        <ChevronLeft size={20} />
+                        이전
+                    </button>
+                    {isReadOnCurrentDate ? (
+                        <button className="mobile-reading-primary-btn completed" onClick={onNavigateToJournal}>
+                            <Check size={18} />
+                            묵상일지 보기
+                        </button>
+                    ) : (
+                        <button className="mobile-reading-primary-btn" onClick={onComplete} disabled={completionStatus === 'loading'}>
+                            {completionStatus === 'loading' ? <Loader size={18} className="animate-spin" /> : <Check size={18} />}
+                            {isToday ? '오늘 읽음 표시' : '읽음 표시'}
+                        </button>
+                    )}
+                    <button
+                        className="mobile-reading-nav-btn"
+                        onClick={handleNextChapter}
+                        disabled={!currentBook || (currentBook === books[books.length - 1]?.id && currentChapter === totalChapters)}
+                    >
+                        다음
+                        <ChevronRight size={20} />
+                    </button>
+                </nav>
 
             </main>
 
@@ -935,24 +1120,6 @@ const BibleViewer = ({
         </div>
     );
 };
-
-// Helper Icon
-const BookOpenIcon = ({ size }) => (
-    <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width={size}
-        height={size}
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-    >
-        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
-        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
-    </svg>
-);
 
 const formatVerseRange = (verses) => {
     if (!verses.length) return '';

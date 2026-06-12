@@ -7,7 +7,7 @@ import { getReadingSummary } from '../utils/bibleUtils';
 import { parseDateOnly } from '../utils/dateOnly';
 import './NotePreview.css';
 
-const NotePreview = ({ date, note, readingLogs, books, onClick }) => {
+const NotePreview = ({ date, readingLogs, books, onClick }) => {
     const parsedDate = parseDateOnly(date);
     // 읽은 말씀 요약 생성 (유틸리티 사용)
     const getReadingSummaryElements = () => {

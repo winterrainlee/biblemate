@@ -3,7 +3,6 @@ import {
     format, startOfMonth, endOfMonth, startOfWeek, endOfWeek,
     eachDayOfInterval, addMonths, subMonths, isSameMonth, isSameDay, isToday
 } from 'date-fns';
-import { ko } from 'date-fns/locale'; // 한국어 로케일
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import './Calendar.css';
 
@@ -31,14 +30,6 @@ const Calendar = ({ readingLogs = [], compact = false, onDateClick, selectedDate
     const handleDayClick = (day, logs) => {
         if (onDateClick) {
             onDateClick(day, logs);
-        }
-    };
-
-    const handleTodayClick = () => {
-        const today = new Date();
-        setCurrentMonth(today);
-        if (onDateClick) {
-            onDateClick(today, getLogForDate(today));
         }
     };
 
