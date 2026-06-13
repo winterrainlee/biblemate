@@ -276,7 +276,7 @@ const BibleViewer = ({
                 verseText: selectedText,
                 mode: 'menu',
                 memoInput: '',
-                quoteEnabled: true,
+                quoteEnabled: false,
                 quoteText: selectedText
             });
         } else {
@@ -451,14 +451,14 @@ const BibleViewer = ({
             verseText,
             mode: 'view-notes',
             memoInput: '',
-            quoteEnabled: true,
+            quoteEnabled: false,
             quoteText: verseText,
             editTargetDate: null
         });
     };
 
     const openMemoComposer = () => {
-        setPopup(prev => ({ ...prev, mode: 'memo', quoteEnabled: true }));
+        setPopup(prev => ({ ...prev, mode: 'memo', quoteEnabled: false }));
     };
 
     const closeComposer = () => {
