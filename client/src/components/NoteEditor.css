@@ -4,7 +4,7 @@
     max-width: 1400px;
     margin: 0 auto;
 
-    background: var(--pk-color-bg);
+    background: var(--pk-color-bg-elevated);
     /* border-top: 1px solid var(--pk-color-border); -> Moved to wrapper in Dashboard */
     padding: 1rem 1.5rem;
     /* Horizontal padding match BibleViewer */
@@ -25,7 +25,8 @@
 .editor-header h3 {
     font-size: 1rem;
     font-weight: 600;
-    color: var(--pk-color-primary);
+    color: var(--pk-color-text);
+    font-family: var(--pk-font-body);
 }
 
 .editor-actions {
@@ -54,19 +55,19 @@
 
 .action-btn.delete:hover {
     background: var(--pk-color-danger-hover);
-    color: #ef4444;
-    border-color: #fecaca;
+    color: var(--pk-color-danger);
+    border-color: var(--pk-color-danger);
 }
 
 .action-btn.primary {
-    background: var(--pk-color-primary);
-    color: white;
-    border-color: var(--pk-color-primary);
+    background: var(--pk-color-primary-solid);
+    color: var(--pk-color-primary-contrast);
+    border-color: var(--pk-color-primary-solid);
 }
 
 .action-btn.primary:hover {
     opacity: 0.9;
-    background: var(--pk-color-primary);
+    background: var(--pk-color-primary-solid);
 }
 
 .action-btn.icon-only {
@@ -81,16 +82,16 @@
     border: 1px solid var(--pk-color-border);
     border-radius: var(--pk-radius-md);
     padding: 0.75rem;
-    font-family: inherit;
+    font-family: var(--pk-font-body);
     font-size: 1rem;
     line-height: 1.6;
-    background: var(--pk-color-bg-secondary);
+    background: var(--pk-color-bg);
 }
 
 .note-textarea:focus {
     outline: none;
     border-color: var(--pk-color-primary);
-    background: var(--pk-color-bg);
+    background: var(--pk-color-bg-elevated);
 }
 
 .editor-footer {

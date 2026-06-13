@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-labelledby="title desc">
+  <title id="title">BibleMate icon</title>
+  <desc id="desc">A warm cream Bible icon with a leather bookmark and candlelight accent.</desc>
+  <rect width="1024" height="1024" rx="236" fill="#FAF6EF"/>
+  <rect x="134" y="140" width="756" height="744" rx="172" fill="#8B5E3C"/>
+  <path d="M252 310c0-62 50-112 112-112h294c62 0 112 50 112 112v430c0 47-38 85-85 85H338c-47 0-85-38-85-85V310Z" fill="#FFFAF2"/>
+  <path d="M354 198h302c63 0 114 51 114 114v35H354c-42 0-76 34-76 76v-111c0-63 51-114 114-114Z" fill="#F3EDE2"/>
+  <path d="M512 260v506" stroke="#8B5E3C" stroke-width="26" stroke-linecap="round" opacity=".24"/>
+  <path d="M354 354h114M354 438h104M560 354h112M560 438h92" stroke="#8A7E6D" stroke-width="28" stroke-linecap="round" opacity=".55"/>
+  <path d="M631 198h78v330l-39-34-39 34V198Z" fill="#C9A36B"/>
+  <path d="M512 618c34-74 84-112 150-112 42 0 79 16 111 47-67 9-117 44-151 105-41-17-78-30-110-40Zm0 0c-34-74-84-112-150-112-42 0-79 16-111 47 67 9 117 44 151 105 41-17 78-30 110-40Z" fill="#6B7F5E" opacity=".92"/>
+  <path d="M512 598v96" stroke="#8B5E3C" stroke-width="24" stroke-linecap="round"/>
+</svg>

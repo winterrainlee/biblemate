@@ -37,8 +37,10 @@ function LoginPage({ onLogin }) {
         <div className="login-page">
             <div className="login-container">
                 <div className="login-header">
-                    <h1>📖 BibleMate</h1>
-                    <p>접근하려면 암호를 입력하세요</p>
+                    <div className="login-mark" aria-hidden="true">BM</div>
+                    <h1>BibleMate</h1>
+                    <p className="login-verse">주의 말씀은 내 발에 등이요 내 길에 빛이니이다</p>
+                    <p>나만의 서재로 들어가기</p>
                 </div>
 
                 <form onSubmit={handleSubmit} className="login-form">
@@ -47,7 +49,7 @@ function LoginPage({ onLogin }) {
                             type="password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            placeholder="암호 입력"
+                        placeholder="암호를 입력하세요"
                             autoFocus
                             disabled={loading}
                         />
@@ -56,7 +58,7 @@ function LoginPage({ onLogin }) {
                     {error && <div className="error-message">{error}</div>}
 
                     <button type="submit" disabled={loading || !password}>
-                        {loading ? '확인 중...' : '로그인'}
+                        {loading ? '확인 중...' : '들어가기'}
                     </button>
                 </form>
             </div>

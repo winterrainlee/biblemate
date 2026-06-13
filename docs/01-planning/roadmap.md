@@ -1,7 +1,7 @@
 # 차기 작업 Roadmap
-- 최신 배포 버전: v2.2.0
-- 최신 배포일자: 2026년 6월 12일
-- 목표 버전: v2.2.0
+- 최신 배포 버전: v2.3.0
+- 최신 배포일자: 2026년 6월 13일
+- 목표 버전: v2.3.0
 - 목표 개발일자: 2026년 6월
 - 플로우 다이어그램: [flow-diagrams.md](flow-diagrams.md)
 
@@ -23,6 +23,37 @@
 |:---:|---|
 | `🔗 의존: [항목명]` | 선행 작업이 완료되어야 시작 가능 |
 | `⚠️ 리스크` | 기술적 불확실성, 외부 요인(라이선스, API 비용), 큰 변경 범위 |
+
+---
+
+## 🎯 v2.3.0 — Visual Redesign: 나만의 서재에서 읽는 성경 (2026년 6월)
+
+### 기준 문서
+- [Visual Redesign Proposal](proposal-visual-redesign.md)
+- [Project Spec v2.3](../02-specs/spec-v2.3.md)
+- [Implementation Plan v2.3.0 Visual Redesign](implementation-plans/implementation-plan-v2.3.0-visual-redesign.md)
+
+### P0 — Visual Foundation
+- [x] `🟡 Medium` **디자인 토큰 교체**: Paper & Ink / Candlelight 팔레트, bg-elevated, primary-solid, radius, border, shadow 정리
+- [x] `🟡 Medium` **하드코딩 색상 토큰화**: Tailwind blue/green/red 계열 hex를 역할 기반 토큰으로 치환
+- [x] `🟢 Easy` **하이라이트 팔레트 조정**: 라이트는 색연필 톤, 다크는 rgba 오버레이 방식 적용
+
+### P1 — Reading Surface & Typography
+- [x] `🟡 Medium` **본문 세리프 전환**: `Noto Serif KR` 기본값, `Gowun Batang`/고딕 선택 옵션 제공
+- [x] `🟡 Medium` **본문 글꼴 설정 추가**: 기존 본문 크기 설정 흐름과 함께 localStorage/설정 상태 연동
+- [x] `🟡 Medium` **성경 본문 paper surface 적용**: 본문 폭, 여백, 절 번호, 컬럼 구분선, hover 효과를 독서 화면에 맞게 조정
+
+### P2 — Surrounding Screens & Microcopy
+- [x] `🟡 Medium` **묵상 카드/일지 메모지 문법 적용**: 파란 left-border와 대시보드 카드 느낌 완화
+- [x] `🟡 Medium` **헤더와 로그인 첫인상 정리**: 로고/탭/버튼 시각 무게 축소, 크림 배경과 세리프 환영 문구 적용
+- [x] `🟢 Easy` **파비콘/앱 아이콘 리디자인**: 브라우저 탭과 apple touch icon을 v2.3 팔레트와 서재 컨셉에 맞게 교체
+- [x] `🟢 Easy` **마이크로카피 교체**: `오늘 펼친 말씀`, `마음에 머문 구절`, `이 말씀 묵상하기` 등 존댓말 톤 정리
+- [x] `🟡 Medium` **대시보드/읽기표/캘린더/차트 팔레트 정합**: 기능 구조 유지, 색상과 표면만 v2.3 기준에 맞춤
+
+### P3 — Verification & Documentation
+- [x] `🟡 Medium` **라이트/다크 × 데스크톱/모바일 점검**: 4조합 스크린샷, contrast, focus ring, 하이라이트 가독성, 파비콘/앱 아이콘 표시 확인
+- [x] `🟡 Medium` **v2.2 모바일 UX 회귀 확인**: safe-area, 바텀시트, 전체 화면 묵상 작성, 하단 action bar, `Aa` 설정 유지
+- [x] `🟢 Easy` **문서 마감**: walkthrough, PR 초안, dev-log, release notes, lessons 업데이트
 
 ---
 
@@ -123,6 +154,15 @@
 
 ## ✅ Completed
 > 배포 완료된 작업의 히스토리를 버전별로 기록합니다.
+
+### v2.3.0 (2026-06-13) - Visual Redesign
+- **DESIGN**: Paper & Ink 라이트 팔레트와 Candlelight 다크 팔레트 적용
+- **READABILITY**: 성경 본문 기본 글꼴을 `Noto Serif KR`로 전환하고 명조/고운바탕/고딕 본문 글꼴 선택 추가
+- **READING**: 성경 본문 영역에 paper surface, 세리프 절 번호, 넓은 줄간격, 따뜻한 hover/selection 적용
+- **JOURNAL**: 묵상 카드와 묵상일지를 메모지/기도 노트 문법으로 정리
+- **BRAND**: 헤더, 로그인 화면, favicon, apple touch icon, manifest 색상을 서재 컨셉으로 정합
+- **COPY**: `오늘 펼친 말씀`, `마음에 머문 구절`, `기도로 마무리`, `이 말씀 묵상하기`, `말씀 복사`, `말씀 여정` 마이크로카피 적용
+- **DOCS**: v2.3 명세, 구현 계획, walkthrough, PR 초안, dev-log, release notes 업데이트
 
 ### v2.2.0 (2026-06-12) - Mobile UX Redesign
 - **MOBILE**: viewport/safe-area/dynamic viewport 기반 정리 및 입력 중 스와이프 guard 보강

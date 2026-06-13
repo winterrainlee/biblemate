@@ -120,7 +120,7 @@ const NoteEditor = forwardRef(({ date, readingLogs, books }, ref) => {
 [의문점과 대답]
 - 읽으며 궁금했던 점과 답을 찾은 내용
 
-[오늘의 기도 한 줄]
+[기도로 마무리]
 - 
 
 `;

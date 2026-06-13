@@ -287,10 +287,10 @@ const JournalPage = ({ date, onDateChange, readingLogs = [], books = [], onNavig
                 parts.push(freeNote.content);
             }
 
-            // [오늘의 기도]
+            // [기도로 마무리]
             if (prayer?.content) {
                 parts.push('');
-                parts.push('[오늘의 기도]');
+                parts.push('[기도로 마무리]');
                 parts.push(prayer.content);
             }
 
@@ -484,7 +484,7 @@ const JournalPage = ({ date, onDateChange, readingLogs = [], books = [], onNavig
                     {!hasAnyContent && !editingFreeNote && !editingPrayer && (
                         <div className="journal-empty">
                             <span className="empty-icon">📝</span>
-                            <p>작성된 묵상이 없습니다</p>
+                            <p>아직 남긴 묵상이 없어요</p>
                             <div className="empty-actions">
                                 <button onClick={startTodayMeditation}>오늘 묵상 시작하기</button>
                             </div>
@@ -495,7 +495,7 @@ const JournalPage = ({ date, onDateChange, readingLogs = [], books = [], onNavig
                     {todayLogs.length > 0 && (
                         <section className="journal-section">
                             <div className="section-header">
-                                <h3 className="section-title">📖 읽은 말씀</h3>
+                                <h3 className="section-title">📖 오늘 펼친 말씀</h3>
                                 {hasAnyContent && (
                                     <div className="section-actions">
                                         <button
@@ -527,7 +527,7 @@ const JournalPage = ({ date, onDateChange, readingLogs = [], books = [], onNavig
                     {/* Section: 구절별 묵상 */}
                     {verseNotes.length > 0 && (
                         <section className="journal-section">
-                            <h3 className="section-title">✨ 구절별 묵상</h3>
+                            <h3 className="section-title">✨ 마음에 머문 구절</h3>
                             <div className="verse-notes-list">
                                 {verseNotes.map(note => {
                                     const isEditing = editingVerseNote?.note.id === note.id;
@@ -645,7 +645,7 @@ const JournalPage = ({ date, onDateChange, readingLogs = [], books = [], onNavig
                     {/* Section: 오늘의 기도 */}
                     <section className="journal-section">
                         <div className="section-header">
-                            <h3 className="section-title">🙏 오늘의 기도</h3>
+                            <h3 className="section-title">🙏 기도로 마무리</h3>
                             {prayer && !editingPrayer && (
                                 <div className="section-actions">
                                     <button className="icon-btn" onClick={() => setEditingPrayer(true)} title="수정"><Edit2 size={16} /></button>
@@ -673,7 +673,7 @@ const JournalPage = ({ date, onDateChange, readingLogs = [], books = [], onNavig
                             <p className="section-content">{prayer.content}</p>
                         ) : (
                             <button className="add-btn" onClick={() => setEditingPrayer(true)}>
-                                + 오늘의 기도 추가
+                                + 기도 남기기
                             </button>
                         )}
                     </section>

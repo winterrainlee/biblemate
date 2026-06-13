@@ -10,8 +10,8 @@ export const ThemeProvider = ({ children }) => {
     // Font Size: base pixel size (default 16)
     const [fontSize, setFontSize] = useState(() => Number(localStorage.getItem('fontSize')) || 16);
 
-    // Font Family: 'sans', 'serif'
-    const [fontFamily, setFontFamily] = useState(() => localStorage.getItem('fontFamily') || 'sans');
+    // Bible body font family: 'serif', 'gowun', 'sans'
+    const [fontFamily, setFontFamily] = useState(() => localStorage.getItem('bibleFontFamily') || localStorage.getItem('fontFamily') || 'serif');
 
     useEffect(() => {
         const root = window.document.documentElement;
@@ -38,14 +38,21 @@ export const ThemeProvider = ({ children }) => {
     }, [theme]);
 
     useEffect(() => {
-        // Apply Font Size & Family
+        // Apply Font Size & Bible body font family
         const root = window.document.documentElement;
+        const bibleFontMap = {
+            serif: 'var(--pk-font-serif)',
+            gowun: 'var(--pk-font-gowun)',
+            sans: 'var(--pk-font-sans)'
+        };
         root.style.setProperty('--pk-font-size-base', `${fontSize}px`);
-        root.style.setProperty('--pk-font-family', fontFamily === 'serif' ? 'var(--pk-font-serif)' : 'var(--pk-font-sans)');
+        root.style.setProperty('--pk-font-family', 'var(--pk-font-sans)');
+        root.style.setProperty('--pk-font-body', bibleFontMap[fontFamily] || 'var(--pk-font-serif)');
 
         // Persist settings
         localStorage.setItem('theme', theme);
         localStorage.setItem('fontSize', fontSize);
+        localStorage.setItem('bibleFontFamily', fontFamily);
         localStorage.setItem('fontFamily', fontFamily);
     }, [theme, fontSize, fontFamily]);
 

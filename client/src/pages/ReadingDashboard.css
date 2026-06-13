@@ -53,8 +53,8 @@
 }
 
 .note-editor-wrapper {
-    background: var(--pk-color-bg);
-    border-top: 1px solid var(--pk-color-border);
+    background: var(--pk-color-bg-elevated);
+    border-top: 1px solid var(--pk-color-border-light);
     height: 35vh;
     min-height: 250px;
     max-height: 450px;
@@ -87,7 +87,7 @@
     .dashboard-sidebar {
         width: 340px;
         flex-shrink: 0;
-        border-right: 1px solid var(--pk-color-border);
+        border-right: 1px solid var(--pk-color-border-light);
         border-bottom: none;
         height: 100%;
         overflow-y: auto;
@@ -111,7 +111,7 @@
 
     .note-editor-wrapper {
         border-top: none;
-        border-left: 1px solid var(--pk-color-border);
+        border-left: 1px solid var(--pk-color-border-light);
         height: 100%;
         max-height: none;
         min-height: 0;
@@ -123,9 +123,9 @@
     .resizer {
         display: flex;
         width: 12px;
-        background: var(--pk-color-bg);
-        border-left: 1px solid var(--pk-color-border);
-        border-right: 1px solid var(--pk-color-border);
+        background: var(--pk-color-bg-secondary);
+        border-left: 1px solid var(--pk-color-border-light);
+        border-right: 1px solid var(--pk-color-border-light);
         cursor: col-resize;
         align-items: center;
         justify-content: center;

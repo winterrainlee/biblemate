@@ -56,7 +56,7 @@ const ReadingProgress = ({ books = [], readingLogs = [] }) => {
 
     return (
         <div className="reading-progress">
-            <h3 className="panel-title">📊 성경 읽기표</h3>
+            <h3 className="panel-title">📊 말씀 여정</h3>
 
             <div className="progress-tabs">
                 <button
@@ -76,7 +76,7 @@ const ReadingProgress = ({ books = [], readingLogs = [] }) => {
             {/* Overall Progress Display */}
             <div className="overall-progress-container">
                 <div className="overall-progress-info">
-                    <span className="overall-label">{activeRange === 'OT' ? '구약' : '신약'} 전체 진행도</span>
+                    <span className="overall-label">{activeRange === 'OT' ? '구약' : '신약'} 말씀 여정</span>
                     <span className="overall-percent">{currentProgress}%</span>
                 </div>
                 <div className="overall-progress-bar-bg">

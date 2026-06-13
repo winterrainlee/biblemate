@@ -1,6 +1,6 @@
 
 import { useNavigate } from 'react-router-dom';
-import { BarChart2, Moon, Sun, Minus, Plus, Settings, Book } from 'lucide-react';
+import { BarChart2, Moon, Sun, Minus, Plus, Settings, BookOpen } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useTab } from '../contexts/TabContext';
 import './Header.css';
@@ -41,7 +41,7 @@ const Header = () => {
                         style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}
                         title="메인으로 이동"
                     >
-                        <Book className="logo-icon" size={24} color="var(--pk-color-primary)" />
+                        <BookOpen className="logo-icon" size={24} color="var(--pk-color-primary)" />
                         <h1 className="header-title">BibleMate</h1>
                     </div>
 

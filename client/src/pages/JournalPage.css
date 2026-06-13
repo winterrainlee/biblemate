@@ -7,7 +7,7 @@
     width: 100%;
     flex: 1;
     /* Force expansion in parent flex container */
-    background-color: var(--pk-color-bg);
+    background-color: var(--pk-color-bg-secondary);
 }
 
 .journal-side {
@@ -111,6 +111,7 @@
     font: inherit;
     font-size: 1.5rem;
     font-weight: 700;
+    font-family: var(--pk-font-body);
     cursor: pointer;
     padding: 0.25rem 0.5rem;
     border-radius: var(--pk-radius-md);
@@ -192,6 +193,10 @@
     padding: 3rem 1rem;
     text-align: center;
     color: var(--text-secondary);
+    background: var(--pk-color-bg-elevated);
+    border: 1px dashed var(--pk-color-border);
+    border-radius: var(--pk-radius-lg);
+    margin-bottom: 1.5rem;
 }
 
 .journal-empty .empty-icon {
@@ -211,9 +216,9 @@
 
 .journal-empty .empty-actions button {
     padding: 0.5rem 1rem;
-    border: 1px solid var(--primary-color, #3b82f6);
+    border: 1px solid var(--primary-color, var(--pk-color-primary));
     background: transparent;
-    color: var(--primary-color, #3b82f6);
+    color: var(--primary-color, var(--pk-color-primary));
     border-radius: 6px;
     cursor: pointer;
     font-size: 0.9rem;
@@ -221,8 +226,8 @@
 }
 
 .journal-empty .empty-actions button:hover {
-    background: var(--primary-color, #3b82f6);
-    color: white;
+    background: var(--pk-color-primary-solid);
+    color: var(--pk-color-primary-contrast);
 }
 
 /* Copy All Button */
@@ -251,16 +256,18 @@
 }
 
 .copy-all-btn.copied {
-    color: #22c55e;
-    border-color: #22c55e;
+    color: var(--pk-color-success);
+    border-color: var(--pk-color-success);
 }
 
 /* Sections */
 .journal-section {
     margin-bottom: 1.5rem;
     padding: 1.25rem;
-    background: var(--bg-secondary);
-    border-radius: 12px;
+    background: var(--pk-color-bg-elevated);
+    border: 1px solid var(--pk-color-border);
+    border-radius: var(--pk-radius-lg);
+    box-shadow: 0 4px 16px var(--pk-color-shadow);
 }
 
 .section-header {
@@ -275,6 +282,7 @@
     font-weight: 600;
     color: var(--text-primary);
     margin: 0;
+    font-family: var(--pk-font-body);
 }
 
 .section-actions {
@@ -287,6 +295,7 @@
     line-height: 1.7;
     color: var(--text-primary);
     white-space: pre-wrap;
+    font-family: var(--pk-font-body);
 }
 
 /* Icon Buttons */
@@ -305,12 +314,12 @@
 }
 
 .icon-btn.copied {
-    color: #22c55e;
+    color: var(--pk-color-success);
     opacity: 1;
 }
 
 .icon-btn.delete:hover {
-    color: #ef4444;
+    color: var(--pk-color-danger);
 }
 
 /* Reading List */
@@ -340,7 +349,7 @@
 }
 
 .reading-badge {
-    color: var(--success-color, #22c55e);
+    color: var(--success-color, var(--pk-color-success));
     font-weight: bold;
 }
 
@@ -352,8 +361,9 @@
 }
 
 .verse-note-card {
-    background: var(--bg-primary);
-    border-radius: 8px;
+    background: var(--pk-color-bg-elevated);
+    border: 1px solid var(--pk-color-border);
+    border-radius: var(--pk-radius-md);
     padding: 0.75rem 1rem;
 }
 
@@ -367,7 +377,7 @@
 
 .verse-ref {
     font-weight: 600;
-    color: var(--primary-color, #3b82f6);
+    color: var(--primary-color, var(--pk-color-primary));
     cursor: pointer;
 }
 
@@ -379,6 +389,8 @@
     margin: 0;
     line-height: 1.6;
     color: var(--text-primary);
+    font-family: var(--pk-font-body);
+    line-height: 1.75;
 }
 
 .note-actions {
@@ -401,7 +413,7 @@
     border: 1px solid var(--border-color, #e5e7eb);
     border-radius: 8px;
     font-size: 0.95rem;
-    font-family: inherit;
+    font-family: var(--pk-font-body);
     line-height: 1.6;
     resize: vertical;
     background: var(--bg-primary);
@@ -410,8 +422,8 @@
 
 .editor-box textarea:focus {
     outline: none;
-    border-color: var(--primary-color, #3b82f6);
-    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+    border-color: var(--primary-color, var(--pk-color-primary));
+    box-shadow: 0 0 0 2px var(--pk-color-primary-light);
 }
 
 .editor-actions {
@@ -422,8 +434,8 @@
 
 .btn-save {
     padding: 0.5rem 1rem;
-    background: var(--primary-color, #3b82f6);
-    color: white;
+    background: var(--pk-color-primary-solid);
+    color: var(--pk-color-primary-contrast);
     border: none;
     border-radius: 6px;
     cursor: pointer;
@@ -432,7 +444,7 @@
 }
 
 .btn-save:hover {
-    background: var(--primary-color-dark, #2563eb);
+    background: var(--primary-color-dark, var(--pk-color-primary-hover));
 }
 
 .btn-cancel {
@@ -454,7 +466,7 @@
     display: block;
     width: 100%;
     padding: 0.75rem;
-    background: var(--bg-primary, white);
+    background: var(--bg-primary, var(--pk-color-bg));
     border: 1px dashed var(--border-color, #e5e7eb);
     border-radius: 8px;
     color: var(--text-secondary);
@@ -464,8 +476,8 @@
 }
 
 .add-btn:hover {
-    border-color: var(--primary-color, #3b82f6);
-    color: var(--primary-color, #3b82f6);
+    border-color: var(--primary-color, var(--pk-color-primary));
+    color: var(--primary-color, var(--pk-color-primary));
 }
 
 /* Mobile Responsive */
@@ -539,7 +551,7 @@
         border: none;
         border-radius: var(--pk-radius-md);
         background-color: var(--pk-color-primary);
-        color: white;
+        color: var(--pk-color-primary-contrast);
         font: inherit;
         font-size: 0.82rem;
         font-weight: 800;
@@ -626,7 +638,7 @@
         width: 100%;
         border: none;
         background-color: var(--pk-color-primary);
-        color: white;
+        color: var(--pk-color-primary-contrast);
     }
 
     .recent-date-list {
@@ -668,14 +680,13 @@
 
 /* Quoted text style */
 .verse-quote-box {
-    background-color: var(--pk-color-bg-secondary);
+    background-color: var(--pk-color-bg-elevated);
     padding: 0.75rem 1rem;
     border-radius: var(--pk-radius-md);
     border-left: 3px solid var(--pk-color-border);
     margin: 0.5rem 0 1rem 0;
-    font-family: "Nanum Myeongjo", serif;
-    font-size: 0.95rem;
-    font-style: italic;
+    font-family: var(--pk-font-body);
+    font-size: 1rem;
     color: var(--pk-color-text-secondary);
     line-height: 1.6;
     white-space: pre-wrap;

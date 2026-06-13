@@ -46,6 +46,7 @@ const Settings = () => {
     };
     const handleFontChange = async (value) => {
         setFontFamily(value);
+        localStorage.setItem('bibleFontFamily', value);
         localStorage.setItem('fontFamily', value);
         try {
             await api.saveSetting('fontFamily', value);
@@ -83,6 +84,7 @@ const Settings = () => {
                     }
                     if (settings.fontFamily) {
                         setFontFamily(settings.fontFamily);
+                        localStorage.setItem('bibleFontFamily', settings.fontFamily);
                         localStorage.setItem('fontFamily', settings.fontFamily);
                     }
                 }
@@ -272,8 +274,8 @@ const Settings = () => {
                             display: 'flex',
                             alignItems: 'center',
                             gap: '0.5rem',
-                            backgroundColor: '#ef4444',
-                            color: 'white',
+                            backgroundColor: 'var(--pk-color-danger)',
+                            color: 'var(--pk-color-primary-contrast)',
                             border: 'none',
                             borderRadius: 'var(--pk-radius-md)',
                             cursor: 'pointer',
@@ -303,10 +305,10 @@ const Settings = () => {
 
                 <div className="highlight-labels-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1rem' }}>
                     {[
-                        { key: 'yellow', color: '#fef08a', name: '노랑' },
-                        { key: 'green', color: '#bbf7d0', name: '초록' },
-                        { key: 'blue', color: '#bfdbfe', name: '파랑' },
-                        { key: 'red', color: '#fecaca', name: '빨강' }
+                        { key: 'yellow', color: 'var(--pk-highlight-yellow)', name: '노랑' },
+                        { key: 'green', color: 'var(--pk-highlight-green)', name: '초록' },
+                        { key: 'blue', color: 'var(--pk-highlight-blue)', name: '파랑' },
+                        { key: 'red', color: 'var(--pk-highlight-red)', name: '빨강' }
                     ].map(item => (
                         <div key={item.key} style={{
                             display: 'flex',
@@ -357,30 +359,15 @@ const Settings = () => {
                 borderRadius: 'var(--pk-radius-lg)'
             }}>
                 <h3 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <Type size={20} /> 글꼴 및 크기 설정
+                    <Type size={20} /> 본문 글꼴 및 크기 설정
                 </h3>
 
                 {/* Font Family Selection */}
                 <div className="font-family-control" style={{ marginBottom: '2rem' }}>
                     <p style={{ color: 'var(--pk-color-text-secondary)', marginBottom: '1rem', fontSize: '0.9rem' }}>
-                        성경 본문을 읽기 편한 서체로 선택하세요.
+                        성경 본문을 읽기 편한 서체로 선택하세요. 버튼과 메뉴는 기존 고딕 UI를 유지합니다.
                     </p>
-                    <div style={{ display: 'flex', gap: '1rem' }}>
-                        <button
-                            onClick={() => handleFontChange('sans')}
-                            style={{
-                                flex: 1,
-                                padding: '1rem',
-                                borderRadius: 'var(--pk-radius-md)',
-                                border: fontFamily === 'sans' ? '2px solid var(--pk-color-primary)' : '1px solid var(--pk-color-border)',
-                                backgroundColor: fontFamily === 'sans' ? 'var(--pk-color-bg-secondary)' : 'var(--pk-color-bg)',
-                                cursor: 'pointer',
-                                transition: 'all 0.2s'
-                            }}
-                        >
-                            <div style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.25rem', fontFamily: 'var(--pk-font-sans)' }}>고딕 (Sans-serif)</div>
-                            <div style={{ fontSize: '0.8rem', color: 'var(--pk-color-text-secondary)' }}>현대적이고 깔끔함</div>
-                        </button>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '1rem' }}>
                         <button
                             onClick={() => handleFontChange('serif')}
                             style={{
@@ -388,13 +375,43 @@ const Settings = () => {
                                 padding: '1rem',
                                 borderRadius: 'var(--pk-radius-md)',
                                 border: fontFamily === 'serif' ? '2px solid var(--pk-color-primary)' : '1px solid var(--pk-color-border)',
-                                backgroundColor: fontFamily === 'serif' ? 'var(--pk-color-bg-secondary)' : 'var(--pk-color-bg)',
+                                backgroundColor: fontFamily === 'serif' ? 'var(--pk-color-bg-elevated)' : 'var(--pk-color-bg)',
                                 cursor: 'pointer',
                                 transition: 'all 0.2s'
                             }}
                         >
-                            <div style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.25rem', fontFamily: 'var(--pk-font-serif)' }}>명조 (Serif)</div>
-                            <div style={{ fontSize: '0.8rem', color: 'var(--pk-color-text-secondary)' }}>전통적이고 가독성이 좋음</div>
+                            <div style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.25rem', fontFamily: 'var(--pk-font-serif)' }}>명조</div>
+                            <div style={{ fontSize: '0.8rem', color: 'var(--pk-color-text-secondary)' }}>기본, 차분한 본문용</div>
+                        </button>
+                        <button
+                            onClick={() => handleFontChange('gowun')}
+                            style={{
+                                flex: 1,
+                                padding: '1rem',
+                                borderRadius: 'var(--pk-radius-md)',
+                                border: fontFamily === 'gowun' ? '2px solid var(--pk-color-primary)' : '1px solid var(--pk-color-border)',
+                                backgroundColor: fontFamily === 'gowun' ? 'var(--pk-color-bg-elevated)' : 'var(--pk-color-bg)',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s'
+                            }}
+                        >
+                            <div style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.25rem', fontFamily: 'var(--pk-font-gowun)' }}>고운바탕</div>
+                            <div style={{ fontSize: '0.8rem', color: 'var(--pk-color-text-secondary)' }}>손글씨에 가까운 온기</div>
+                        </button>
+                        <button
+                            onClick={() => handleFontChange('sans')}
+                            style={{
+                                flex: 1,
+                                padding: '1rem',
+                                borderRadius: 'var(--pk-radius-md)',
+                                border: fontFamily === 'sans' ? '2px solid var(--pk-color-primary)' : '1px solid var(--pk-color-border)',
+                                backgroundColor: fontFamily === 'sans' ? 'var(--pk-color-bg-elevated)' : 'var(--pk-color-bg)',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s'
+                            }}
+                        >
+                            <div style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.25rem', fontFamily: 'var(--pk-font-sans)' }}>고딕</div>
+                            <div style={{ fontSize: '0.8rem', color: 'var(--pk-color-text-secondary)' }}>선명하고 익숙한 화면 글꼴</div>
                         </button>
                     </div>
                 </div>
@@ -422,8 +439,9 @@ const Settings = () => {
                         padding: '1.5rem',
                         border: '1px dashed var(--pk-color-border)',
                         borderRadius: 'var(--pk-radius-md)',
-                        backgroundColor: 'var(--pk-color-bg-secondary)',
-                        fontFamily: 'var(--pk-font-family)'
+                        backgroundColor: 'var(--pk-color-bg-elevated)',
+                        fontFamily: 'var(--pk-font-body)',
+                        lineHeight: 1.9
                     }}>
                         <p style={{ marginBottom: '0.5rem' }}>성경은 하나님의 감동으로 된 것으로 교훈과 책망과 바르게 함과 의로 교육하기에 유익하니 (딤후 3:16)</p>
                         <p style={{ fontSize: '0.85em', opacity: 0.8 }}>All Scripture is God-breathed and is useful for teaching, rebuking, correcting and training in righteousness. (2 Tim 3:16)</p>
@@ -457,7 +475,7 @@ const Settings = () => {
                             justifyContent: 'center',
                             gap: '0.5rem',
                             backgroundColor: 'var(--pk-color-primary)',
-                            color: 'white',
+                            color: 'var(--pk-color-primary-contrast)',
                             border: 'none',
                             borderRadius: 'var(--pk-radius-md)',
                             cursor: 'pointer',
@@ -506,7 +524,7 @@ const Settings = () => {
                 </h3>
 
                 <div className="license-info" style={{ fontSize: '0.9rem', color: 'var(--pk-color-text-secondary)', lineHeight: '1.6' }}>
-                    <p style={{ marginBottom: '0.5rem' }}><strong>BibleMate v2.2.0</strong></p>
+                    <p style={{ marginBottom: '0.5rem' }}><strong>BibleMate v2.3.0</strong></p>
                     <p style={{ marginBottom: '1rem' }}>개인 묵상과 성경 읽기를 돕기 위해 만든 웹 애플리케이션입니다.</p>
 
                     <h4 style={{ fontSize: '0.95rem', color: 'var(--pk-color-text)', marginBottom: '0.5rem' }}>성경 데이터 저작권</h4>
@@ -554,7 +572,7 @@ const Settings = () => {
                         height: '64px',
                         borderRadius: '50%',
                         backgroundColor: resultModal.type === 'success' ? '#dcfce7' : '#fee2e2',
-                        color: resultModal.type === 'success' ? '#16a34a' : '#dc2626',
+                            color: resultModal.type === 'success' ? 'var(--pk-color-success)' : 'var(--pk-color-danger)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center'
@@ -580,7 +598,7 @@ const Settings = () => {
                         style={{
                             padding: '0.75rem 2rem',
                             backgroundColor: 'var(--pk-color-primary)',
-                            color: 'white',
+                            color: 'var(--pk-color-primary-contrast)',
                             border: 'none',
                             borderRadius: 'var(--pk-radius-md)',
                             fontSize: '1rem',

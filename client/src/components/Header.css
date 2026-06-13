@@ -1,6 +1,7 @@
 .main-header {
-    background-color: var(--pk-color-bg);
-    border-bottom: 1px solid var(--pk-color-border);
+    background-color: color-mix(in srgb, var(--pk-color-bg) 94%, transparent);
+    border-bottom: 1px solid var(--pk-color-border-light);
+    backdrop-filter: blur(12px);
     height: 60px;
     display: flex;
     align-items: center;
@@ -44,7 +45,8 @@
 .header-title {
     font-size: 1.25rem;
     font-weight: 700;
-    color: var(--pk-color-primary);
+    color: var(--pk-color-text);
+    font-family: var(--pk-font-body);
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -82,11 +84,12 @@
 .header-tab.active::after {
     content: '';
     position: absolute;
-    bottom: -10px;
-    left: 0;
-    right: 0;
+    bottom: -7px;
+    left: 1rem;
+    right: 1rem;
     height: 2px;
     background: var(--pk-color-primary);
+    border-radius: 999px;
 }
 
 .short-label {
@@ -157,9 +160,9 @@
     }
 
     .header-tab.active {
-        background-color: var(--pk-color-bg);
+        background-color: var(--pk-color-bg-elevated);
         border-radius: var(--pk-radius-sm);
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 1px 3px var(--pk-color-shadow);
     }
 
     .header-tab.active::after {

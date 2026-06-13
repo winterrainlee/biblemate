@@ -502,14 +502,13 @@ const BibleViewer = ({
             return (
                 <div className="note-content-wrapper">
                     <div className="note-quote-styled" style={{
-                        fontSize: '0.9rem',
-                        fontStyle: 'italic',
-                        fontFamily: 'Nanum Myeongjo, serif',
+                        fontSize: '1rem',
+                        fontFamily: 'var(--pk-font-body)',
                         color: 'var(--pk-color-text-secondary)',
-                        padding: '8px',
-                        backgroundColor: 'var(--pk-color-bg-secondary)',
-                        borderRadius: '4px',
-                        borderLeft: '3px solid var(--pk-color-primary-light, #e0e7ff)',
+                        padding: '10px 12px',
+                        backgroundColor: 'var(--pk-color-bg-elevated)',
+                        borderRadius: 'var(--pk-radius-md)',
+                        border: '1px solid var(--pk-color-border)',
                         marginBottom: '8px'
                     }}>
                         "{quoteText}"
@@ -566,7 +565,7 @@ const BibleViewer = ({
                         </div>
                     ))}
                     {leftNotes.length === 0 && !isLoadingNotes && (
-                        <div className="empty-side-note">전반부 묵상이 없습니다.</div>
+                        <div className="empty-side-note">아직 앞부분에 남긴 묵상이 없어요.</div>
                     )}
                 </div>
             </aside>
@@ -745,7 +744,7 @@ const BibleViewer = ({
                                         {renderNoteContent(note.content)}
                                     </article>
                                 )) : (
-                                    <p className="mobile-empty-note">이 장에 작성된 묵상이 없습니다.</p>
+                                    <p className="mobile-empty-note">아직 이 장에 남긴 묵상이 없어요.</p>
                                 )}
                             </div>
                         </section>
@@ -796,7 +795,7 @@ const BibleViewer = ({
                                     style={{
                                         ...(hlColor ? { backgroundColor: hlColor } : {}),
                                         ...(isSelected ? {
-                                            backgroundColor: 'var(--pk-color-primary-light, #e0e7ff)',
+                                            backgroundColor: 'var(--pk-color-primary-light)',
                                             boxShadow: 'inset 3px 0 0 var(--pk-color-primary)'
                                         } : {})
                                     }}
@@ -838,15 +837,15 @@ const BibleViewer = ({
                         ) : isReadOnCurrentDate ? (
                             <>
                                 <Check size={20} />
-                                {isToday ? '오늘 읽음' : '읽음'}
+                                {isToday ? '오늘의 말씀 완료' : '읽음'}
                             </>
                         ) : (
-                            isToday ? '오늘 읽음 표시하기' : '읽음 표시하기'
+                            isToday ? '오늘의 말씀을 마쳤습니다' : '읽음 표시하기'
                         )}
                     </button>
                     {isReadOnCurrentDate && (
                         <p className="chapter-complete-msg">
-                            {isToday ? '오늘 성경 읽기를 완료했습니다.' : `${lastReadDate}에 성경 읽기가 완료되었습니다.`}
+                            {isToday ? '오늘의 말씀을 마쳤습니다.' : `${lastReadDate}에 성경 읽기가 완료되었습니다.`}
                             <span
                                 className="journal-link"
                                 onClick={onNavigateToJournal}
@@ -925,7 +924,7 @@ const BibleViewer = ({
                                     </div>
                                 )}
                                 <button className="action-btn primary-action" onClick={openMemoComposer}>
-                                    <MessageSquare size={16} /> 묵상하기
+                                    <MessageSquare size={16} /> 이 말씀 묵상하기
                                 </button>
                                 {getNotesForVerse(popup.verseNum).length > 0 && (
                                     <button className="action-btn" onClick={() => setPopup(prev => ({ ...prev, mode: 'view-notes' }))}>
@@ -967,7 +966,7 @@ const BibleViewer = ({
                                             <button
                                                 className="palette-color-btn"
                                                 style={{
-                                                    backgroundColor: '#f3f4f6',
+                                                    backgroundColor: 'var(--pk-color-bg-secondary)',
                                                     color: 'var(--pk-color-text-secondary)',
                                                     border: '1px solid var(--pk-color-border)',
                                                     display: 'flex',
@@ -992,7 +991,7 @@ const BibleViewer = ({
                                         </div>
                                     )}
                                 </div>
-                                <button className="action-btn" onClick={handleCopyClick}><Copy size={16} /> 구절 복사</button>
+                                <button className="action-btn" onClick={handleCopyClick}><Copy size={16} /> 말씀 복사</button>
                             </div>
                         ) : (
                             <div className="memo-composer">
@@ -1083,7 +1082,7 @@ const BibleViewer = ({
                     ) : (
                         <button className="mobile-reading-primary-btn" onClick={onComplete} disabled={completionStatus === 'loading'}>
                             {completionStatus === 'loading' ? <Loader size={18} className="animate-spin" /> : <Check size={18} />}
-                            {isToday ? '오늘 읽음 표시' : '읽음 표시'}
+                            {isToday ? '오늘의 말씀 완료' : '읽음 표시'}
                         </button>
                     )}
                     <button
@@ -1113,7 +1112,7 @@ const BibleViewer = ({
                         </div>
                     ))}
                     {rightNotes.length === 0 && !isLoadingNotes && (
-                        <div className="empty-side-note">후반부 묵상이 없습니다.</div>
+                        <div className="empty-side-note">아직 뒷부분에 남긴 묵상이 없어요.</div>
                     )}
                 </div>
             </aside>

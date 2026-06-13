@@ -1,5 +1,5 @@
 .note-preview-container {
-    background-color: var(--pk-color-bg);
+    background-color: var(--pk-color-bg-elevated);
     border: 1px solid var(--pk-color-border);
     border-radius: var(--pk-radius-md);
     padding: 1rem;
@@ -13,7 +13,7 @@
 
 .note-preview-container:hover {
     border-color: var(--pk-color-primary);
-    background-color: var(--pk-color-bg-alt);
+    background-color: var(--pk-color-bg);
 }
 
 .note-preview-header {
@@ -56,7 +56,7 @@
     font-size: 1rem;
     font-weight: 700;
     color: var(--pk-color-primary);
-    background-color: var(--pk-color-bg-secondary);
+    background-color: var(--pk-color-bg);
     padding: 0.5rem 0.75rem;
     border-radius: var(--pk-radius-sm);
 }
@@ -64,7 +64,7 @@
 .no-reading {
     font-size: 0.85rem;
     color: var(--pk-color-text-tertiary);
-    font-style: italic;
+    font-family: var(--pk-font-body);
 }
 
 .meditation-preview {

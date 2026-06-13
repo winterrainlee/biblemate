@@ -114,7 +114,7 @@ const BibleChartPage = () => {
                     <button onClick={() => navigate(-1)} className="chart-back-btn" title="뒤로가기">
                         <ArrowLeft size={24} />
                     </button>
-                    <h1 className="chart-title">성경 읽기표</h1>
+                    <h1 className="chart-title">말씀 여정</h1>
                 </div>
 
                 {/* Filter Buttons moved to Header Right */}
@@ -157,7 +157,7 @@ const BibleChartPage = () => {
                             </div>
                             {nextUnread && (
                                 <button className="next-unread-btn" onClick={() => navigateToBible(nextUnread.book, nextUnread.chapter)}>
-                                    다음 안 읽은 장 읽기
+                                    다음 말씀 이어 읽기
                                 </button>
                             )}
                         </div>

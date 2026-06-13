@@ -73,8 +73,8 @@
 }
 
 .nav-item.active {
-    background-color: var(--pk-color-primary);
-    color: white;
+    background-color: var(--pk-color-primary-solid);
+    color: var(--pk-color-primary-contrast);
 }
 
 .sidebar-footer {

@@ -56,7 +56,7 @@
 .stats-value {
     font-size: 1.1rem;
     font-weight: 700;
-    color: var(--primary-color, #3b82f6);
+    color: var(--primary-color, var(--pk-color-primary));
 }
 
 .top-books-list {

@@ -78,7 +78,7 @@ const Search = () => {
                     style={{
                         padding: '0 1.5rem',
                         backgroundColor: 'var(--pk-color-primary)',
-                        color: 'white',
+                        color: 'var(--pk-color-primary-contrast)',
                         border: 'none',
                         borderRadius: 'var(--pk-radius-md)',
                         fontWeight: '600',

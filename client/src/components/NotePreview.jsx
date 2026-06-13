@@ -28,13 +28,13 @@ const NotePreview = ({ date, readingLogs, books, onClick }) => {
             <div className="note-preview-header">
                 <span className="preview-title">
                     <PenTool size={14} />
-                    {parsedDate ? format(parsedDate, 'M월 d일 (EEEE)', { locale: ko }) : ''} 오늘 읽은 말씀
+                    {parsedDate ? format(parsedDate, 'M월 d일 (EEEE)', { locale: ko }) : ''} 오늘 펼친 말씀
                 </span>
             </div>
 
             <div className="note-preview-content">
                 <div className="reading-summary">
-                    {getReadingSummaryElements() || <p className="no-reading">읽은 말씀 기록이 없습니다.</p>}
+                    {getReadingSummaryElements() || <p className="no-reading">아직 펼친 말씀이 없어요.</p>}
                 </div>
             </div>
         </div>

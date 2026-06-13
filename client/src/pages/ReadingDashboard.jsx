@@ -230,7 +230,7 @@ const ReadingDashboard = () => {
                     chapter: currentChapter,
                     verses_count: verses.length
                 });
-                showToast('읽기 완료! 참 잘하셨습니다.', 'success');
+                showToast('오늘의 말씀을 마쳤습니다.', 'success');
                 setCompletionStatus('success');
                 // 잠시 후 success 상태 해제
                 setTimeout(() => setCompletionStatus('idle'), 2000);
@@ -325,7 +325,7 @@ const ReadingDashboard = () => {
         };
 
         copyText()
-            .then(() => showToast('구절을 복사했습니다.', 'success'))
+            .then(() => showToast('말씀을 복사했습니다.', 'success'))
             .catch((error) => {
                 console.error('Failed to copy verse:', error);
                 showToast('복사에 실패했습니다.', 'error');
@@ -452,11 +452,11 @@ const ReadingDashboard = () => {
                     bottom: 'calc(24px + var(--pk-safe-area-bottom))',
                     left: '50%',
                     transform: 'translateX(-50%)',
-                    backgroundColor: toast.type === 'error' ? '#ef4444' : toast.type === 'warning' ? '#eab308' : '#3b82f6',
-                    color: 'white',
+                    backgroundColor: toast.type === 'error' ? 'var(--pk-color-danger)' : toast.type === 'warning' ? 'var(--pk-color-primary)' : 'var(--pk-color-primary-solid)',
+                    color: 'var(--pk-color-primary-contrast)',
                     padding: '12px 24px',
                     borderRadius: '9999px',
-                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                    boxShadow: '0 8px 24px var(--pk-color-shadow)',
                     display: 'flex',
                     alignItems: 'center',
                     gap: '8px',

@@ -19,8 +19,9 @@
     justify-content: space-between;
     gap: 1rem;
     padding: 1rem 1.5rem;
-    background: var(--pk-color-bg);
-    border-bottom: 1px solid var(--pk-color-border);
+    background: color-mix(in srgb, var(--pk-color-bg) 94%, transparent);
+    border-bottom: 1px solid var(--pk-color-border-light);
+    backdrop-filter: blur(12px);
     position: sticky;
     top: 0;
     z-index: 10;
@@ -47,6 +48,7 @@
     font-size: 1.25rem;
     font-weight: 700;
     margin: 0;
+    font-family: var(--pk-font-body);
 }
 
 /* Filter Buttons in Header */
@@ -74,8 +76,8 @@
 }
 
 .filter-btn.active {
-    background: var(--pk-color-primary);
-    color: white;
+    background: var(--pk-color-primary-solid);
+    color: var(--pk-color-primary-contrast);
     border-color: var(--pk-color-primary);
 }
 
@@ -96,9 +98,10 @@
     align-items: center;
     gap: 1.5rem;
     padding: 1.5rem;
-    background: var(--pk-color-bg-secondary);
+    background: var(--pk-color-bg-elevated);
+    border: 1px solid var(--pk-color-border);
     border-radius: var(--pk-radius-lg);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 16px var(--pk-color-shadow);
 }
 
 .stat-main {
@@ -194,8 +197,8 @@
     padding: 0 1rem;
     border: none;
     border-radius: var(--pk-radius-md);
-    background-color: var(--pk-color-primary);
-    color: white;
+    background-color: var(--pk-color-primary-solid);
+    color: var(--pk-color-primary-contrast);
     font: inherit;
     font-size: 0.92rem;
     font-weight: 800;
