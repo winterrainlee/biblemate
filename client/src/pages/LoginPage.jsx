@@ -37,7 +37,9 @@ function LoginPage({ onLogin }) {
         <div className="login-page">
             <div className="login-container">
                 <div className="login-header">
-                    <div className="login-mark" aria-hidden="true">BM</div>
+                    <div className="login-mark" aria-hidden="true">
+                        <img src="/logo.png" alt="" />
+                    </div>
                     <h1>BibleMate</h1>
                     <p className="login-verse">주의 말씀은 내 발에 등이요 내 길에 빛이니이다</p>
                     <p>나만의 서재로 들어가기</p>
