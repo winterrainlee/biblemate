@@ -16,6 +16,7 @@
 
 ## 📋 02. Specs (명세서)
 - [Project Spec v2.3](02-specs/spec-v2.3.md): v2.3 시각 디자인 재구성 명세서
+- [Favicon & App Icon Design Guidelines v2.3.1](02-specs/favicon-app-icon-design-v2.3.1.md): Gemma E4B 이미지 해석 기반 파비콘/앱 아이콘 제작 방향
 - [Project Spec v2.0](02-specs/spec-v2.0.md): v2.0 핵심 기능 명세서
 - [System Architecture](02-specs/architecture.md): 시스템 구조 및 설계 철학
 - [Layout Plan v2.0](02-specs/layout-v2.0.md): UI/UX 레이아웃 설계
