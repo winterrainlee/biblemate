@@ -1,6 +1,6 @@
 # 📚 Documentation Index
 
-> BibleMate 프로젝트 문서 목차입니다. (최초 생성일: 2026-01-05 | 최신 수정일: 2026-06-12)
+> BibleMate 프로젝트 문서 목차입니다. (최초 생성일: 2026-01-05 | 최신 수정일: 2026-06-24)
 
 ---
 
@@ -8,6 +8,7 @@
 - [Roadmap](01-planning/roadmap.md): 차기 버전 로드맵 및 기능 목록
 - [Visual Redesign Proposal](01-planning/proposal-visual-redesign.md): v2.3 시각 디자인 재구성 제안서
 - [Implementation Plans](01-planning/implementation-plans/): 버전별 구현 계획서
+  - [Implementation Plan v2.3.1 App Icon & Favicon](01-planning/implementation-plans/implementation-plan-v2.3.1-app-icon-favicon.md): 앱 아이콘/파비콘 정리 구현 계획
   - [Implementation Plan v2.3.0 Visual Redesign](01-planning/implementation-plans/implementation-plan-v2.3.0-visual-redesign.md): 서재 컨셉 시각 디자인 재구성 구현 계획
   - [Implementation Plan v2.2.0 Mobile UX](01-planning/implementation-plans/implementation-plan-v2.2.0-mobile-ux.md): 모바일 UX 재설계 구현 계획
 
@@ -28,6 +29,7 @@
 ## 📝 03. Logs (개발/검증 로그)
 
 ### Development Logs
+- [Dev Log v2.3.1](03-logs/dev-log-v2.3.1.md): 앱 아이콘/파비콘 정리
 - [Dev Log v2.3](03-logs/dev-log-v2.3.md): v2.3 시각 디자인 재구성
 - [Dev Log v2.2](03-logs/dev-log-v2.2.md): v2.2 모바일 UX 재설계
 - [Dev Log v2.1](03-logs/dev-log-v2.1.md): v2.1 UX 개선 및 데이터 핫픽스
@@ -43,6 +45,7 @@
 
 ### Pull Requests
 - [PR Drafts](03-logs/pr/): 버전별 PR 초안
+  - [PR Draft v2.3.1 App Icon & Favicon](03-logs/pr/pr-v2.3.1-app-icon-favicon.md): v2.3.1 앱 아이콘/파비콘 PR 초안
   - [PR Draft v2.3 Visual Foundation](03-logs/pr/pr-v2.3-visual-foundation.md): v2.3 디자인 토큰/팔레트 PR 초안
   - [PR Draft v2.3 Reading Surface](03-logs/pr/pr-v2.3-reading-surface.md): v2.3 본문 표면/타이포그래피 PR 초안
   - [PR Draft v2.3 Surrounding Screens](03-logs/pr/pr-v2.3-surrounding-screens.md): v2.3 주변 화면/파비콘/마이크로카피 PR 초안
@@ -56,6 +59,7 @@
 
 ### Walkthroughs
 - [Walkthroughs](03-logs/walkthroughs/): 구현/검증 과정 기록
+  - [Walkthrough v2.3.1 App Icon & Favicon](03-logs/walkthroughs/walkthrough-v2.3.1-app-icon-favicon.md): v2.3.1 앱 아이콘/파비콘 구현/검증 기록
   - [Walkthrough v2.3.0 Visual Foundation](03-logs/walkthroughs/walkthrough-v2.3.0-visual-foundation.md): v2.3 디자인 토큰/팔레트 구현/검증 기록
   - [Walkthrough v2.3.0 Reading Surface](03-logs/walkthroughs/walkthrough-v2.3.0-reading-surface.md): v2.3 본문 표면/타이포그래피 구현/검증 기록
   - [Walkthrough v2.3.0 Surrounding Screens](03-logs/walkthroughs/walkthrough-v2.3.0-surrounding-screens.md): v2.3 주변 화면/파비콘/마이크로카피 구현/검증 기록
@@ -71,6 +75,7 @@
 ---
 
 ## 📦 04. Releases (배포 노트)
+- [v2.3.1](04-releases/release-notes-v2.3.1.md): 앱 아이콘/파비콘 정리 (2026-06-24)
 - [v2.3.0](04-releases/release-notes-v2.3.0.md): 시각 디자인 재구성 (2026-06-13)
 - [v2.2.0](04-releases/release-notes-v2.2.0.md): 모바일 UX 재설계 (2026-06-12)
 - [v2.1.3](04-releases/release-notes-v2.1.3.md): 에스겔 HAN 추출 안정화 및 재임포트 (2026-03-09)

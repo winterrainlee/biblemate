@@ -1,7 +1,7 @@
 # 차기 작업 Roadmap
-- 최신 배포 버전: v2.3.0
-- 최신 배포일자: 2026년 6월 13일
-- 목표 버전: v2.3.0
+- 최신 배포 버전: v2.3.1
+- 최신 배포일자: 2026년 6월 24일
+- 목표 버전: v2.3.1
 - 목표 개발일자: 2026년 6월
 - 플로우 다이어그램: [flow-diagrams.md](flow-diagrams.md)
 
@@ -23,6 +23,18 @@
 |:---:|---|
 | `🔗 의존: [항목명]` | 선행 작업이 완료되어야 시작 가능 |
 | `⚠️ 리스크` | 기술적 불확실성, 외부 요인(라이선스, API 비용), 큰 변경 범위 |
+
+---
+
+## 🎯 v2.3.1 — App Icon & Favicon (2026년 6월)
+
+### 기준 문서
+- [Implementation Plan v2.3.1 App Icon & Favicon](implementation-plans/implementation-plan-v2.3.1-app-icon-favicon.md)
+
+### P0 — Brand Asset Patch
+- [x] `🟢 Easy` **제공 이미지 기반 아이콘 세트 생성**: logo, favicon, apple touch icon, manifest icon 생성
+- [x] `🟢 Easy` **HTML/manifest 연결 정리**: SVG favicon 참조 제거, PNG/ICO 중심 연결
+- [x] `🟢 Easy` **버전/문서 정합**: v2.3.1 표시 버전, dev-log, walkthrough, PR 초안, release notes 업데이트
 
 ---
 
@@ -154,6 +166,11 @@
 
 ## ✅ Completed
 > 배포 완료된 작업의 히스토리를 버전별로 기록합니다.
+
+### v2.3.1 (2026-06-24) - App Icon & Favicon
+- **BRAND**: 사용자 제공 성경책 이미지 기반 앱 아이콘/파비콘 세트 정리
+- **PWA**: manifest install icon을 192/512 PNG로 연결
+- **DOCS**: v2.3.1 구현 계획, walkthrough, PR 초안, dev-log, release notes 업데이트
 
 ### v2.3.0 (2026-06-13) - Visual Redesign
 - **DESIGN**: Paper & Ink 라이트 팔레트와 Candlelight 다크 팔레트 적용

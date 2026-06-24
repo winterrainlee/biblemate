@@ -1,6 +1,6 @@
 ﻿# Lessons Learned & Best Practices
 
-> **마지막 업데이트: 2026-06-12**
+> **마지막 업데이트: 2026-06-24**
 
 Bible Reading Mate 프로젝트를 진행하며 각 버전(v1.0 ~ v2.1)에서 습득한 기술적 교훈과 베스트 프랙티스를 정리한 문서입니다.
 
@@ -72,6 +72,9 @@ Bible Reading Mate 프로젝트를 진행하며 각 버전(v1.0 ~ v2.1)에서 �
 - **브랜드 자산도 버전 범위에 포함** `v2.3`
   - 시각 디자인을 바꿀 때 favicon/app icon이 이전 톤으로 남아 있으면 브라우저 탭과 홈 화면에서 첫인상이 어긋납니다.
   - **Lesson**: visual redesign 범위에는 화면 CSS뿐 아니라 `favicon`, `apple-touch-icon`, `manifest`의 theme/background color까지 포함해 검증해야 합니다.
+- **아이콘 폴백 세트 명시** `v2.3.1`
+  - 브라우저 탭, 북마크, iOS 홈 화면, PWA install icon은 각기 다른 파일과 크기를 선호합니다.
+  - **Lesson**: 대표 `logo.png` 하나에만 의존하지 말고, `favicon.ico`, 16/32 PNG, `apple-touch-icon`, 192/512 manifest icon을 함께 생성하고 연결을 검증해야 합니다.
 
 ### ⚛️ React 개발 패턴
 - **Atomic State Management** `v1.2`
