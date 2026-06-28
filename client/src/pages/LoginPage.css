@@ -61,6 +61,13 @@
     margin-bottom: 10px !important;
 }
 
+.login-verse-ref {
+    display: block;
+    font-size: 0.8em;
+    color: var(--pk-color-text-tertiary);
+    margin-top: 4px;
+}
+
 .login-form {
     display: flex;
     flex-direction: column;

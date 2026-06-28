@@ -1,11 +1,24 @@
 # 차기 작업 Roadmap
-- 최신 배포 버전: v2.3.1
-- 최신 배포일자: 2026년 6월 24일
-- 목표 버전: v2.3.1
+- 최신 배포 버전: v2.3.2
+- 최신 배포일자: 2026년 6월 28일
+- 목표 버전: v2.3.2
 - 목표 개발일자: 2026년 6월
 - 플로우 다이어그램: [flow-diagrams.md](flow-diagrams.md)
 
 > ℹ️ **작업 절차 및 버전 관리 기준**은 [개발 방법론](dev-method.md) 문서를 참고하세요.
+
+---
+
+## 🎯 v2.3.2 — Mobile Verse Selection & Login Copy Hotfix (2026년 6월)
+
+### 기준 문서
+- [Implementation Plan v2.3.2 Mobile Verse Selection Hotfix](implementation-plans/implementation-plan-v2.3.2-mobile-verse-selection-hotfix.md)
+
+### P0 — Patch Hotfix
+- [x] `🟢 Easy` **모바일 성경 헤더 압축**: 읽음 상태 뱃지를 책 제목 행에 통합하고 묵상/Aa 액션을 한 줄로 배치
+- [x] `🟢 Easy` **구절 선택 공간 확보**: 선택 모드에서 모바일 헤더와 하단 액션 바를 접어 팝업 공간 확보
+- [x] `🟢 Easy` **로그인 말씀 문구 정리**: 시편 119:105 문구를 두 줄로 나누고 출처 표기 추가
+- [x] `🟢 Easy` **배포 준비 정리**: v2.3.2 버전/문서/검증 기록 업데이트
 
 ---
 
@@ -166,6 +179,12 @@
 
 ## ✅ Completed
 > 배포 완료된 작업의 히스토리를 버전별로 기록합니다.
+
+### v2.3.2 (2026-06-28) - Mobile Verse Selection & Login Copy Hotfix
+- **MOBILE**: 모바일 성경 헤더를 2행 구성으로 압축하고 읽음 상태를 제목 행 뱃지로 통합
+- **UX**: 구절 선택 중 모바일 헤더와 하단 액션 바를 숨겨 선택 팝업 공간 확보
+- **COPY**: 로그인 화면 말씀 문구에 줄바꿈과 `(시편 119:105)` 출처 표기 추가
+- **DOCS**: v2.3.2 구현 계획, walkthrough, PR 초안, dev-log, release notes 업데이트
 
 ### v2.3.1 (2026-06-24) - App Icon & Favicon
 - **BRAND**: 사용자 제공 성경책 이미지 기반 앱 아이콘/파비콘 세트 정리

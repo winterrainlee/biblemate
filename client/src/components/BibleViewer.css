@@ -248,8 +248,11 @@
 }
 
 .mobile-context-trigger,
+.mobile-context-row,
+.mobile-sub-actions,
 .mobile-chapter-notes-btn,
 .mobile-reading-settings-btn,
+.mobile-status-badge,
 .mobile-reading-action-bar {
     display: none;
 }
@@ -473,7 +476,7 @@
         right: 0 !important;
         bottom: 0 !important;
         width: 100%;
-        max-height: calc(var(--pk-viewport-height) - var(--pk-safe-area-top) - 24px);
+        max-height: calc(var(--pk-viewport-height) - var(--pk-safe-area-top) - var(--pk-header-height, 60px) - 24px);
         padding: 1rem 1rem calc(1rem + var(--pk-safe-area-bottom));
         border-radius: 18px 18px 0 0;
         border-right: none;
@@ -977,13 +980,21 @@
         padding: 0.65rem 0 0.55rem;
     }
 
+    .mobile-context-row {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        width: 100%;
+    }
+
     .mobile-context-trigger {
         display: flex;
         align-items: center;
         justify-content: space-between;
         gap: 0.75rem;
         min-height: 44px;
-        width: 100%;
+        flex: 1;
+        min-width: 0;
         padding: 0.55rem 0.75rem;
         border: 1px solid var(--pk-color-border);
         border-radius: var(--pk-radius-md);
@@ -1008,26 +1019,53 @@
         color: var(--pk-color-primary);
     }
 
+    .mobile-status-badge {
+        display: flex;
+        align-items: center;
+        flex-shrink: 0;
+        padding: 0.3rem 0.55rem;
+        border-radius: var(--pk-radius-sm);
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: var(--pk-color-text-tertiary);
+        background-color: var(--pk-color-bg-secondary);
+        border: 1px solid var(--pk-color-border-light);
+        white-space: nowrap;
+    }
+
+    .mobile-status-badge.completed {
+        color: var(--pk-color-success);
+        background-color: color-mix(in srgb, var(--pk-color-success) 10%, var(--pk-color-bg));
+        border-color: color-mix(in srgb, var(--pk-color-success) 25%, transparent);
+        cursor: pointer;
+    }
+
     .bible-nav-header .nav-controls-container {
         display: none;
     }
 
     .reading-status-container {
-        justify-content: center;
-        font-size: 0.82rem;
+        display: none;
+    }
+
+    .mobile-sub-actions {
+        display: flex;
+        gap: 0.45rem;
+        width: 100%;
     }
 
     .mobile-chapter-notes-btn {
         display: flex;
         align-items: center;
         justify-content: center;
-        min-height: 40px;
+        flex: 1;
+        min-height: 36px;
         border: 1px solid var(--pk-color-border);
         border-radius: var(--pk-radius-md);
         background-color: var(--pk-color-bg-elevated);
         color: var(--pk-color-primary);
         font: inherit;
-        font-size: 0.9rem;
+        font-size: 0.85rem;
         font-weight: 700;
     }
 
@@ -1035,9 +1073,8 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        align-self: center;
-        min-width: 48px;
-        min-height: 40px;
+        min-width: 44px;
+        min-height: 36px;
         border: 1px solid var(--pk-color-border);
         border-radius: var(--pk-radius-md);
         background-color: var(--pk-color-bg);
@@ -1049,6 +1086,27 @@
     .mobile-chapter-notes-btn:disabled {
         color: var(--pk-color-text-tertiary);
         opacity: 0.75;
+    }
+
+    /* 방안 2: 구절 선택 모드 시 헤더/하단바 숨김 */
+    .bible-nav-header.selection-mode {
+        max-height: 0;
+        padding: 0;
+        overflow: hidden;
+        border-bottom: none;
+        opacity: 0;
+        transition: max-height 0.2s ease-out, padding 0.2s ease-out, opacity 0.15s ease-out;
+    }
+
+    .mobile-reading-action-bar.selection-hidden {
+        transform: translateY(100%);
+        opacity: 0;
+        pointer-events: none;
+        transition: transform 0.2s ease-out, opacity 0.15s ease-out;
+    }
+
+    .mobile-reading-action-bar {
+        transition: transform 0.2s ease-out, opacity 0.15s ease-out;
     }
 
     .mobile-sheet-backdrop {
@@ -1167,7 +1225,7 @@
     }
 
     .verse-row {
-        scroll-margin-top: 9rem;
+        scroll-margin-top: 6rem;
     }
 
     .verse-popup .popup-close-btn,

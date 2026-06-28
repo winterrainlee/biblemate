@@ -41,7 +41,7 @@ function LoginPage({ onLogin }) {
                         <img src="/logo.png" alt="" />
                     </div>
                     <h1>BibleMate</h1>
-                    <p className="login-verse">주의 말씀은 내 발에 등이요 내 길에 빛이니이다</p>
+                    <p className="login-verse">주의 말씀은 내 발에 등이요<br />내 길에 빛이니이다<span className="login-verse-ref">(시편 119:105)</span></p>
                     <p>나만의 서재로 들어가기</p>
                 </div>
 

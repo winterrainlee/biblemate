@@ -572,15 +572,24 @@ const BibleViewer = ({
 
             {/* 중앙 본문 영역 */}
             <main className="bible-main-content" style={{ '--bible-text-scale': bibleTextScale / 100 }}>
-                <header className="bible-nav-header">
-                    <button
-                        className="mobile-context-trigger"
-                        onClick={() => setIsMobileSelectorOpen(true)}
-                        aria-label={`${bookName} ${chapter}장, ${currentVersionLabel} 선택`}
-                    >
-                        <span className="mobile-context-primary">오늘 이어 읽기 · {bookName} {chapter}장</span>
-                        <span className="mobile-context-secondary">{currentVersionLabel} ▼</span>
-                    </button>
+                <header className={`bible-nav-header${popup.visible ? ' selection-mode' : ''}`}>
+                    <div className="mobile-context-row">
+                        <button
+                            className="mobile-context-trigger"
+                            onClick={() => setIsMobileSelectorOpen(true)}
+                            aria-label={`${bookName} ${chapter}장, ${currentVersionLabel} 선택`}
+                        >
+                            <span className="mobile-context-primary">오늘 이어 읽기 · {bookName} {chapter}장</span>
+                            <span className="mobile-context-secondary">{currentVersionLabel} ▼</span>
+                        </button>
+                        <span
+                            className={`mobile-status-badge ${isCompleted ? 'completed' : ''}`}
+                            onClick={() => isCompleted && onNavigateToJournal(lastReadDate)}
+                            title={isCompleted ? "해당 날짜 묵상일지로 이동" : ""}
+                        >
+                            {isCompleted ? '✓ 읽음' : '읽지 않음'}
+                        </span>
+                    </div>
                     <div className="nav-controls-container">
                         {/* Previous Chapter Button */}
                         <button
@@ -661,19 +670,21 @@ const BibleViewer = ({
                             </span>
                         )}
                     </div>
-                    <button
-                        className="mobile-chapter-notes-btn"
-                        onClick={() => setIsChapterNotesOpen(true)}
-                        disabled={chapterNotes.length === 0}
-                    >
-                        이 장의 묵상 {chapterNotes.length}개 보기
-                    </button>
-                    <button
-                        className="mobile-reading-settings-btn"
-                        onClick={() => setIsReadingSettingsOpen(true)}
-                    >
-                        Aa
-                    </button>
+                    <div className="mobile-sub-actions">
+                        <button
+                            className="mobile-chapter-notes-btn"
+                            onClick={() => setIsChapterNotesOpen(true)}
+                            disabled={chapterNotes.length === 0}
+                        >
+                            이 장의 묵상 {chapterNotes.length}개 보기
+                        </button>
+                        <button
+                            className="mobile-reading-settings-btn"
+                            onClick={() => setIsReadingSettingsOpen(true)}
+                        >
+                            Aa
+                        </button>
+                    </div>
                 </header>
 
                 {isMobileSelectorOpen && (
@@ -1065,7 +1076,7 @@ const BibleViewer = ({
                     </div>
                 )}
 
-                <nav className="mobile-reading-action-bar" aria-label="성경 읽기 작업">
+                <nav className={`mobile-reading-action-bar${popup.visible ? ' selection-hidden' : ''}`} aria-label="성경 읽기 작업">
                     <button
                         className="mobile-reading-nav-btn"
                         onClick={handlePrevChapter}
