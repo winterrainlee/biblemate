@@ -579,7 +579,7 @@ const BibleViewer = ({
                             onClick={() => setIsMobileSelectorOpen(true)}
                             aria-label={`${bookName} ${chapter}장, ${currentVersionLabel} 선택`}
                         >
-                            <span className="mobile-context-primary">오늘 이어 읽기 · {bookName} {chapter}장</span>
+                            <span className="mobile-context-primary">{bookName} {chapter}장 · 오늘 이어 읽기</span>
                             <span className="mobile-context-secondary">{currentVersionLabel} ▼</span>
                         </button>
                         <span
