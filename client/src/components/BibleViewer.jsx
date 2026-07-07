@@ -20,6 +20,7 @@ const BibleViewer = ({
     onCopyCitation,
     onToast,
     onNavigateToJournal, // [NEW] Link to Journal tab
+    onVerseNoteSaved,
     completionStatus = 'idle', // idle, loading, success, error
     highlightLabels, // [NEW] Shared labels from dashboard
 
@@ -362,6 +363,11 @@ const BibleViewer = ({
             const targetBook = book || currentBook; // Consistent with noteData
             const notes = await getVerseNotesByChapter(targetBook, chapter || currentChapter);
             setChapterNotes(notes);
+            try {
+                await onVerseNoteSaved?.();
+            } catch (refreshError) {
+                console.error('Failed to refresh reading logs after verse note save:', refreshError);
+            }
             onToast?.('묵상을 저장했습니다.', 'success');
 
             // Optional: alert or toast success

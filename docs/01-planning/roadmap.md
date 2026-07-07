@@ -1,11 +1,24 @@
 # 차기 작업 Roadmap
-- 최신 배포 버전: v2.3.2
-- 최신 배포일자: 2026년 6월 28일
-- 목표 버전: v2.3.2
-- 목표 개발일자: 2026년 6월
+- 최신 배포 버전: v2.3.3
+- 최신 배포일자: 2026년 7월 7일
+- 목표 버전: v2.3.3
+- 목표 개발일자: 2026년 7월
 - 플로우 다이어그램: [flow-diagrams.md](flow-diagrams.md)
 
 > ℹ️ **작업 절차 및 버전 관리 기준**은 [개발 방법론](dev-method.md) 문서를 참고하세요.
+
+---
+
+## 🎯 v2.3.3 — Auto Read from Verse Note (2026년 7월)
+
+### 기준 문서
+- [Implementation Plan v2.3.3 Auto Read from Verse Note](implementation-plans/implementation-plan-v2.3.3-auto-read-from-verse-note.md)
+
+### P0 — Patch UX/Data Consistency
+- [x] `🟡 Medium` **묵상 저장 기반 읽음 자동 생성**: 구절별 묵상 저장 시 동일 날짜/책/장 읽기 기록 자동 생성
+- [x] `🟢 Easy` **중복 방지**: 이미 해당 장을 포함하는 읽기 기록이 있으면 추가 생성 방지
+- [x] `🟢 Easy` **즉시 UI 반영**: 성경 읽기 화면에서 묵상 저장 후 읽음 상태 새로고침
+- [x] `🟢 Easy` **버전/문서 정합**: v2.3.3 표시 버전, dev-log, walkthrough, PR 초안, release notes 업데이트
 
 ---
 
@@ -179,6 +192,12 @@
 
 ## ✅ Completed
 > 배포 완료된 작업의 히스토리를 버전별로 기록합니다.
+
+### v2.3.3 (2026-07-07) - Auto Read from Verse Note
+- **READING**: 구절 묵상 저장 시 해당 날짜/책/장 읽기 기록 자동 생성
+- **DATA**: 기존 읽기 기록이 해당 장을 포함하면 중복 저장하지 않도록 방어
+- **UX**: 묵상 저장 후 성경 읽기 화면의 완료 상태 즉시 갱신
+- **DOCS**: v2.3.3 구현 계획, walkthrough, PR 초안, dev-log, release notes 업데이트
 
 ### v2.3.2 (2026-06-28) - Mobile Verse Selection & Login Copy Hotfix
 - **MOBILE**: 모바일 성경 헤더를 2행 구성으로 압축하고 읽음 상태를 제목 행 뱃지로 통합

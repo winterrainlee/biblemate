@@ -3,6 +3,33 @@ import { getDB, saveDB } from '../db/init.js';
 
 const router = express.Router();
 
+const ensureReadingLogForVerseNote = (db, { date, book, chapter }) => {
+    const chapterNumber = parseInt(chapter);
+
+    const checkStmt = db.prepare(`
+        SELECT id FROM reading_logs
+        WHERE date = ? AND book = ? AND chapter_from <= ? AND chapter_to >= ?
+        LIMIT 1
+    `);
+    checkStmt.bind([date, book, chapterNumber, chapterNumber]);
+
+    const exists = checkStmt.step();
+    checkStmt.free();
+
+    if (exists) {
+        return { created: false };
+    }
+
+    const insertStmt = db.prepare(`
+        INSERT INTO reading_logs (book, chapter_from, chapter_to, date, created_at, updated_at)
+        VALUES (?, ?, ?, ?, datetime('now'), datetime('now'))
+    `);
+    insertStmt.run([book, chapterNumber, chapterNumber, date]);
+    insertStmt.free();
+
+    return { created: true };
+};
+
 /**
  * GET /api/verse-notes?date=YYYY-MM-DD
  * 날짜별 구절 묵상 목록
@@ -111,9 +138,11 @@ router.post('/', (req, res) => {
         stmt.run([date, book, parseInt(chapter), parseInt(verse), content, verse_range || null, now, now]);
         stmt.free();
 
+        const readingLog = ensureReadingLogForVerseNote(db, { date, book, chapter });
+
         saveDB();
 
-        res.json({ ok: true, message: '저장되었습니다.' });
+        res.json({ ok: true, message: '저장되었습니다.', readingLog });
     } catch (error) {
         console.error('POST /verse-notes error:', error);
         res.status(500).json({ code: 'INTERNAL_ERROR', message: error.message });

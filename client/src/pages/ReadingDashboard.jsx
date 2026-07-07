@@ -101,12 +101,22 @@ const ReadingDashboard = () => {
     const dateStr = format(currentDate, 'yyyy-MM-dd');
     const todayStr = format(new Date(), 'yyyy-MM-dd');
     const isToday = dateStr === todayStr;
+    const logCoversChapter = (log, book, chapter, date = null) => {
+        const start = Number(log.chapter_from || log.chapter);
+        const end = Number(log.chapter_to || log.chapter_from || log.chapter);
+        const targetChapter = Number(chapter);
+
+        return log.book === book
+            && (!date || log.date === date)
+            && start <= targetChapter
+            && end >= targetChapter;
+    };
 
     // 선택된 날짜(dateStr)에 읽었는지 여부 (날짜 상관없이 읽은 기록이 있으면 True)
-    const isChapterCompleted = readingLogs.some(l => l.book === currentBook && l.chapter == currentChapter);
+    const isChapterCompleted = readingLogs.some(l => logCoversChapter(l, currentBook, currentChapter));
 
     // 가장 최근 읽은 기록 (오늘 포함 모든 기록 중 최신)
-    const allLogs = readingLogs.filter(l => l.book === currentBook && l.chapter == currentChapter);
+    const allLogs = readingLogs.filter(l => logCoversChapter(l, currentBook, currentChapter));
     let lastReadDate = allLogs.length > 0 ? allLogs[0].date : null;
     if (lastReadDate === todayStr) lastReadDate = '오늘';
 
@@ -206,7 +216,7 @@ const ReadingDashboard = () => {
     const handleChapterComplete = async () => {
         const dateStr = format(currentDate, 'yyyy-MM-dd');
         // 오늘 날짜의 기록만 찾아서 토글
-        const existingLog = readingLogs.find(l => l.date === dateStr && l.book === currentBook && l.chapter == currentChapter);
+        const existingLog = readingLogs.find(l => logCoversChapter(l, currentBook, currentChapter, dateStr));
 
         setCompletionStatus('loading');
         try {
@@ -217,7 +227,7 @@ const ReadingDashboard = () => {
                 setCompletionStatus('idle');
             } else {
                 // 추가
-                const isAlreadyLoggedToday = readingLogs.some(l => l.date === dateStr && l.book === currentBook && l.chapter == currentChapter);
+                const isAlreadyLoggedToday = readingLogs.some(l => logCoversChapter(l, currentBook, currentChapter, dateStr));
                 if (isAlreadyLoggedToday) {
                     showToast('이미 오늘 읽은 장입니다.', 'warning');
                     setCompletionStatus('idle');
@@ -416,11 +426,12 @@ const ReadingDashboard = () => {
                             onToast={showToast}
                             onComplete={handleChapterComplete}
                             onNavigateToJournal={() => handleNavigateToJournal(lastReadDate)}
+                            onVerseNoteSaved={() => loadReadingLogs()}
                             isCompleted={isChapterCompleted}
                             highlightLabels={highlightLabels}
                             isToday={isToday}
                             lastReadDate={lastReadDate}
-                            isReadOnCurrentDate={readingLogs.some(l => l.date === dateStr && l.book === currentBook && l.chapter == currentChapter)}
+                            isReadOnCurrentDate={readingLogs.some(l => logCoversChapter(l, currentBook, currentChapter, dateStr))}
                             book={currentBook}
                             bookName={currentBookName}
                             chapter={currentChapter}
