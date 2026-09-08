@@ -324,7 +324,7 @@
 .verse-row {
     display: grid;
     grid-template-columns: 2rem minmax(0, 1fr);
-    align-items: start;
+    align-items: baseline;
     column-gap: 0.55rem;
     padding: 0.52rem 0.45rem;
     border-radius: 0.3rem;
@@ -338,18 +338,17 @@
 }
 
 .verse-meta {
-    position: relative;
     display: flex;
     justify-content: flex-end;
-    padding-top: 0.28rem;
+    align-items: baseline;
 }
 
 .verse-num {
     font-family: var(--pk-font-sans);
     font-weight: 600;
-    font-size: 0.68rem;
-    line-height: 1;
-    color: var(--pk-color-text-tertiary);
+    font-size: 0.82rem;
+    line-height: inherit;
+    color: var(--pk-color-text-secondary);
     font-variant-numeric: tabular-nums;
     user-select: none;
 }
@@ -369,16 +368,17 @@
     text-decoration: none;
 }
 
-/* 묵상은 본문을 장식하지 않고 절 번호 옆 작은 점으로만 알린다. */
+/* 묵상은 절 번호와 분리된 왼쪽 마진 선으로 표시한다. */
 .note-indicator {
     position: absolute;
-    top: 0.52rem;
-    right: -0.72rem;
+    top: 0;
+    bottom: 0;
+    left: -0.95rem;
     display: flex;
     align-items: center;
     justify-content: center;
     width: 44px;
-    height: 44px;
+    height: auto;
     padding: 0;
     border: 0;
     background: transparent;
@@ -386,19 +386,20 @@
     z-index: 1;
 }
 
-.note-indicator-dot {
-    width: 5px;
-    height: 5px;
-    border-radius: 50%;
+.note-indicator-line {
+    width: 2px;
+    height: calc(100% - 1rem);
+    min-height: 1.4rem;
+    border-radius: 2px;
     background-color: var(--pk-color-primary);
-    opacity: 0.72;
-    transition: opacity 0.2s, transform 0.2s;
+    opacity: 0.62;
+    transition: opacity 0.2s, width 0.2s;
 }
 
-.note-indicator:hover .note-indicator-dot,
-.note-indicator:focus-visible .note-indicator-dot {
+.note-indicator:hover .note-indicator-line,
+.note-indicator:focus-visible .note-indicator-line {
     opacity: 1;
-    transform: scale(1.35);
+    width: 3px;
 }
 
 .last-read-header-info {
@@ -1328,7 +1329,7 @@
     }
 
     .note-indicator {
-        right: -0.85rem;
+        left: -0.9rem;
     }
 
     .verse-popup .popup-close-btn,

@@ -822,17 +822,17 @@ const BibleViewer = ({
                                     onClick={(e) => handleVerseClick(e, v)}
                                     onMouseDown={(e) => e.stopPropagation()} // Prevent document click outside
                                 >
+                                    {hasNote && (
+                                        <button
+                                            className="note-indicator"
+                                            onClick={(e) => openVerseNotes(v, e)}
+                                            aria-label={`${bookName} ${chapter}:${v.verse} 묵상 보기`}
+                                        >
+                                            <span className="note-indicator-line" aria-hidden="true" />
+                                        </button>
+                                    )}
                                     <span className="verse-meta">
                                         <span className="verse-num">{v.verse}</span>
-                                        {hasNote && (
-                                            <button
-                                                className="note-indicator"
-                                                onClick={(e) => openVerseNotes(v, e)}
-                                                aria-label={`${bookName} ${chapter}:${v.verse} 묵상 보기`}
-                                            >
-                                                <span className="note-indicator-dot" aria-hidden="true" />
-                                            </button>
-                                        )}
                                     </span>
                                     <span className={`verse-content ${hasNote ? 'has-note' : ''}`}>
                                         {v.text || v.content || ''}

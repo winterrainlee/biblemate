@@ -13,7 +13,7 @@
 - 본문의 큰 paper card, border, radius, shadow와 2단 조판을 제거했다.
 - 본문 최대 폭을 Workspace에서 `46rem`, Reading 폭에서 `42rem`으로 제한했다.
 - 절 행을 절 번호 gutter와 본문으로 나누고, 본문 크기·행간·절 간격·좌우 여백을 재조정했다.
-- 기존 빨간 밑줄과 `📝` 중첩 표시를 제거하고 절 번호 옆의 작은 점으로 묵상 존재를 표시했다. 보이는 점은 작지만 기존 묵상 열기 버튼의 hit area는 `44×44px`다.
+- 기존 빨간 밑줄과 `📝` 중첩 표시를 제거했다. 1차 실기기 피드백 후 절 번호는 본문 기준선에 맞춘 `0.82rem` 크기로 올리고, 묵상 존재는 번호와 분리된 왼쪽 여백의 세로선으로 표시한다. 기존 묵상 열기 버튼의 최소 너비는 `44px`로 유지했다.
 - 장/역본/Aa/읽음/묵상 조작의 면과 강조를 줄여 본문보다 먼저 보이지 않도록 했다.
 - 기존 `이 장의 묵상` 시트를 모든 폭에서 접근 가능하게 유지했다. Compact에서는 bottom sheet, 넓은 폭에서는 중앙 modal로 표현한다.
 - 전역 Header는 Reading 상태에서만 시각적 무게를 낮췄다.
@@ -54,6 +54,7 @@ npm run build
 - [375px Light](../../assets/reading-canvas/reading-canvas-375-light.png)
 - [375px Light — 묵상/하이라이트](../../assets/reading-canvas/reading-canvas-375-notes-highlight-light.png)
 - [375px Dark — 묵상/하이라이트](../../assets/reading-canvas/reading-canvas-375-notes-highlight-dark.png)
+- [375px Light — C안 절 번호/묵상 마진 선](../../assets/reading-canvas/reading-canvas-375-margin-line-light.png)
 
 ### 650×900 — Reading / 1:1 Split View급
 
@@ -65,6 +66,7 @@ npm run build
 스크린샷:
 
 - [650px Light](../../assets/reading-canvas/reading-canvas-650-light.png)
+- [650px Light — C안 절 번호/묵상 마진 선](../../assets/reading-canvas/reading-canvas-650-margin-line-light.png)
 
 ### 1280×900 — Workspace
 
@@ -78,22 +80,24 @@ npm run build
 
 - [1280px Light](../../assets/reading-canvas/reading-canvas-1280-light.png)
 - [1280px Dark — 묵상/하이라이트](../../assets/reading-canvas/reading-canvas-1280-notes-highlight-dark.png)
+- [1280px Light — C안 절 번호/묵상 마진 선](../../assets/reading-canvas/reading-canvas-1280-margin-line-light.png)
 
 ### Light / Dark와 기존 표시
 
-- 에스겔 2장에서 묵상 점 5개와 하이라이트 행 1개 렌더 확인
+- 에스겔 2장에서 묵상 마진 선 5개와 하이라이트 행 1개 렌더 확인
 - Light 하이라이트: `rgb(242, 220, 146)`
 - Dark 하이라이트: `rgba(214, 176, 89, 0.45)`
 - Dark 본문: `rgb(237, 229, 216)`
 - Dark 하이라이트 합성 배경 대비 본문 대비율: 약 `4.94:1`로 WCAG AA 일반 텍스트 기준 통과
-- 하이라이트와 묵상 점이 함께 있는 절에서도 충돌이나 본문 밀림 없음
+- 하이라이트와 묵상 마진 선이 함께 있는 절에서도 충돌이나 본문 밀림 없음
+- 375px에서 묵상 선과 절 번호 사이의 시각적 간격 약 `12px`, 가로 overflow 없음
 
 ## 4. 기존 Reading 기능 회귀
 
 - Compact `다음`: 에스겔 2장 → 3장 이동 확인
 - Compact `이전`: 에스겔 3장 → 2장 복귀 확인
 - 장/책/역본 select의 기존 값과 변경 흐름 유지
-- 묵상 점 클릭과 `이 장의 묵상` 접근 경로 유지
+- 묵상 마진 선 클릭 시 기존 절 묵상 상세 열기와 `이 장의 묵상` 접근 경로 유지
 - 선택/하이라이트/복사/묵상 작성 로직은 이번 단계에서 변경하지 않음
 
 ## 5. 시각 QA
@@ -102,7 +106,7 @@ npm run build
 - 로컬 Gemma E4B는 375px Light/Dark에서 본문 clipping이나 bottom bar의 과도한 우세를 발견하지 않았다.
 - E4B가 제기한 Dark 하이라이트 대비는 계산 결과 `4.94:1`로 검증했다.
 - 로컬 Gemma 26B 2차 검토는 실기기 검수 전 blocker/major 이슈가 없다고 판단했다.
-- 남은 prototype 판단 항목은 5×5px 묵상 점의 실제 발견성이다. 버튼 hit area는 44×44px이며 최종 감각은 실기기에서 확인한다.
+- 남은 판단 항목은 왼쪽 마진 선의 발견성과 절 번호 위계가 실제 iPhone에서 자연스러운지 여부다. 묵상 표시의 클릭 영역은 기존 접근성을 유지했으며 최종 감각은 실기기에서 확인한다.
 
 ## 6. 알려진 제한 / 범위 밖 신호
 
@@ -130,13 +134,16 @@ npm run build
 - 사용자 피드백: “잘 보이고, 읽는 데는 지장이 없음.”
 - 최초 확인 장은 에스겔 9장과 10장이었으며, 로컬 DB에 해당 장 묵상이 없어 점 표시와 묵상 목록이 보이지 않았음.
 - Tailscale API 경로에서 에스겔 2장의 기존 묵상 5개(1, 3, 6, 8, 10절)와 5절 하이라이트 응답을 재확인함.
-- 실제 iPhone에서 에스겔 2장으로 이동한 뒤 묵상 점·목록·하이라이트 표시를 추가 확인해야 함.
+- 실제 iPhone에서 에스겔 2장으로 이동한 뒤 묵상 표시·목록·하이라이트가 보이는 것을 사용자가 확인함.
+- 사용자 피드백: 본문 읽기는 편하지만 절 번호와 묵상 점이 너무 가깝고, 위첨자형 절 번호는 중요도가 낮아 보임.
+- 세 가지 시안 중 C안(절 번호는 본문 기준선, 묵상은 왼쪽 여백의 세로선)을 사용자 선택으로 반영함.
+- C안은 375/650/1280px 에뮬레이션과 묵상 상세 열기까지 재검증했으며, 실제 iPhone 재검수는 대기 중임.
 
 - [ ] 실제 iPhone 13 mini Safari/PWA safe-area 확인
 - [ ] Safari 주소창 변화 중 viewport/스크롤 확인
 - [ ] 실제 손가락 스크롤과 장 이동 제스처 충돌 확인
 - [ ] 본문 크기, 행간, 절 간격, 좌우 여백의 20~30분 읽기 감각 확인
-- [ ] 묵상 점 발견성과 `Aa`/장 선택 조작의 시각적 무게 확인
+- [ ] 절 번호 위계와 묵상 마진 선의 간격·발견성, `Aa`/장 선택 조작의 시각적 무게 확인
 - [ ] 사용자 최종 질문 승인: **이 화면에서 20~30분 동안 성경을 읽고 싶은가?**
 
 실기기 승인 전에는 Reading Canvas를 완료 처리하거나 다음 feature를 시작하거나 `feature/v3.0`에 병합하지 않는다.
