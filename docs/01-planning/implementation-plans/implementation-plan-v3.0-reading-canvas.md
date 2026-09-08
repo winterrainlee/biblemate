@@ -3,13 +3,16 @@
 - 목표 버전: v3.0.0
 - 작업: Reading Canvas prototype
 - 기준 명세: `docs/02-specs/spec-v3.0.md`
-- 상태: 초안 / 사용자 승인 전
+- 상태: **사용자 승인 완료 / 구현 시작 가능**
+- 구현계획 승인일: 2026-09-08
 
 ## Goal
 
 - 기능 연결보다 먼저 성경 본문 자체의 읽기 경험을 재설계하고, iPhone 13 mini / 1:1 Split View / Desktop Workspace 세 폭에서 사용 가능한 Reading Canvas prototype을 만든다.
 
 ## User Review Required
+
+> 아래 항목은 구현계획 자체의 승인 항목이 아니라, 구현된 prototype을 실제로 보고 판단하는 최종 검수 항목이다.
 
 - [ ] 본문 최대 폭, 여백, 행간, 절 간격의 방향 승인
 - [ ] 절 번호와 묵상 존재 표시 방식 승인
