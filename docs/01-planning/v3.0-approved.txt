@@ -1,4 +1,0 @@
-BibleMate v3.0 planning approved by project owner on 2026-09-08.
-Canonical specification: docs/02-specs/spec-v3.0.md
-Canonical v3 roadmap: docs/01-planning/roadmap-v3.0.md
-Next implementation gate: docs/01-planning/implementation-plans/implementation-plan-v3.0-reading-canvas.md
