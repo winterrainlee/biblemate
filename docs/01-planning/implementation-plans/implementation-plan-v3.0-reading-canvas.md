@@ -3,7 +3,7 @@
 - 목표 버전: v3.0.0
 - 작업: Reading Canvas prototype
 - 기준 명세: `docs/02-specs/spec-v3.0.md`
-- 상태: **사용자 승인 완료 / 구현 시작 가능**
+- 상태: **구현·검증 및 사용자 실기기 승인 완료**
 - 구현계획 승인일: 2026-09-08
 
 ## Goal
@@ -14,12 +14,12 @@
 
 > 아래 항목은 구현계획 자체의 승인 항목이 아니라, 구현된 prototype을 실제로 보고 판단하는 최종 검수 항목이다.
 
-- [ ] 본문 최대 폭, 여백, 행간, 절 간격의 방향 승인
-- [ ] 절 번호와 묵상 존재 표시 방식 승인
-- [ ] 장/역본/Aa 컨트롤의 위치와 시각적 무게 승인
-- [ ] Compact / Reading / Workspace에서 본문이 한 화면의 주역으로 보이는지 승인
-- [ ] iPhone 13 mini 실기기에서 실제 읽기/스크롤/터치 검수 승인
-- [ ] prototype 승인 전 Selection/Composer 구현으로 넘어가지 않음
+- [x] 본문 최대 폭, 여백, 행간, 절 간격의 방향 승인
+- [x] 절 번호와 묵상 존재 표시 방식 승인
+- [x] 장/역본/Aa 컨트롤의 위치와 시각적 무게 승인
+- [x] Compact / Reading / Workspace에서 본문이 한 화면의 주역으로 보이는지 승인
+- [x] iPhone 13 mini 실기기에서 실제 읽기/스크롤/터치 검수 승인
+- [x] prototype 승인 전 Selection/Composer 구현으로 넘어가지 않음
 
 ## Proposed Changes
 
@@ -55,20 +55,20 @@
 
 ### Automated Tests
 
-- [ ] `cd client && npm run lint`
-- [ ] `cd client && npm run build`
+- [x] `cd client && npm run lint`
+- [x] `cd client && npm run build`
 
 ### Desktop / Emulation Verification
 
-- [ ] 약 375px: iPhone 13 mini급 폭
-- [ ] 약 600~700px: iPad/desktop 1:1 Split View급 폭
-- [ ] 1000px 이상: Desktop Workspace
-- [ ] Light mode
-- [ ] Dark mode
-- [ ] 긴 절/짧은 절 혼합 장에서 줄바꿈 확인
-- [ ] 하이라이트 4색이 본문 가독성을 해치지 않는지 확인
-- [ ] 기존 묵상 표시가 레이아웃을 깨뜨리지 않는지 확인
-- [ ] 이전/다음 장 이동 등 기존 기능이 prototype 때문에 깨지지 않았는지 확인
+- [x] 약 375px: iPhone 13 mini급 폭
+- [x] 약 600~700px: iPad/desktop 1:1 Split View급 폭
+- [x] 1000px 이상: Desktop Workspace
+- [x] Light mode
+- [x] Dark mode
+- [x] 긴 절/짧은 절 혼합 장에서 줄바꿈 확인
+- [x] 하이라이트 4색이 본문 가독성을 해치지 않는지 확인
+- [x] 기존 묵상 표시가 레이아웃을 깨뜨리지 않는지 확인
+- [x] 이전/다음 장 이동 등 기존 기능이 prototype 때문에 깨지지 않았는지 확인
 
 ### Real-device Verification — Required Gate
 
@@ -87,12 +87,14 @@
 
 실기기 필수 확인 항목:
 
-- [ ] iPhone 13 mini 실제 Safari/PWA에서 본문을 자연스럽게 읽을 수 있음
-- [ ] 실제 safe-area에서 헤더/본문/하단 영역이 잘리지 않음
-- [ ] 주소창 변화와 실제 viewport 높이 변화가 읽기 흐름을 깨뜨리지 않음
-- [ ] 세로 스크롤이 자연스럽고 장 이동 제스처와 충돌하지 않음
-- [ ] 구절 row의 실제 터치 감각과 오터치 가능성을 확인함
-- [ ] 20~30분 읽기를 상정했을 때 행간, 절 간격, 좌우 여백이 편안함
+- [x] iPhone 13 mini 실제 Safari에서 본문을 자연스럽게 읽을 수 있음
+- [x] 실제 safe-area에서 헤더/본문/하단 영역이 잘리지 않음
+- [x] 주소창 변화와 실제 viewport 높이 변화가 읽기 흐름을 깨뜨리지 않음
+- [x] 세로 스크롤이 자연스럽고 장 이동 제스처와 충돌하지 않음
+- [x] 구절 row의 실제 터치 감각과 오터치 가능성을 확인함
+- [x] 20~30분 읽기를 상정했을 때 행간, 절 간격, 좌우 여백이 편안함
+
+최종 실기기 결과는 개별 계측이 아니라 iPhone Safari에서의 사용자 읽기·스크롤·터치 검수와 최종 만족 승인으로 판정했다. 별도 문제는 보고되지 않았다.
 
 ### Verification Layers
 

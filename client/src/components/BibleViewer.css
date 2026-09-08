@@ -338,9 +338,11 @@
 }
 
 .verse-meta {
+    position: relative;
     display: flex;
     justify-content: flex-end;
     align-items: baseline;
+    z-index: 2;
 }
 
 .verse-num {
@@ -348,7 +350,8 @@
     font-weight: 600;
     font-size: 0.82rem;
     line-height: inherit;
-    color: var(--pk-color-text-secondary);
+    color: var(--pk-color-text);
+    opacity: 0.72;
     font-variant-numeric: tabular-nums;
     user-select: none;
 }
@@ -392,7 +395,7 @@
     min-height: 1.4rem;
     border-radius: 2px;
     background-color: var(--pk-color-primary);
-    opacity: 0.62;
+    opacity: 0.75;
     transition: opacity 0.2s, width 0.2s;
 }
 
@@ -1138,7 +1141,7 @@
     }
 
     .reading-meta-row {
-        min-height: 32px;
+        min-height: 44px;
     }
 
     .mobile-sub-actions {
@@ -1153,7 +1156,7 @@
         align-items: center;
         justify-content: center;
         flex: 1;
-        min-height: 32px;
+        min-height: 44px;
         border: 0;
         border-radius: var(--pk-radius-sm);
         background-color: transparent;
@@ -1168,7 +1171,7 @@
         align-items: center;
         justify-content: center;
         min-width: 44px;
-        min-height: 32px;
+        min-height: 44px;
         border: 0;
         border-radius: var(--pk-radius-sm);
         background-color: transparent;

@@ -179,6 +179,9 @@ const BibleViewer = ({
             if (e.key === 'Escape') {
                 setPopup(prev => ({ ...prev, visible: false }));
                 setSelectedVerses([]);
+                setIsMobileSelectorOpen(false);
+                setIsChapterNotesOpen(false);
+                setIsReadingSettingsOpen(false);
             }
         };
         window.addEventListener('keydown', handleKeyDown);
@@ -698,14 +701,14 @@ const BibleViewer = ({
 
                 {isMobileSelectorOpen && (
                     <div className="mobile-sheet-backdrop" onClick={() => setIsMobileSelectorOpen(false)}>
-                        <section className="mobile-sheet" onClick={(e) => e.stopPropagation()} aria-label="본문 선택">
+                        <section className="mobile-sheet" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-label="본문 선택">
                             <div className="mobile-sheet-handle" />
                             <div className="mobile-sheet-header">
                                 <div>
                                     <div className="mobile-sheet-title">본문 선택</div>
                                     <div className="mobile-sheet-subtitle">{bookName} {chapter}장 · {currentVersionLabel}</div>
                                 </div>
-                                <button className="mobile-sheet-close" onClick={() => setIsMobileSelectorOpen(false)} aria-label="닫기">
+                                <button className="mobile-sheet-close" onClick={() => setIsMobileSelectorOpen(false)} aria-label="닫기" autoFocus>
                                     <X size={20} />
                                 </button>
                             </div>
@@ -741,14 +744,14 @@ const BibleViewer = ({
 
                 {isChapterNotesOpen && (
                     <div className="mobile-sheet-backdrop" onClick={() => setIsChapterNotesOpen(false)}>
-                        <section className="mobile-sheet chapter-notes-sheet" onClick={(e) => e.stopPropagation()} aria-label="이 장의 묵상">
+                        <section className="mobile-sheet chapter-notes-sheet" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-label="이 장의 묵상">
                             <div className="mobile-sheet-handle" />
                             <div className="mobile-sheet-header">
                                 <div>
                                     <div className="mobile-sheet-title">{bookName} {chapter}장 묵상</div>
                                     <div className="mobile-sheet-subtitle">이 장의 묵상 {chapterNotes.length}개</div>
                                 </div>
-                                <button className="mobile-sheet-close" onClick={() => setIsChapterNotesOpen(false)} aria-label="닫기">
+                                <button className="mobile-sheet-close" onClick={() => setIsChapterNotesOpen(false)} aria-label="닫기" autoFocus>
                                     <X size={20} />
                                 </button>
                             </div>
@@ -773,14 +776,14 @@ const BibleViewer = ({
 
                 {isReadingSettingsOpen && (
                     <div className="mobile-sheet-backdrop" onClick={() => setIsReadingSettingsOpen(false)}>
-                        <section className="mobile-sheet" onClick={(e) => e.stopPropagation()} aria-label="본문 가독성 설정">
+                        <section className="mobile-sheet" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-label="본문 가독성 설정">
                             <div className="mobile-sheet-handle" />
                             <div className="mobile-sheet-header">
                                 <div>
                                     <div className="mobile-sheet-title">본문 가독성</div>
                                     <div className="mobile-sheet-subtitle">성경 본문에만 적용됩니다</div>
                                 </div>
-                                <button className="mobile-sheet-close" onClick={() => setIsReadingSettingsOpen(false)} aria-label="닫기">
+                                <button className="mobile-sheet-close" onClick={() => setIsReadingSettingsOpen(false)} aria-label="닫기" autoFocus>
                                     <X size={20} />
                                 </button>
                             </div>
