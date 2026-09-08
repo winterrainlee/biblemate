@@ -4,25 +4,12 @@
     display: flex;
     width: 100%;
     height: 100%;
-    background-color: var(--pk-color-bg-secondary);
+    background-color: var(--pk-color-bg);
 }
 
-/* 사이드바 스타일 (20%) */
+/* v3.0 Reading Canvas에서는 본문을 기본 화면의 유일한 주역으로 둔다. */
 .bible-side-panel {
-    flex: 0 0 20%;
-    min-width: 250px;
-    max-width: 350px;
-    border-right: 1px solid var(--pk-color-border-light);
-    background-color: var(--pk-color-bg-secondary);
-    display: flex;
-    flex-direction: column;
-    overflow-y: auto;
-    height: 100%;
-    /* Adjust based on header height, simple fix for scrolling */
-    scrollbar-width: none;
-    /* Firefox */
-    -ms-overflow-style: none;
-    /* IE/Edge */
+    display: none;
 }
 
 /* Hide Scrollbar for side panel */
@@ -61,14 +48,14 @@
 /* Main Content Layout */
 .bible-main-content {
     flex: 1;
+    min-width: 0;
     display: flex;
     flex-direction: column;
     overflow-y: auto;
-    /* Independent scrolling */
     height: 100%;
-    /* Constrain height to viewport minus global header */
-    padding: 0 clamp(1.5rem, 4vw, 4rem) 2.5rem;
+    padding: 0 clamp(1.5rem, 5vw, 5rem) 3rem;
     background-color: var(--pk-color-bg);
+    scroll-padding-top: 7rem;
 }
 
 .empty-side-note {
@@ -92,8 +79,10 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    gap: 0.5rem;
-    padding: 1rem 0;
+    gap: 0.35rem;
+    width: min(100%, 50rem);
+    margin: 0 auto;
+    padding: 0.7rem 0 0.55rem;
     border-bottom: 1px solid var(--pk-color-border-light);
     position: sticky;
     top: 0;
@@ -105,7 +94,7 @@
 .nav-controls-container {
     display: flex;
     align-items: center;
-    gap: 1.5rem;
+    gap: 0.75rem;
     justify-content: center;
     width: 100%;
 }
@@ -113,7 +102,7 @@
 .nav-selectors {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.2rem;
     flex-wrap: wrap;
     justify-content: center;
 }
@@ -124,36 +113,28 @@
     color: var(--pk-color-primary) !important;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 599px) {
     .bible-nav-header {
-        padding: 0.75rem 0.5rem;
+        padding: 0.55rem 0 0.45rem;
     }
 
     .nav-controls-container {
-        flex-direction: column;
-        gap: 0.75rem;
-    }
-
-    .nav-selectors {
-        width: 100%;
-        display: grid;
-        grid-template-columns: 1fr 1fr;
         gap: 0.5rem;
     }
 
+    .nav-selectors {
+        gap: 0.25rem;
+    }
+
     .version-select-wrapper {
-        grid-column: span 2;
-        /* Version takes full width on top */
-        order: -1;
         display: flex;
-        justify-content: center;
     }
 
     .bible-nav-header .nav-btn {
         position: absolute;
         top: 50%;
         transform: translateY(-50%);
-        background-color: var(--pk-color-bg-secondary);
+        background-color: transparent;
         z-index: 5;
     }
 
@@ -168,7 +149,6 @@
     .nav-controls-container {
         position: relative;
         padding: 0 3rem;
-        /* Space for absolute buttons */
     }
 }
 
@@ -213,10 +193,10 @@
     appearance: none;
     background-color: transparent;
     border: none;
-    font-size: 1.5rem;
-    font-weight: 700;
+    font-size: 1.08rem;
+    font-weight: 650;
     color: var(--pk-color-text);
-    padding: 0.2rem 0.5rem;
+    padding: 0.35rem 0.45rem;
     border-radius: var(--pk-radius-md);
     cursor: pointer;
     font-family: var(--pk-font-body);
@@ -243,18 +223,66 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    font-size: 0.9rem;
+    font-size: 0.78rem;
     color: var(--pk-color-text-secondary);
 }
 
 .mobile-context-trigger,
 .mobile-context-row,
-.mobile-sub-actions,
-.mobile-chapter-notes-btn,
-.mobile-reading-settings-btn,
 .mobile-status-badge,
 .mobile-reading-action-bar {
     display: none;
+}
+
+.reading-meta-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.9rem;
+    min-height: 32px;
+}
+
+.mobile-sub-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.mobile-chapter-notes-btn,
+.mobile-reading-settings-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 32px;
+    border: 0;
+    background: transparent;
+    color: var(--pk-color-text-secondary);
+    font: inherit;
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
+.mobile-chapter-notes-btn {
+    padding: 0.25rem 0.45rem;
+}
+
+.mobile-reading-settings-btn {
+    min-width: 36px;
+    padding: 0.25rem;
+    font-family: var(--pk-font-serif);
+    font-size: 0.9rem;
+}
+
+.mobile-chapter-notes-btn:hover:not(:disabled),
+.mobile-reading-settings-btn:hover {
+    color: var(--pk-color-primary);
+    background-color: var(--pk-color-primary-light);
+    border-radius: var(--pk-radius-sm);
+}
+
+.mobile-chapter-notes-btn:disabled {
+    opacity: 0.55;
+    cursor: default;
 }
 
 .status-label {
@@ -284,81 +312,93 @@
     }
 }
 
-/* 본문 2단 레이아웃 핵심 */
+/* Reading Canvas: 카드나 다단 조판 없이 한 흐름으로 읽는다. */
 .bible-text-grid {
-    column-count: 2;
-    column-gap: 3rem;
-    column-rule: 1px solid var(--pk-color-border-light);
-    max-width: 980px;
+    max-width: 46rem;
     width: 100%;
-    margin: 1.5rem auto 0;
-    padding: clamp(1.25rem, 3vw, 2rem);
-    border: 1px solid var(--pk-color-border-light);
-    border-radius: var(--pk-radius-lg);
-    background-color: var(--pk-color-bg-elevated);
-    box-shadow: 0 10px 32px var(--pk-color-shadow);
-    line-height: 1.95;
+    margin: 0.9rem auto 0;
+    padding: clamp(1.25rem, 3vw, 2.25rem) 0 2rem;
+    background-color: transparent;
 }
 
 .verse-row {
-    break-inside: avoid-column;
-    /* 구절이 컬럼 사이에서 잘리지 않도록 */
-    padding: 0.45rem 0.35rem;
-    border-radius: var(--pk-radius-sm);
+    display: grid;
+    grid-template-columns: 2rem minmax(0, 1fr);
+    align-items: start;
+    column-gap: 0.55rem;
+    padding: 0.52rem 0.45rem;
+    border-radius: 0.3rem;
     cursor: pointer;
     transition: background-color 0.2s;
     position: relative;
 }
 
 .verse-row:hover {
-    background-color: var(--pk-color-primary-light);
+    background-color: color-mix(in srgb, var(--pk-color-primary-light) 55%, transparent);
+}
+
+.verse-meta {
+    position: relative;
+    display: flex;
+    justify-content: flex-end;
+    padding-top: 0.28rem;
 }
 
 .verse-num {
-    font-family: var(--pk-font-body);
-    font-weight: 700;
-    font-size: 0.7em;
+    font-family: var(--pk-font-sans);
+    font-weight: 600;
+    font-size: 0.68rem;
+    line-height: 1;
     color: var(--pk-color-text-tertiary);
-    margin-right: 0.45rem;
-    vertical-align: super;
+    font-variant-numeric: tabular-nums;
     user-select: none;
 }
 
 .verse-content {
-    font-size: calc(1.05rem * var(--bible-text-scale, 1));
+    font-size: calc(clamp(1.06rem, 0.99rem + 0.18vw, 1.16rem) * var(--bible-text-scale, 1));
     color: var(--pk-color-text);
-    transition: text-decoration 0.2s;
     font-family: var(--pk-font-body);
-    line-height: 1.95;
+    font-weight: 400;
+    line-height: 2;
     word-break: keep-all;
+    overflow-wrap: break-word;
+    text-wrap: pretty;
 }
 
 .verse-content.has-note {
-    text-decoration: underline;
-    text-decoration-color: var(--pk-color-danger);
-    text-decoration-thickness: 1.5px;
-    text-underline-offset: 4px;
+    text-decoration: none;
 }
 
-/* 📝 아이콘 스타일 */
+/* 묵상은 본문을 장식하지 않고 절 번호 옆 작은 점으로만 알린다. */
 .note-indicator {
-    display: inline-flex;
+    position: absolute;
+    top: 0.52rem;
+    right: -0.72rem;
+    display: flex;
     align-items: center;
     justify-content: center;
-    margin-left: 4px;
-    width: 28px;
-    height: 28px;
+    width: 44px;
+    height: 44px;
     padding: 0;
     border: 0;
     background: transparent;
-    font-size: 0.8rem;
     cursor: pointer;
-    opacity: 0.7;
-    transition: opacity 0.2s;
+    z-index: 1;
 }
 
-.note-indicator:hover {
+.note-indicator-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background-color: var(--pk-color-primary);
+    opacity: 0.72;
+    transition: opacity 0.2s, transform 0.2s;
+}
+
+.note-indicator:hover .note-indicator-dot,
+.note-indicator:focus-visible .note-indicator-dot {
     opacity: 1;
+    transform: scale(1.35);
 }
 
 .last-read-header-info {
@@ -787,7 +827,67 @@
 }
 
 .mobile-sheet-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 1200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    background-color: var(--pk-color-overlay);
+}
+
+.mobile-sheet {
+    width: min(30rem, 100%);
+    max-height: min(42rem, calc(var(--pk-viewport-height) - 2rem));
+    overflow: hidden;
+    padding: 1rem 1.1rem 1.25rem;
+    border: 1px solid var(--pk-color-border);
+    border-radius: var(--pk-radius-lg);
+    background-color: var(--pk-color-bg-elevated);
+    box-shadow: 0 16px 42px var(--pk-color-shadow);
+    animation: fadeIn 0.16s ease-out;
+}
+
+.mobile-sheet-handle {
     display: none;
+}
+
+.mobile-sheet-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.mobile-sheet-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--pk-color-text);
+}
+
+.mobile-sheet-subtitle {
+    margin-top: 0.2rem;
+    font-size: 0.84rem;
+    color: var(--pk-color-text-secondary);
+}
+
+.mobile-sheet-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
+    margin: -0.45rem -0.45rem 0 0;
+    border: 0;
+    border-radius: 50%;
+    background-color: transparent;
+    color: var(--pk-color-text-secondary);
+}
+
+.mobile-sheet-close:hover {
+    background-color: var(--pk-color-bg-secondary);
 }
 
 .mobile-selector-fields {
@@ -917,35 +1017,23 @@
     animation: fadeIn 0.5s ease-out;
 }
 
-/* Mobile Responsive Layout */
-@media (max-width: 1024px) {
-
-    /* Hide sidebars on smaller screens */
-    .bible-side-panel {
-        display: none !important;
-    }
-
-    /* Expand main content */
+/* Reading: 1:1 Split View처럼 확보 폭이 중간인 환경 */
+@media (max-width: 899px) {
     .bible-main-content {
         width: 100%;
-        padding: 0 1rem 1rem 1rem;
-        /* Reduce padding */
+        padding: 0 clamp(1rem, 4vw, 2rem) 2rem;
     }
 
-    /* Switch to single column text */
     .bible-text-grid {
-        column-count: 1;
-        column-gap: 0;
-        padding: 1rem;
+        max-width: 42rem;
+        padding-top: 1.25rem;
     }
 
     .verse-row {
-        padding: 0.75rem 0.25rem;
-        /* More vertical space for readability */
-        border-bottom: 1px solid var(--pk-color-border-light);
+        padding-top: 0.58rem;
+        padding-bottom: 0.58rem;
     }
 
-    /* Adjust navigation for mobile */
     .bible-nav-header {
         position: sticky;
         top: 0;
@@ -958,47 +1046,44 @@
         width: 100%;
     }
 
-    .nav-select {
-        font-size: 1.1rem;
-        /* Smaller font on mobile */
-    }
 }
 
-@media (max-width: 768px) {
+/* Compact: 실제 기기명이 아니라 600px 미만의 사용 가능 폭 */
+@media (max-width: 599px) {
     .bible-viewer-container {
         position: relative;
         height: 100%;
     }
 
     .bible-main-content {
-        padding: 0 1rem calc(5.75rem + var(--pk-safe-area-bottom)) 1rem;
+        padding: 0 clamp(0.85rem, 4vw, 1rem) calc(5.4rem + var(--pk-safe-area-bottom));
     }
 
     .bible-nav-header {
         align-items: stretch;
-        gap: 0.45rem;
-        padding: 0.65rem 0 0.55rem;
+        gap: 0.2rem;
+        padding: 0.45rem 0 0.35rem;
     }
 
     .mobile-context-row {
         display: flex;
         align-items: center;
-        gap: 0.5rem;
+        gap: 0.25rem;
         width: 100%;
     }
 
     .mobile-context-trigger {
         display: flex;
         align-items: center;
-        justify-content: space-between;
-        gap: 0.75rem;
+        justify-content: center;
+        gap: 0.45rem;
         min-height: 44px;
         flex: 1;
         min-width: 0;
-        padding: 0.55rem 0.75rem;
-        border: 1px solid var(--pk-color-border);
-        border-radius: var(--pk-radius-md);
-        background-color: var(--pk-color-bg-secondary);
+        padding: 0.3rem 0.35rem;
+        border: 0;
+        border-radius: var(--pk-radius-sm);
+        background-color: transparent;
         color: var(--pk-color-text);
         font: inherit;
         text-align: left;
@@ -1006,7 +1091,10 @@
 
     .mobile-context-primary {
         min-width: 0;
-        font-weight: 800;
+        flex: 0 1 auto;
+        font-family: var(--pk-font-body);
+        font-size: 1rem;
+        font-weight: 700;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -1015,21 +1103,21 @@
     .mobile-context-secondary {
         flex-shrink: 0;
         font-size: 0.82rem;
-        font-weight: 700;
-        color: var(--pk-color-primary);
+        font-weight: 600;
+        color: var(--pk-color-text-secondary);
     }
 
     .mobile-status-badge {
         display: flex;
         align-items: center;
         flex-shrink: 0;
-        padding: 0.3rem 0.55rem;
-        border-radius: var(--pk-radius-sm);
-        font-size: 0.72rem;
-        font-weight: 700;
+        padding: 0.2rem 0.35rem;
+        border-radius: 0;
+        font-size: 0.68rem;
+        font-weight: 600;
         color: var(--pk-color-text-tertiary);
-        background-color: var(--pk-color-bg-secondary);
-        border: 1px solid var(--pk-color-border-light);
+        background-color: transparent;
+        border: 0;
         white-space: nowrap;
     }
 
@@ -1048,9 +1136,14 @@
         display: none;
     }
 
+    .reading-meta-row {
+        min-height: 32px;
+    }
+
     .mobile-sub-actions {
         display: flex;
-        gap: 0.45rem;
+        justify-content: center;
+        gap: 0.15rem;
         width: 100%;
     }
 
@@ -1059,14 +1152,14 @@
         align-items: center;
         justify-content: center;
         flex: 1;
-        min-height: 36px;
-        border: 1px solid var(--pk-color-border);
-        border-radius: var(--pk-radius-md);
-        background-color: var(--pk-color-bg-elevated);
-        color: var(--pk-color-primary);
+        min-height: 32px;
+        border: 0;
+        border-radius: var(--pk-radius-sm);
+        background-color: transparent;
+        color: var(--pk-color-text-secondary);
         font: inherit;
         font-size: 0.85rem;
-        font-weight: 700;
+        font-weight: 600;
     }
 
     .mobile-reading-settings-btn {
@@ -1074,13 +1167,13 @@
         align-items: center;
         justify-content: center;
         min-width: 44px;
-        min-height: 36px;
-        border: 1px solid var(--pk-color-border);
-        border-radius: var(--pk-radius-md);
-        background-color: var(--pk-color-bg);
-        color: var(--pk-color-text);
+        min-height: 32px;
+        border: 0;
+        border-radius: var(--pk-radius-sm);
+        background-color: transparent;
+        color: var(--pk-color-text-secondary);
         font: inherit;
-        font-weight: 900;
+        font-weight: 700;
     }
 
     .mobile-chapter-notes-btn:disabled {
@@ -1110,12 +1203,8 @@
     }
 
     .mobile-sheet-backdrop {
-        position: fixed;
-        inset: 0;
-        z-index: 1200;
-        display: flex;
         align-items: flex-end;
-        background-color: rgba(15, 23, 42, 0.36);
+        padding: 0;
     }
 
     .mobile-sheet {
@@ -1123,12 +1212,16 @@
         max-height: calc(var(--pk-viewport-height) - var(--pk-safe-area-top) - 32px);
         padding: 0.5rem 1rem calc(1rem + var(--pk-safe-area-bottom));
         border-radius: 18px 18px 0 0;
+        border-right: 0;
+        border-bottom: 0;
+        border-left: 0;
         background-color: var(--pk-color-bg-elevated);
         box-shadow: 0 -16px 40px var(--pk-color-shadow);
         animation: mobileSheetUp 0.18s ease-out;
     }
 
     .mobile-sheet-handle {
+        display: block;
         width: 42px;
         height: 4px;
         margin: 0.25rem auto 0.85rem;
@@ -1157,15 +1250,8 @@
     }
 
     .mobile-sheet-close {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        min-width: 44px;
-        min-height: 44px;
-        border: 0;
-        border-radius: 999px;
+        margin: 0;
         background-color: var(--pk-color-bg-secondary);
-        color: var(--pk-color-text-secondary);
     }
 
     .mobile-reading-action-bar {
@@ -1225,7 +1311,24 @@
     }
 
     .verse-row {
-        scroll-margin-top: 6rem;
+        grid-template-columns: 1.7rem minmax(0, 1fr);
+        column-gap: 0.4rem;
+        padding: 0.52rem 0.1rem;
+        scroll-margin-top: 5rem;
+    }
+
+    .verse-content {
+        font-size: calc(1.06rem * var(--bible-text-scale, 1));
+        line-height: 1.98;
+    }
+
+    .bible-text-grid {
+        margin-top: 0.35rem;
+        padding: 0.8rem 0 1.5rem;
+    }
+
+    .note-indicator {
+        right: -0.85rem;
     }
 
     .verse-popup .popup-close-btn,

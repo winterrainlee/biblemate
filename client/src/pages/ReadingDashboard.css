@@ -7,7 +7,7 @@
     display: flex;
     flex-direction: column;
     height: 100%;
-    background-color: var(--pk-color-bg-secondary);
+    background-color: var(--pk-color-bg);
     overflow: hidden;
 }
 
@@ -50,6 +50,11 @@
     width: 100%;
     overflow-y: hidden;
     /* Allow scroll inside wrapper if needed */
+}
+
+.dashboard-container.bible-mode-active .bible-viewer-wrapper {
+    max-width: none;
+    padding: 0;
 }
 
 .note-editor-wrapper {

@@ -585,8 +585,8 @@ const BibleViewer = ({
                             onClick={() => setIsMobileSelectorOpen(true)}
                             aria-label={`${bookName} ${chapter}장, ${currentVersionLabel} 선택`}
                         >
-                            <span className="mobile-context-primary">{bookName} {chapter}장 · 오늘 이어 읽기</span>
-                            <span className="mobile-context-secondary">{currentVersionLabel} ▼</span>
+                            <span className="mobile-context-primary">{bookName} {chapter}장</span>
+                            <span className="mobile-context-secondary">{currentVersionLabel}</span>
                         </button>
                         <span
                             className={`mobile-status-badge ${isCompleted ? 'completed' : ''}`}
@@ -661,35 +661,38 @@ const BibleViewer = ({
                         </button>
                     </div>
 
-                    <div
-                        className="reading-status-container"
-                        onClick={() => isCompleted && onNavigateToJournal(lastReadDate)}
-                        style={{ cursor: isCompleted ? 'pointer' : 'default' }}
-                        title={isCompleted ? "해당 날짜 묵상일지로 이동" : ""}
-                    >
-                        <span className={`status-label ${isCompleted ? 'completed' : ''}`}>
-                            {isCompleted ? '읽음' : '읽지 않음'}
-                        </span>
-                        {lastReadDate && (
-                            <span className="status-date">
-                                ({lastReadDate === format(new Date(), 'yyyy-MM-dd') ? '오늘' : lastReadDate})
+                    <div className="reading-meta-row">
+                        <div
+                            className="reading-status-container"
+                            onClick={() => isCompleted && onNavigateToJournal(lastReadDate)}
+                            style={{ cursor: isCompleted ? 'pointer' : 'default' }}
+                            title={isCompleted ? "해당 날짜 묵상일지로 이동" : ""}
+                        >
+                            <span className={`status-label ${isCompleted ? 'completed' : ''}`}>
+                                {isCompleted ? '읽음' : '읽지 않음'}
                             </span>
-                        )}
-                    </div>
-                    <div className="mobile-sub-actions">
-                        <button
-                            className="mobile-chapter-notes-btn"
-                            onClick={() => setIsChapterNotesOpen(true)}
-                            disabled={chapterNotes.length === 0}
-                        >
-                            이 장의 묵상 {chapterNotes.length}개 보기
-                        </button>
-                        <button
-                            className="mobile-reading-settings-btn"
-                            onClick={() => setIsReadingSettingsOpen(true)}
-                        >
-                            Aa
-                        </button>
+                            {lastReadDate && (
+                                <span className="status-date">
+                                    ({lastReadDate === format(new Date(), 'yyyy-MM-dd') ? '오늘' : lastReadDate})
+                                </span>
+                            )}
+                        </div>
+                        <div className="mobile-sub-actions">
+                            <button
+                                className="mobile-chapter-notes-btn"
+                                onClick={() => setIsChapterNotesOpen(true)}
+                                disabled={chapterNotes.length === 0}
+                            >
+                                이 장의 묵상 {chapterNotes.length}개
+                            </button>
+                            <button
+                                className="mobile-reading-settings-btn"
+                                onClick={() => setIsReadingSettingsOpen(true)}
+                                aria-label="본문 가독성 설정"
+                            >
+                                Aa
+                            </button>
+                        </div>
                     </div>
                 </header>
 
@@ -819,18 +822,20 @@ const BibleViewer = ({
                                     onClick={(e) => handleVerseClick(e, v)}
                                     onMouseDown={(e) => e.stopPropagation()} // Prevent document click outside
                                 >
-                                    <span className="verse-num">{v.verse}</span>
-                                    <span className={`verse-content ${hasNote ? 'has-note' : ''}`}>
-                                        {v.text || v.content || ''}
+                                    <span className="verse-meta">
+                                        <span className="verse-num">{v.verse}</span>
                                         {hasNote && (
                                             <button
                                                 className="note-indicator"
                                                 onClick={(e) => openVerseNotes(v, e)}
                                                 aria-label={`${bookName} ${chapter}:${v.verse} 묵상 보기`}
                                             >
-                                                📝
+                                                <span className="note-indicator-dot" aria-hidden="true" />
                                             </button>
                                         )}
+                                    </span>
+                                    <span className={`verse-content ${hasNote ? 'has-note' : ''}`}>
+                                        {v.text || v.content || ''}
                                     </span>
                                 </div>
                             );
