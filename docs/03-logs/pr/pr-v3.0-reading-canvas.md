@@ -3,7 +3,9 @@
 **Branch**: `feature/v3.0-reading-canvas` → `feature/v3.0`
 **Date**: 2026-09-08
 **Version**: v3.0.0
-**Status**: 사용자 실기기 승인 완료 / 통합 승인 대기
+**Status**: PR #3 병합 완료
+**PR**: https://github.com/winterrainlee/biblemate/pull/3
+**Merge commit**: `78ff790`
 
 ## 1. 주요 변경 사항
 
@@ -91,4 +93,4 @@
 - Journal / Chart / Settings 전면 재설계 없음
 - DB/API 변경 없음
 - 다음 v3.0 feature 선행 구현 없음
-- 이 PR 준비 과정에서 push, 원격 PR 생성, `feature/v3.0` 병합을 수행하지 않음
+- PR #3을 통해 `feature/v3.0`에 병합 완료

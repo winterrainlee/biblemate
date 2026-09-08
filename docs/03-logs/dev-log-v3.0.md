@@ -42,5 +42,5 @@
 
 ## 다음 계획
 
-- Reading Canvas PR 리뷰 후 사용자 승인에 따라 `feature/v3.0` 통합
+- Reading Canvas는 PR #3으로 `feature/v3.0` 통합 완료
 - Verse Selection은 별도 구현계획 승인 전 시작하지 않음
