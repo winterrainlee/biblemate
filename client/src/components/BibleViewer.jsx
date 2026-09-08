@@ -179,6 +179,9 @@ const BibleViewer = ({
             if (e.key === 'Escape') {
                 setPopup(prev => ({ ...prev, visible: false }));
                 setSelectedVerses([]);
+                setIsMobileSelectorOpen(false);
+                setIsChapterNotesOpen(false);
+                setIsReadingSettingsOpen(false);
             }
         };
         window.addEventListener('keydown', handleKeyDown);
@@ -585,8 +588,8 @@ const BibleViewer = ({
                             onClick={() => setIsMobileSelectorOpen(true)}
                             aria-label={`${bookName} ${chapter}장, ${currentVersionLabel} 선택`}
                         >
-                            <span className="mobile-context-primary">{bookName} {chapter}장 · 오늘 이어 읽기</span>
-                            <span className="mobile-context-secondary">{currentVersionLabel} ▼</span>
+                            <span className="mobile-context-primary">{bookName} {chapter}장</span>
+                            <span className="mobile-context-secondary">{currentVersionLabel}</span>
                         </button>
                         <span
                             className={`mobile-status-badge ${isCompleted ? 'completed' : ''}`}
@@ -661,48 +664,51 @@ const BibleViewer = ({
                         </button>
                     </div>
 
-                    <div
-                        className="reading-status-container"
-                        onClick={() => isCompleted && onNavigateToJournal(lastReadDate)}
-                        style={{ cursor: isCompleted ? 'pointer' : 'default' }}
-                        title={isCompleted ? "해당 날짜 묵상일지로 이동" : ""}
-                    >
-                        <span className={`status-label ${isCompleted ? 'completed' : ''}`}>
-                            {isCompleted ? '읽음' : '읽지 않음'}
-                        </span>
-                        {lastReadDate && (
-                            <span className="status-date">
-                                ({lastReadDate === format(new Date(), 'yyyy-MM-dd') ? '오늘' : lastReadDate})
+                    <div className="reading-meta-row">
+                        <div
+                            className="reading-status-container"
+                            onClick={() => isCompleted && onNavigateToJournal(lastReadDate)}
+                            style={{ cursor: isCompleted ? 'pointer' : 'default' }}
+                            title={isCompleted ? "해당 날짜 묵상일지로 이동" : ""}
+                        >
+                            <span className={`status-label ${isCompleted ? 'completed' : ''}`}>
+                                {isCompleted ? '읽음' : '읽지 않음'}
                             </span>
-                        )}
-                    </div>
-                    <div className="mobile-sub-actions">
-                        <button
-                            className="mobile-chapter-notes-btn"
-                            onClick={() => setIsChapterNotesOpen(true)}
-                            disabled={chapterNotes.length === 0}
-                        >
-                            이 장의 묵상 {chapterNotes.length}개 보기
-                        </button>
-                        <button
-                            className="mobile-reading-settings-btn"
-                            onClick={() => setIsReadingSettingsOpen(true)}
-                        >
-                            Aa
-                        </button>
+                            {lastReadDate && (
+                                <span className="status-date">
+                                    ({lastReadDate === format(new Date(), 'yyyy-MM-dd') ? '오늘' : lastReadDate})
+                                </span>
+                            )}
+                        </div>
+                        <div className="mobile-sub-actions">
+                            <button
+                                className="mobile-chapter-notes-btn"
+                                onClick={() => setIsChapterNotesOpen(true)}
+                                disabled={chapterNotes.length === 0}
+                            >
+                                이 장의 묵상 {chapterNotes.length}개
+                            </button>
+                            <button
+                                className="mobile-reading-settings-btn"
+                                onClick={() => setIsReadingSettingsOpen(true)}
+                                aria-label="본문 가독성 설정"
+                            >
+                                Aa
+                            </button>
+                        </div>
                     </div>
                 </header>
 
                 {isMobileSelectorOpen && (
                     <div className="mobile-sheet-backdrop" onClick={() => setIsMobileSelectorOpen(false)}>
-                        <section className="mobile-sheet" onClick={(e) => e.stopPropagation()} aria-label="본문 선택">
+                        <section className="mobile-sheet" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-label="본문 선택">
                             <div className="mobile-sheet-handle" />
                             <div className="mobile-sheet-header">
                                 <div>
                                     <div className="mobile-sheet-title">본문 선택</div>
                                     <div className="mobile-sheet-subtitle">{bookName} {chapter}장 · {currentVersionLabel}</div>
                                 </div>
-                                <button className="mobile-sheet-close" onClick={() => setIsMobileSelectorOpen(false)} aria-label="닫기">
+                                <button className="mobile-sheet-close" onClick={() => setIsMobileSelectorOpen(false)} aria-label="닫기" autoFocus>
                                     <X size={20} />
                                 </button>
                             </div>
@@ -738,14 +744,14 @@ const BibleViewer = ({
 
                 {isChapterNotesOpen && (
                     <div className="mobile-sheet-backdrop" onClick={() => setIsChapterNotesOpen(false)}>
-                        <section className="mobile-sheet chapter-notes-sheet" onClick={(e) => e.stopPropagation()} aria-label="이 장의 묵상">
+                        <section className="mobile-sheet chapter-notes-sheet" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-label="이 장의 묵상">
                             <div className="mobile-sheet-handle" />
                             <div className="mobile-sheet-header">
                                 <div>
                                     <div className="mobile-sheet-title">{bookName} {chapter}장 묵상</div>
                                     <div className="mobile-sheet-subtitle">이 장의 묵상 {chapterNotes.length}개</div>
                                 </div>
-                                <button className="mobile-sheet-close" onClick={() => setIsChapterNotesOpen(false)} aria-label="닫기">
+                                <button className="mobile-sheet-close" onClick={() => setIsChapterNotesOpen(false)} aria-label="닫기" autoFocus>
                                     <X size={20} />
                                 </button>
                             </div>
@@ -770,14 +776,14 @@ const BibleViewer = ({
 
                 {isReadingSettingsOpen && (
                     <div className="mobile-sheet-backdrop" onClick={() => setIsReadingSettingsOpen(false)}>
-                        <section className="mobile-sheet" onClick={(e) => e.stopPropagation()} aria-label="본문 가독성 설정">
+                        <section className="mobile-sheet" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-label="본문 가독성 설정">
                             <div className="mobile-sheet-handle" />
                             <div className="mobile-sheet-header">
                                 <div>
                                     <div className="mobile-sheet-title">본문 가독성</div>
                                     <div className="mobile-sheet-subtitle">성경 본문에만 적용됩니다</div>
                                 </div>
-                                <button className="mobile-sheet-close" onClick={() => setIsReadingSettingsOpen(false)} aria-label="닫기">
+                                <button className="mobile-sheet-close" onClick={() => setIsReadingSettingsOpen(false)} aria-label="닫기" autoFocus>
                                     <X size={20} />
                                 </button>
                             </div>
@@ -819,18 +825,20 @@ const BibleViewer = ({
                                     onClick={(e) => handleVerseClick(e, v)}
                                     onMouseDown={(e) => e.stopPropagation()} // Prevent document click outside
                                 >
-                                    <span className="verse-num">{v.verse}</span>
+                                    {hasNote && (
+                                        <button
+                                            className="note-indicator"
+                                            onClick={(e) => openVerseNotes(v, e)}
+                                            aria-label={`${bookName} ${chapter}:${v.verse} 묵상 보기`}
+                                        >
+                                            <span className="note-indicator-line" aria-hidden="true" />
+                                        </button>
+                                    )}
+                                    <span className="verse-meta">
+                                        <span className="verse-num">{v.verse}</span>
+                                    </span>
                                     <span className={`verse-content ${hasNote ? 'has-note' : ''}`}>
                                         {v.text || v.content || ''}
-                                        {hasNote && (
-                                            <button
-                                                className="note-indicator"
-                                                onClick={(e) => openVerseNotes(v, e)}
-                                                aria-label={`${bookName} ${chapter}:${v.verse} 묵상 보기`}
-                                            >
-                                                📝
-                                            </button>
-                                        )}
                                     </span>
                                 </div>
                             );

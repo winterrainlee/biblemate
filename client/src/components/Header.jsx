@@ -30,7 +30,7 @@ const Header = () => {
     };
 
     return (
-        <header className="main-header">
+        <header className={`main-header ${activeTab === 'bible' ? 'reading-active' : ''}`}>
             <div className="header-container">
                 <div className="header-left">
                     <div
