@@ -10,6 +10,8 @@
 - [Visual Redesign Proposal](01-planning/proposal-visual-redesign.md): v2.3 시각 디자인 재구성 제안서
 - [Implementation Plans](01-planning/implementation-plans/): 버전별 구현 계획서
   - [Implementation Plan v3.0 Reflection Composer](01-planning/implementation-plans/implementation-plan-v3.0-reflection-composer.md): 선택 snapshot 기반 묵상 작성·수정 상태 구현 계획
+  - [Implementation Plan v3.0 Existing Notes Integration](01-planning/implementation-plans/implementation-plan-v3.0-existing-notes.md): 기존 묵상 목록·본문 이동·수정·삭제 통합 계획
+  - [Implementation Plan v3.0 Responsive Integration](01-planning/implementation-plans/implementation-plan-v3.0-responsive-integration.md): 핵심 읽기 흐름의 폭·높이·safe-area·공용 패널 통합 계획
   - [Implementation Plan v3.0 Visual Cleanup](01-planning/implementation-plans/implementation-plan-v3.0-visual-cleanup.md): 주변 화면 시각 정리와 병렬 파일 소유권 계획
   - [Implementation Plan v3.0 Regression Harness](01-planning/implementation-plans/implementation-plan-v3.0-regression-harness.md): 임시 DB 기반 v2.x 데이터·API 회귀 검증 계획
   - [Implementation Plan v3.0 Verse Selection](01-planning/implementation-plans/implementation-plan-v3.0-verse-selection.md): 단일·비연속 다중 구절 선택 모델 구현 계획
@@ -80,6 +82,8 @@
 
 ### Walkthroughs
 - [Walkthroughs](03-logs/walkthroughs/): 구현/검증 과정 기록
+  - [Walkthrough v3.0 Responsive Integration](03-logs/walkthroughs/walkthrough-v3.0-responsive-integration.md): 높이·scroll·safe-area·공용 우측 패널 통합과 폭별 검증 기록
+  - [Walkthrough v3.0 Existing Notes Integration](03-logs/walkthroughs/walkthrough-v3.0-existing-notes.md): 기존 묵상 단일 목록 구현과 자동 검증 기록
   - [Walkthrough v3.0 Context Toolbar](03-logs/walkthroughs/walkthrough-v3.0-context-toolbar.md): Context Toolbar 구현·자동 검증·iPhone 실기기 승인 기록
   - [Walkthrough v3.0 Verse Selection](03-logs/walkthroughs/walkthrough-v3.0-verse-selection.md): Verse Selection 구현·자동 검증·iPhone 실기기 확인 기록
   - [Walkthrough v3.0 Reading Canvas](03-logs/walkthroughs/walkthrough-v3.0-reading-canvas.md): Reading Canvas 구현·반응형·실기기 검증 기록

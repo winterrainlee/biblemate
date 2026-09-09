@@ -404,3 +404,45 @@ Bible Reading Mate 프로젝트를 진행하며 각 버전(v1.0 ~ v2.1)에서 �
 
 - **문제**: 자동 CRUD·backup/restore 검증을 실제 사용자 DB에서 수행하면 정상 테스트 자체가 데이터 변경을 일으킨다.
 - **Lesson**: 임시 디렉터리 DB와 임의 포트 서버를 사용하고, 실행 전후 DB hash·inode·크기·Git 상태를 비교하라. 실패나 signal에서도 child process와 fixture를 정리해야 한다.
+
+---
+
+## 24. 기존 기록 목록의 commit point와 재조회 `v3.0`
+
+### 🔄 작업 성공과 후속 재조회 성공을 같은 결과로 취급하지 않는다
+
+- **문제**: 삭제 API가 성공한 뒤 목록 재조회가 실패했을 때 전체 작업을 삭제 실패로 표시하면 사용자는 이미 삭제된 기록을 다시 시도하거나 화면에 되살아난 것으로 오해할 수 있다.
+- **Lesson**: 저장·삭제의 서버 commit point에서 로컬 목록을 먼저 확정하고, 후속 재조회는 별도 동기화 단계로 취급하라. 재조회 실패는 기존 항목을 보존한 채 재시도 가능 상태로 표현해야 한다.
+
+### 🧭 장별 비동기 목록은 context와 request 순서를 함께 검증한다
+
+- **문제**: 빠른 장 이동이나 연속 refresh에서 늦게 도착한 이전 장 응답이 현재 장의 목록과 본문 표시를 덮을 수 있다.
+- **Lesson**: `book:chapter` context key와 단조 증가 request id가 모두 최신일 때만 응답을 적용하라. 화면에 표시할 파생 목록도 현재 context가 일치할 때만 노출한다.
+
+---
+
+## 25. Responsive 통합의 scroll owner와 stacking context `v3.0`
+
+### 📏 높이는 최상위 viewport부터 실제 scroll owner까지 연속해서 정의한다
+
+- **문제**: `100vh`, flex item의 기본 `min-height:auto`, 중첩 overflow가 섞이면 Safari 주소창·키보드 변화에서 본문과 하단 액션이 서로 다른 높이를 기준으로 배치된다.
+- **Lesson**: dynamic viewport와 safe-area를 root에서 정의하고 모든 중간 flex container에 `min-height: 0`을 전달한 뒤, 실제 콘텐츠 한 곳만 주 스크롤 영역으로 지정하라.
+
+### 🪟 `isolation`은 fixed overlay의 큰 z-index도 부모 안에 가둘 수 있다
+
+- **문제**: 읽기 container에 stacking context를 만들자 `z-index: 1300`인 전체 화면 Composer도 상위 앱 Header의 `z-index: 50` 아래에 표시됐다.
+- **Lesson**: overlay를 포함한 container에 `isolation`, transform, opacity 같은 stacking context 생성 속성을 추가할 때는 viewport 모서리의 `elementFromPoint`와 실제 screenshot으로 전역 Header 위 표시 여부를 확인하라.
+
+### 🔤 breakpoint는 기능 상태와 Header 수용 폭을 분리해 관리한다
+
+- **문제**: Reading 상태가 시작되는 600px 직후에 데스크톱 전체 라벨과 전역 글자 조절을 모두 유지하면 큰 글자에서 Header가 먼저 넘친다.
+- **Lesson**: 기능 breakpoint는 유지하되 Header는 실제 control 합산 폭에 따라 중간 축약 구간을 둘 수 있다. 기능 구조 변경과 단순 표기 축약을 같은 breakpoint로 강제하지 않는다.
+
+---
+
+## 26. 전체 목록과 선택 문맥 목록의 역할 분리 `v3.0`
+
+### 🎯 같은 데이터라도 진입 문맥에 따라 범위를 명시한다
+
+- **문제**: 장 전체 묵상 진입점이 선택 상태에서 숨고, 선택 도구의 `묵상`은 새 작성만 열어 사용자가 기존 기록을 찾을 수 없었다.
+- **Lesson**: 상단 진입점은 장 전체 목록, 선택 문맥 진입점은 선택 범위와 하나라도 겹치는 관련 목록으로 역할을 분리하라. 필터를 열기 전에 선택 snapshot을 보존해야 선택 UI를 닫아도 결과 범위가 바뀌지 않는다.

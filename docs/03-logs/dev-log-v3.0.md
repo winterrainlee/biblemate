@@ -143,3 +143,58 @@
 - 병합 커밋: PR #8 `c19cfd7`, PR #7 `aa316c4`, PR #6 `074fcc8`
 - 통합 브랜치에서 lint, production build, Composer/navigation guard 테스트 9/9, 임시 DB 회귀 Harness 8/8 재통과
 - 사용자 검수 서버는 실행하지 않았으며 원본 `server/data/bible.db`의 기존 로컬 변경을 유지
+
+#### [Planning] Existing Notes Integration
+
+- Reflection Composer 통합 계약을 기준으로 기존 묵상 목록·마진 표시·본문 이동·수정·삭제의 단일 흐름을 설계
+- Compact 시트, Reading dialog, Workspace 우측 패널이 같은 `ChapterNotesPanel`과 장별 refresh 상태를 공유하도록 계획
+- 작성·수정·삭제 성공과 후속 목록 refresh 실패를 분리하고 context/request guard로 오래된 응답 적용을 차단
+- DB/API schema 변경 없이 기존 `verse_notes`와 격리 Regression Harness를 재사용
+- 구현계획 문서 작성 완료, 애플리케이션 코드 수정 전 사용자 승인 대기
+- 사용자 구현계획 승인 후 `feature/v3.0-existing-notes` 독립 브랜치 착수
+
+#### [Implementation] Existing Notes Integration
+
+- 사용자 계획 승인에 따라 `feature/v3.0-existing-notes` 독립 브랜치에서 구현
+- Compact 하단 시트, Reading modal dialog, Workspace 우측 1/3 패널이 같은 `ChapterNotesPanel`과 목록 상태를 사용하도록 통합
+- 묵상 0개 진입, 마진 표시에서 대상 카드 선택, 본문 절 이동, 복사·Reflection Composer 수정·삭제를 한 흐름으로 연결
+- 장 context와 최신 request가 일치하는 조회만 적용하고, 삭제 성공 시 항목·마진 표시를 먼저 제거한 뒤 백그라운드 재조회 실패와 삭제 실패를 분리
+- 조회 오류는 기존 목록을 보존하며 최초 실패는 거짓 빈 상태 대신 재시도 화면을 표시
+- 모델/navigation guard 테스트 15/15, ESLint, production build, 임시 DB 회귀 Harness 8/8 통과
+- 사용자 검수 서버는 열지 않았고 원본 `server/data/bible.db` 보호 검사 통과
+- Responsive 통합 이후 Composer·7버튼 Toolbar·Journal 결과와 함께 한 번의 실기기 검수 세션에서 확인 예정
+
+#### [Planning] Responsive 통합
+
+- Existing Notes 완료 결과를 포함해 Header, Layout, ReadingDashboard와 핵심 Reading surface의 breakpoint·높이·overflow 접점을 재점검
+- 기능 breakpoint는 Compact `<600px`, Reading `600–899px`, Workspace `≥900px`로 유지하고 Header 640px·legacy Dashboard 768px 규칙은 Bible mode 범위에서 충돌만 해소하도록 계획
+- Compact의 safe-area·키보드·7버튼, Reading의 단일 본문·modal, Workspace의 본문 2/3 + 공용 우측 작업면을 통합 검증 대상으로 확정
+- 사용자 결정에 따라 iPhone Safari를 필수 승인 게이트로 유지하고 650px·1280px은 자동 구조 검증하되 모바일 무관 미세 문제는 hotfix 이관 가능
+- 자동 검증 완료 전 검수 서버를 열지 않고 최종 한 세션에서 Composer, Existing Notes, 주변 화면과 지속성을 함께 확인
+- 구현계획 문서 작성 완료, 코드 수정 전 사용자 승인 대기
+
+#### [Implementation & Verification] Responsive 통합
+
+- 사용자 계획 승인 후 `feature/v3.0-responsive-integration` 브랜치에서 viewport 높이, safe-area, scroll owner와 flex 최소 크기 계약을 통합
+- `html/body/#root → Layout → Dashboard → BibleViewer`의 높이·overflow 연결을 명시하고 실제 본문을 주 스크롤 영역으로 고정
+- Compact 본문 하단 여백과 scroll padding을 기본 읽기 bar/7버튼 Toolbar 높이에 맞추고 작은 높이에서도 Toolbar 자체 스크롤과 Composer 저장 액션을 유지
+- Composer와 Existing Notes가 Workspace에서 `300–420px` 공용 우측 작업면 폭, 전체 높이, 독립 스크롤을 공유하도록 정리
+- 641–720px Header는 축약 라벨과 모바일 읽기표 버튼을 사용해 전체 라벨·전역 글자 조절의 overflow를 방지
+- Login은 dynamic viewport 높이와 내부 세로 스크롤을 사용해 전역 root overflow 계약에서도 작은 화면 내용이 잘리지 않게 보강
+- 자동 브라우저 검수 중 `isolation`이 전체 화면 Composer를 앱 Header 아래 stacking context에 가두는 문제를 발견해 해당 격리를 제거하고 상단 제목·닫기 영역 복구 확인
+- 375×812, 375×500, 650×900, 899/900 경계, 1280×900에서 가로 overflow 0, modal/panel 전환, 공용 패널 300/420px, 최소 44px 7버튼, 빈 묵상 장을 확인
+- 최대 전역 글자 20px, Dark mode, 하이라이트 4색, 긴 묵상·다중 범위에서도 가로 overflow 없음 확인
+- 모델/navigation guard 테스트 15/15, ESLint, production build, 임시 DB 회귀 Harness 8/8과 원본 DB 보호 검사 통과
+- 자동 검사용 `127.0.0.1:5188` 서버와 synthetic fixture·브라우저 탭을 종료·삭제했으며 사용자용 5174/Tailscale 검수 서버는 열지 않음
+
+#### [Validation Fix] 모바일 기존 묵상 진입점
+
+- 실기기 검수에서 구절 선택 시 상단 Header와 함께 기존 묵상 진입점이 숨겨지는 탐색성 문제를 확인
+- 사용자 B안 승인에 따라 7개 Context Toolbar 액션은 유지하고 선택 제목 줄에 `기존 묵상 N개` 버튼을 추가
+- 평상시 `이 장의 묵상 N개` 문구도 `기존 묵상 N개`로 통일해 새 작성용 `묵상` 액션과 구분
+- 후속 승인에 따라 상단 버튼은 장 전체 묵상을, 선택 메뉴는 선택 구절 중 하나라도 `verse_range`와 겹치는 관련 묵상만 표시하도록 분리
+- 필터 결과가 없을 때 선택 구절 전용 empty state를 표시하고 단일·연속·비연속 범위 필터 테스트를 추가
+- 모델/navigation guard 테스트 16/16, ESLint, production build, `git diff --check` 재통과
+- 실제 묵상 DB 복제본을 Tailscale 인터페이스에만 바인딩해 iPhone 재검수를 완료하고 사용자 승인 후 서비스·5174 포트·복제본을 제거
+- 원본 `server/data/bible.db` SHA-256이 검수 시작 전후 동일함을 확인
+- 사용자 승인 후 `feature/v3.0-responsive-integration`을 원격에 push하고 `feature/v3.0` 대상 PR #9 생성

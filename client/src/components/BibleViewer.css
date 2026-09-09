@@ -4,6 +4,9 @@
     display: flex;
     width: 100%;
     height: 100%;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
     background-color: var(--pk-color-bg);
 }
 
@@ -49,6 +52,7 @@
 .bible-main-content {
     flex: 1;
     min-width: 0;
+    min-height: 0;
     display: flex;
     flex-direction: column;
     overflow-y: auto;
@@ -56,6 +60,8 @@
     padding: 0 clamp(1.5rem, 5vw, 5rem) 3rem;
     background-color: var(--pk-color-bg);
     scroll-padding-top: 7rem;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
 }
 
 .empty-side-note {
@@ -435,6 +441,8 @@
     box-shadow: 0 10px 32px var(--pk-color-shadow);
     backdrop-filter: blur(14px);
     transform: translateX(-50%);
+    max-height: calc(var(--pk-viewport-height) - var(--pk-safe-area-top) - var(--pk-safe-area-bottom) - 1rem);
+    overflow-y: auto;
 }
 
 .bible-main-content.selection-active {
@@ -451,8 +459,35 @@
 .verse-selection-header-actions {
     position: relative;
     display: flex;
+    align-items: center;
     flex: 0 0 auto;
     gap: 0.2rem;
+}
+
+.verse-selection-existing-notes {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 0.35rem 0.55rem;
+    border: 0;
+    border-radius: var(--pk-radius-sm);
+    background-color: transparent;
+    color: var(--pk-color-text-secondary);
+    font: inherit;
+    font-size: 0.78rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.verse-selection-existing-notes:hover:not(:disabled),
+.verse-selection-existing-notes:focus-visible {
+    color: var(--pk-color-primary);
+    background-color: var(--pk-color-primary-light);
+}
+
+.verse-selection-existing-notes:disabled {
+    opacity: 0.55;
 }
 
 .verse-selection-actions {
@@ -1252,6 +1287,8 @@
 
     .bible-main-content {
         padding: 0 clamp(0.85rem, 4vw, 1rem) calc(5.4rem + var(--pk-safe-area-bottom));
+        scroll-padding-top: 5rem;
+        scroll-padding-bottom: calc(5.4rem + var(--pk-safe-area-bottom));
     }
 
     .bible-nav-header {
@@ -1463,6 +1500,7 @@
         background-color: color-mix(in srgb, var(--pk-color-bg-elevated) 92%, transparent);
         backdrop-filter: blur(14px);
         box-shadow: 0 -8px 24px var(--pk-color-shadow);
+        min-width: 0;
     }
 
     .mobile-reading-action-bar button {
@@ -1471,6 +1509,8 @@
         font: inherit;
         font-size: 0.88rem;
         font-weight: 800;
+        min-width: 0;
+        overflow: hidden;
     }
 
     .mobile-reading-nav-btn {
@@ -1526,10 +1566,12 @@
         border-left: 0;
         border-radius: 0;
         transform: none;
+        max-height: calc(var(--pk-viewport-height) - var(--pk-safe-area-top));
     }
 
     .bible-main-content.selection-active {
         padding-bottom: calc(9rem + var(--pk-safe-area-bottom));
+        scroll-padding-bottom: calc(9rem + var(--pk-safe-area-bottom));
     }
 
     .verse-content {
