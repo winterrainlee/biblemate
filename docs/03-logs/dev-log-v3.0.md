@@ -133,3 +133,13 @@
 - 세 커밋을 임시 detached worktree에 결합해 lint, production build, Composer 5/5, Regression 8/8 통과 확인
 - 원본 `server/data/bible.db`와 사용자 검수 서버는 사용하지 않음
 - Reflection Composer PR #6, Visual Cleanup PR #7, Regression Harness PR #8 생성; 모두 `feature/v3.0` 대상이며 병합 대기
+
+#### [Review & Integration] Wave 1
+
+- PR #6 리뷰에서 전역 화면 전환 시 dirty draft 유실, 저장 성공 후 refresh 실패의 거짓 실패 표시, stale context 적용 문제를 발견하고 `6f28cfe`에서 수정
+- PR #7 리뷰에서 필터/notebook 탭의 선택 상태와 로그인 입력 accessible name을 보강하고 `a4e7c21`에서 수정
+- PR #8 리뷰에서 임시 포트 선점 재시도와 rollback 전체 데이터 비교를 보강하고 `06eeebf`에서 수정
+- PR #8 → #7 → #6 순으로 `feature/v3.0`에 merge commit 병합
+- 병합 커밋: PR #8 `c19cfd7`, PR #7 `aa316c4`, PR #6 `074fcc8`
+- 통합 브랜치에서 lint, production build, Composer/navigation guard 테스트 9/9, 임시 DB 회귀 Harness 8/8 재통과
+- 사용자 검수 서버는 실행하지 않았으며 원본 `server/data/bible.db`의 기존 로컬 변경을 유지

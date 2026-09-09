@@ -2,7 +2,7 @@
 
 - 작업 브랜치: `feature/v3.0-visual-cleanup`
 - 병렬 트랙: 주변 화면 Wave 1
-- 상태: **구현계획 승인 / 구현 중**
+- 상태: **구현·리뷰·통합 완료 (PR #7)**
 - 선행 조건: Reading Canvas 시각 원칙 승인 완료
 
 ## Goal

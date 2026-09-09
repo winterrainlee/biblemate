@@ -2,7 +2,7 @@
 
 - 작업 브랜치: `feature/v3.0-reflection-composer`
 - 병렬 트랙: 핵심 묵상 트랙 Wave 1
-- 상태: **구현계획 승인 / 구현 중**
+- 상태: **구현·리뷰·통합 완료 (PR #6)**
 - 선행 조건: Context Toolbar 통합 완료
 
 ## Goal
