@@ -51,7 +51,8 @@ function LoginPage({ onLogin }) {
                             type="password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                        placeholder="암호를 입력하세요"
+                            placeholder="암호를 입력하세요"
+                            aria-label="암호"
                             autoFocus
                             disabled={loading}
                         />

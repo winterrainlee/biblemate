@@ -58,16 +58,18 @@ const ReadingProgress = ({ books = [], readingLogs = [] }) => {
         <div className="reading-progress">
             <h3 className="reading-progress-title">📊 말씀 여정</h3>
 
-            <div className="reading-progress-tabs">
+            <div className="reading-progress-tabs" role="group" aria-label="성경 범위 선택">
                 <button
                     className={`reading-progress-tab ${activeRange === 'OT' ? 'active' : ''}`}
                     onClick={() => setActiveRange('OT')}
+                    aria-pressed={activeRange === 'OT'}
                 >
                     구약
                 </button>
                 <button
                     className={`reading-progress-tab ${activeRange === 'NT' ? 'active' : ''}`}
                     onClick={() => setActiveRange('NT')}
+                    aria-pressed={activeRange === 'NT'}
                 >
                     신약
                 </button>

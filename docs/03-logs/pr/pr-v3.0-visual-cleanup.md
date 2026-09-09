@@ -30,4 +30,3 @@
 - `BibleViewer*`, `ReadingDashboard*`, Header/Layout/index.css
 - Journal 구절 묵상 목록·편집 영역
 - API/server 변경
-

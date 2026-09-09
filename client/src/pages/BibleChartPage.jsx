@@ -118,22 +118,25 @@ const BibleChartPage = () => {
                 </div>
 
                 {/* Filter Buttons moved to Header Right */}
-                <div className="chart-filters" aria-label="성경 범위 필터">
+                <div className="chart-filters" role="group" aria-label="성경 범위 필터">
                     <button
                         className={`chart-filter-btn ${filter === 'all' ? 'active' : ''}`}
                         onClick={() => setFilter('all')}
+                        aria-pressed={filter === 'all'}
                     >
                         전체
                     </button>
                     <button
                         className={`chart-filter-btn ${filter === 'ot' ? 'active' : ''}`}
                         onClick={() => setFilter('ot')}
+                        aria-pressed={filter === 'ot'}
                     >
                         구약
                     </button>
                     <button
                         className={`chart-filter-btn ${filter === 'nt' ? 'active' : ''}`}
                         onClick={() => setFilter('nt')}
+                        aria-pressed={filter === 'nt'}
                     >
                         신약
                     </button>
