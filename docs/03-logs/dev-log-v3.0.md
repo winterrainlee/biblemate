@@ -197,3 +197,4 @@
 - 모델/navigation guard 테스트 16/16, ESLint, production build, `git diff --check` 재통과
 - 실제 묵상 DB 복제본을 Tailscale 인터페이스에만 바인딩해 iPhone 재검수를 완료하고 사용자 승인 후 서비스·5174 포트·복제본을 제거
 - 원본 `server/data/bible.db` SHA-256이 검수 시작 전후 동일함을 확인
+- 사용자 승인 후 `feature/v3.0-responsive-integration`을 원격에 push하고 `feature/v3.0` 대상 PR #9 생성

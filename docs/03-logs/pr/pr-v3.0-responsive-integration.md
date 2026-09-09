@@ -3,7 +3,8 @@
 **Branch**: `feature/v3.0-responsive-integration` → `feature/v3.0`
 **Date**: 2026-09-09
 **Version**: v3.0.0
-**Status**: 초안 준비 완료 / push 및 PR 생성 승인 대기
+**Status**: PR #9 생성 완료 / 리뷰 대기
+**PR**: https://github.com/winterrainlee/biblemate/pull/9
 
 ## 1. 주요 변경 사항
 
@@ -47,4 +48,4 @@
 
 - Journal 전체 재설계, 검색·태그·Markdown·자동 저장 없음
 - 모바일 외 미세 시각 문제는 사용자 승인 기준에 따라 후속 hotfix 가능
-- 원격 push와 실제 PR 생성은 별도 사용자 승인 후 진행
+- 사용자 승인 후 원격 push 및 PR #9 생성 완료
