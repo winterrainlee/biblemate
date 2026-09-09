@@ -107,3 +107,10 @@
 - 사용자 1차 확인 후 7개 직접 버튼으로 수정하고 동일 검수 서버에서 재확인
 - 사용자 최종 승인 완료
 - Desktop 3폭·키보드·Light/Dark 조합은 승인된 B안에 따라 후속 hotfix 후보로 유지
+
+#### [Integration] Context Toolbar + Highlight + Copy
+
+- GitHub PR #5를 merge commit 방식으로 `feature/v3.0`에 병합
+- 병합 커밋: `32e1e73`
+- 검수용 5174 macOS 임시 서비스를 제거하고 포트 종료 확인
+- 다음 작업 착수 전 Reflection Composer, Existing Notes, Visual Cleanup, 회귀 검증의 병렬 가능 범위를 의존성 기준으로 재검토

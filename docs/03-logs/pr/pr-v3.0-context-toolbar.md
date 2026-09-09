@@ -3,8 +3,9 @@
 **Branch**: `feature/v3.0-context-toolbar` → `feature/v3.0`
 **Date**: 2026-09-09
 **Version**: v3.0.0
-**Status**: PR #5 리뷰 대기 — 모바일 우선 완료 기준 승인
+**Status**: PR #5 병합 완료 — 모바일 우선 완료 기준 승인
 **PR**: https://github.com/winterrainlee/biblemate/pull/5
+**Merge commit**: `32e1e73`
 
 ## 1. 주요 변경 사항
 
@@ -85,3 +86,4 @@
 - DB schema / backup 형식 변경 없음
 - Responsive breakpoint 변경 없음
 - 검수 중 변경된 `server/data/bible.db`는 사용자 로컬 데이터이며 PR에서 제외
+- PR #5로 `feature/v3.0` 통합 완료
