@@ -1,10 +1,10 @@
 # Release Notes v3.0.0
 
-**배포일**: 미정
+**배포일**: 2026-09-09 예정
 **버전**: v3.0.0
-**상태**: 개발 중
+**상태**: Release Candidate
 
-## 현재 완료된 변경
+## 주요 변경
 
 ### Reading Canvas
 
@@ -72,5 +72,11 @@
 - Existing Notes 모델/navigation guard 테스트 15/15, lint/build 및 격리 회귀 Harness 8/8 통과
 - Responsive 375·650·899/900·1280px 브라우저 검증, 최대 글자·Dark 4색 확인 및 전체 자동 회귀 재통과
 - iPhone 실기기에서 장 전체 기존 묵상과 단일·비연속 선택 관련 묵상 필터를 확인하고 사용자 승인
+- Release Candidate에서 모델/navigation guard 테스트 16/16, ESLint, production build, 격리 API 회귀 8/8 재통과
+- root/client/server 및 backup export metadata의 앱 버전 `3.0.0` 정합 확인
+- 사용자 DB와 release seed DB의 검증 전후 SHA-256 무변경 확인
 
-전체 v3.0 릴리즈 노트는 후속 기능 완료에 맞춰 계속 갱신합니다.
+## 알려진 비차단 항목
+
+- iPad 실제 Split View, Desktop keyboard 전용 조작, PWA standalone의 미세 시각 차이는 발견 시 v3.0.x hotfix로 처리합니다.
+- 기존 DB schema와 API·backup 형식은 변경하지 않습니다.

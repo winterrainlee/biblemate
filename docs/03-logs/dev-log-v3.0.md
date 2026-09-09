@@ -3,10 +3,10 @@
 ## 개요
 
 - **버전**: v3.0.0
-- **기간**: 2026-09-08 ~ 진행 중
+- **기간**: 2026-09-08 ~ 2026-09-09 (Release Candidate 준비)
 - **목표**: 성경 읽기와 묵상 기록의 핵심 경험을 실제 사용 흐름 중심으로 재구성
 - **통합 브랜치**: `feature/v3.0`
-- **현재 작업 브랜치**: `feature/v3.0-context-toolbar`
+- **현재 작업 브랜치**: `feature/v3.0-release`
 
 ## 변경 내역
 
@@ -55,7 +55,7 @@
 - [x] Verse Selection working tree `git diff --check`
 - [ ] Verse Selection 브라우저 반응형·실기기 검수
 
-## 다음 계획
+## 당시 다음 계획
 
 - Reading Canvas는 PR #3, Verse Selection은 PR #4로 `feature/v3.0` 통합 완료
 - Context Toolbar + Highlight + Copy PR 생성 및 `feature/v3.0` 통합
@@ -200,3 +200,13 @@
 - 사용자 승인 후 `feature/v3.0-responsive-integration`을 원격에 push하고 `feature/v3.0` 대상 PR #9 생성
 - PR #9를 merge commit 방식으로 `feature/v3.0`에 병합 (`9901f32`)
 - 로컬 통합 브랜치를 fast-forward하고 사용자 `server/data/bible.db` 변경이 그대로 유지됨을 확인
+
+#### [Release] v3.0.0 Phase 1
+
+- 사용자 Release 구현계획 승인 후 `feature/v3.0-release` 전용 worktree를 생성해 기본 작업 트리의 사용자 DB와 분리
+- root/client/server package와 lockfile, Settings, backup export metadata의 제품 버전을 `3.0.0`으로 통일
+- README의 과거 3컬럼·빨간 밑줄 설명을 Reading First·7버튼·반응형 Composer·Existing Notes 기준으로 갱신
+- roadmap에 v3.0.0 완료 범위와 Release 마감 항목을 추가하고 release notes를 Release Candidate 상태로 정리
+- 활성 버전 표기와 backup export metadata를 교차 감사하고 PWA manifest에는 별도 앱 버전 필드가 없음을 확인
+- 모델/navigation guard 테스트 16/16, ESLint, Vite production build, 임시 DB 회귀 Harness 8/8 통과
+- 사용자 기본 DB와 release seed DB의 SHA-256이 검증 전후 동일하고 master 대비 DB diff가 없음을 확인

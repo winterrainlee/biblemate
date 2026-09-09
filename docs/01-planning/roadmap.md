@@ -1,11 +1,34 @@
 # 차기 작업 Roadmap
 - 최신 배포 버전: v2.3.3
 - 최신 배포일자: 2026년 7월 7일
-- 목표 버전: v2.3.3
-- 목표 개발일자: 2026년 7월
+- 목표 버전: v3.0.0
+- 목표 개발일자: 2026년 9월
 - 플로우 다이어그램: [flow-diagrams.md](flow-diagrams.md)
 
 > ℹ️ **작업 절차 및 버전 관리 기준**은 [개발 방법론](dev-method.md) 문서를 참고하세요.
+
+---
+
+## 🎯 v3.0.0 — Reading First (2026년 9월)
+
+### 기준 문서
+- [Project Spec v3.0](../02-specs/spec-v3.0.md)
+- [v3.0 개발 진행표](v3.0-progress.md)
+- [v3.0 Release 구현 계획](implementation-plans/implementation-plan-v3.0-release.md)
+
+### P0 — 읽기 핵심 흐름
+- [x] `🔴 Hard` **Reading Canvas**: Compact / Reading / Workspace 반응형 읽기 화면
+- [x] `🟡 Medium` **Verse Selection**: 단일·연속·비연속 구절 선택과 모바일 gesture 경계
+- [x] `🟡 Medium` **Context Toolbar**: 하이라이트 4색·지우기·묵상·복사 7개 직접 액션
+- [x] `🔴 Hard` **Reflection Composer**: 전체 화면·우측 패널 작성과 dirty/save 보호
+- [x] `🟡 Medium` **Existing Notes**: 장 전체·선택 관련 묵상 보기, 이동·복사·수정·삭제
+
+### P1 — 통합 안정화
+- [x] `🟡 Medium` **Responsive 통합**: viewport·safe-area·scroll owner·공용 우측 작업면 정리
+- [x] `🟡 Medium` **주변 화면 정리**: Journal·Chart·Settings·Login의 시각 언어 통합
+- [x] `🟡 Medium` **격리 회귀 Harness**: 임시 DB 기반 v2.x API·backup·migration 8개 검사
+- [x] `🟢 Easy` **모바일 실기기 승인**: iPhone Safari + Tailscale 최종 검수
+- [ ] `🟢 Easy` **Release 마감**: 버전·문서·최종 회귀·master/tag·배포
 
 ---
 

@@ -446,3 +446,17 @@ Bible Reading Mate 프로젝트를 진행하며 각 버전(v1.0 ~ v2.1)에서 �
 
 - **문제**: 장 전체 묵상 진입점이 선택 상태에서 숨고, 선택 도구의 `묵상`은 새 작성만 열어 사용자가 기존 기록을 찾을 수 없었다.
 - **Lesson**: 상단 진입점은 장 전체 목록, 선택 문맥 진입점은 선택 범위와 하나라도 겹치는 관련 목록으로 역할을 분리하라. 필터를 열기 전에 선택 snapshot을 보존해야 선택 UI를 닫아도 결과 범위가 바뀌지 않는다.
+
+---
+
+## 27. Release 버전 표기와 자동 배포 경계 `v3.0`
+
+### 🧾 사용자 표시와 backup metadata도 같은 버전 표면이다
+
+- **문제**: package와 Settings만 올리면 README와 backup export의 `app_version`이 이전 버전으로 남을 수 있다.
+- **Lesson**: root/client/server manifest와 lockfile뿐 아니라 사용자 표시, README, export metadata를 활성 버전 표면으로 함께 감사하라. 의존성의 우연히 같은 버전은 제품 버전으로 오인해 바꾸지 않는다.
+
+### 🚀 master push와 배포 승인을 하나의 게이트로 취급한다
+
+- **문제**: master push가 GitHub Actions 배포를 즉시 시작하는 저장소에서 merge 승인과 배포 승인을 분리하지 않으면 의도보다 일찍 운영 변경이 발생한다.
+- **Lesson**: release commit은 깨끗한 worktree에서 먼저 준비하고 diff·tag 대상을 제출하라. master/tag push는 자동 배포가 시작된다는 사실을 명시한 별도 승인 이후에만 수행한다.

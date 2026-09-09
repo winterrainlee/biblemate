@@ -386,7 +386,7 @@ const Settings = () => {
                 </h3>
 
                 <div className="license-info">
-                    <p className="license-version"><strong>BibleMate v2.3.3</strong></p>
+                    <p className="license-version"><strong>BibleMate v3.0.0</strong></p>
                     <p>개인 묵상과 성경 읽기를 돕기 위해 만든 웹 애플리케이션입니다.</p>
 
                     <h4>성경 데이터 저작권</h4>
