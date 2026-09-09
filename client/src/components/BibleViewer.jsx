@@ -1,8 +1,21 @@
 
-import React, { useState, useEffect, useRef } from 'react';
-import { Check, MessageSquare, Copy, X, Send, Loader, ChevronLeft, ChevronRight, Trash2, Edit2, Eraser } from 'lucide-react';
+import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
+import { Check, MessageSquare, Copy, X, Loader, ChevronLeft, ChevronRight, Trash2, Edit2, Eraser } from 'lucide-react';
 import { getVerseNotesByChapter, saveVerseNote, deleteVerseNote } from '../services/journalApi';
 import { format } from 'date-fns';
+import { useTab } from '../contexts/TabContext';
+import ReflectionComposer from './ReflectionComposer';
+import {
+    buildVerseNotePayload,
+    createComposerSession,
+    createSelectionSnapshot,
+    formatVerseRange,
+    isCurrentSelectionContext,
+    isComposerDirty,
+    parseStoredContent,
+    parseVerseRange,
+    runComposerRefreshes
+} from './reflectionComposerModel';
 import './BibleViewer.css';
 
 const BibleViewer = ({
@@ -35,6 +48,8 @@ const BibleViewer = ({
     onVersionChange
 }) => {
 
+    const { registerNavigationGuard } = useTab();
+
 
     // Derived state for navigation
     const selectedBookObj = books.find(b => b.id === currentBook);
@@ -50,27 +65,27 @@ const BibleViewer = ({
     // Navigation Handlers
     const handlePrevChapter = () => {
         if (currentChapter > 1) {
-            onChapterChange(currentChapter - 1);
+            runWithComposerGuard(() => onChapterChange(currentChapter - 1));
         } else {
             // Find previous book
             const currIdx = books.findIndex(b => b.id === currentBook);
             if (currIdx > 0) {
                 const prevBook = books[currIdx - 1];
                 // Navigate to the LAST chapter of the previous book
-                onBookChange(prevBook.id, prevBook.chapters);
+                runWithComposerGuard(() => onBookChange(prevBook.id, prevBook.chapters));
             }
         }
     };
 
     const handleNextChapter = () => {
         if (currentChapter < totalChapters) {
-            onChapterChange(currentChapter + 1);
+            runWithComposerGuard(() => onChapterChange(currentChapter + 1));
         } else {
             // Next book
             const currIdx = books.findIndex(b => b.id === currentBook);
             if (currIdx < books.length - 1) {
                 const nextBook = books[currIdx + 1];
-                onBookChange(nextBook.id);
+                runWithComposerGuard(() => onBookChange(nextBook.id));
             }
         }
     };
@@ -78,8 +93,9 @@ const BibleViewer = ({
     const [isLoadingNotes, setIsLoadingNotes] = useState(false);
     const selectionContextKey = `${currentBook}:${currentChapter}:${currentVersion}`;
     const selectionContextRef = useRef(selectionContextKey);
+    const selectedVersesContextRef = useRef(selectionContextKey);
     const [selectedVerses, setSelectedVerses] = useState([]);
-    const activeSelectedVerses = selectionContextRef.current === selectionContextKey
+    const activeSelectedVerses = selectedVersesContextRef.current === selectionContextKey
         ? selectedVerses
         : [];
     const isSelectionMode = activeSelectedVerses.length > 0;
@@ -98,13 +114,15 @@ const BibleViewer = ({
         y: 0,
         verseNum: null,
         verseText: '',
-        mode: 'menu',
-        memoInput: '',
-        quoteEnabled: false,
-        quoteText: '',
-        editTargetDate: null // [NEW] Track original date for edits
+        verseRange: null
     });
+    const [composerSession, setComposerSession] = useState(null);
     const popupRef = useRef(null);
+    const mainContentRef = useRef(null);
+    const composerSessionRef = useRef(null);
+    const closeComposerSessionRef = useRef(null);
+    const composerRequestRef = useRef(0);
+    const composerSaveRef = useRef(null);
     const copyTimeoutRef = useRef(null);
     const toolbarActionRef = useRef(null);
     const lastSelectedVerseRef = useRef(null);
@@ -113,7 +131,65 @@ const BibleViewer = ({
     const touchEndRef = useRef(null);
     const dragRef = useRef({ isDragging: false, startX: 0, startY: 0, initialLeft: 0, initialTop: 0 });
     const closeVersePopup = () => {
-        setPopup(prev => ({ ...prev, visible: false, verseRange: null, editTargetDate: null }));
+        setPopup(prev => ({ ...prev, visible: false, verseRange: null }));
+    };
+
+    const commitComposerSession = (update) => {
+        const previous = composerSessionRef.current;
+        const next = typeof update === 'function' ? update(previous) : update;
+        composerSessionRef.current = next;
+        setComposerSession(next);
+    };
+
+    const restoreReadingScroll = (scrollTop) => {
+        window.requestAnimationFrame(() => {
+            if (mainContentRef.current) mainContentRef.current.scrollTop = scrollTop;
+        });
+    };
+
+    const closeComposerSession = ({ force = false, restoreFocus = true } = {}) => {
+        const session = composerSessionRef.current;
+        if (!session) return true;
+        if (session.status === 'saving' && !force) {
+            onToast?.('묵상을 저장하고 있습니다.', 'error');
+            return false;
+        }
+        if (!force && isComposerDirty(session)
+            && !window.confirm('저장하지 않은 변경사항이 있습니다. 묵상 작성을 닫으시겠습니까?')) {
+            return false;
+        }
+
+        const scrollTop = mainContentRef.current?.scrollTop || 0;
+        composerRequestRef.current += 1;
+        composerSaveRef.current = null;
+        commitComposerSession(null);
+        restoreReadingScroll(scrollTop);
+        if (restoreFocus) {
+            window.requestAnimationFrame(() => lastSelectedVerseRef.current?.focus());
+        }
+        return true;
+    };
+    closeComposerSessionRef.current = closeComposerSession;
+
+    useEffect(() => registerNavigationGuard(
+        () => closeComposerSessionRef.current?.({ restoreFocus: false }) ?? true
+    ), [registerNavigationGuard]);
+
+    useEffect(() => {
+        const handleBeforeUnload = (event) => {
+            const session = composerSessionRef.current;
+            if (!session || !isComposerDirty(session)) return;
+            event.preventDefault();
+            event.returnValue = '';
+        };
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+    }, []);
+
+    const runWithComposerGuard = (action) => {
+        if (!composerSessionRef.current || closeComposerSession({ restoreFocus: false })) {
+            action();
+        }
     };
 
     const closeVerseSelection = (restoreFocus = true) => {
@@ -129,13 +205,13 @@ const BibleViewer = ({
     const minSwipeDistance = 50;
     const isInteractiveTouchTarget = (target) => {
         return Boolean(target?.closest?.(
-            'button, input, textarea, select, a, [contenteditable="true"], .verse-popup, .mobile-sheet, .mobile-reading-action-bar'
+            'button, input, textarea, select, a, [contenteditable="true"], .verse-popup, .reflection-composer, .mobile-sheet, .mobile-reading-action-bar'
         ));
     };
 
     const onTouchStart = (e) => {
         const isVerseTarget = Boolean(e.target?.closest?.('.verse-select-target'));
-        if (popup.visible || (isInteractiveTouchTarget(e.target) && !isVerseTarget)) {
+        if (popup.visible || composerSession || (isInteractiveTouchTarget(e.target) && !isVerseTarget)) {
             touchStartRef.current = null;
             touchEndRef.current = null;
             verseGestureRef.current = { moved: false, target: null, suppressTarget: null, suppressUntil: 0 };
@@ -172,7 +248,7 @@ const BibleViewer = ({
             verseGestureRef.current.suppressUntil = Date.now() + 700;
         }
 
-        if (!start || !end || isSelectionMode || popup.visible) return;
+        if (!start || !end || isSelectionMode || popup.visible || composerSession) return;
         const distX = start.x - end.x;
         const distY = Math.abs(start.y - end.y);
         // Ignore if vertical movement is greater (scrolling, not swiping)
@@ -229,7 +305,9 @@ const BibleViewer = ({
     useEffect(() => {
         const handleKeyDown = (e) => {
             if (e.key === 'Escape') {
-                if (popup.visible || isMobileSelectorOpen || isChapterNotesOpen || isReadingSettingsOpen) {
+                if (composerSessionRef.current) {
+                    closeComposerSessionRef.current?.();
+                } else if (popup.visible || isMobileSelectorOpen || isChapterNotesOpen || isReadingSettingsOpen) {
                     setPopup(prev => ({ ...prev, visible: false }));
                     setIsMobileSelectorOpen(false);
                     setIsChapterNotesOpen(false);
@@ -261,6 +339,8 @@ const BibleViewer = ({
             if (copyTimeoutRef.current) {
                 clearTimeout(copyTimeoutRef.current);
             }
+            composerRequestRef.current += 1;
+            composerSaveRef.current = null;
         };
     }, []);
 
@@ -269,7 +349,7 @@ const BibleViewer = ({
     }, [bibleTextScale]);
 
     useEffect(() => {
-        selectionContextRef.current = selectionContextKey;
+        selectedVersesContextRef.current = selectionContextKey;
         toolbarActionRef.current = null;
         setToolbarAction(null);
         setSelectedVerses([]);
@@ -277,6 +357,10 @@ const BibleViewer = ({
         touchEndRef.current = null;
         lastSelectedVerseRef.current = null;
         verseGestureRef.current = { moved: false, target: null, suppressTarget: null, suppressUntil: 0 };
+    }, [selectionContextKey]);
+
+    useLayoutEffect(() => {
+        selectionContextRef.current = selectionContextKey;
     }, [selectionContextKey]);
 
     // Check if a verse has a highlight
@@ -305,8 +389,8 @@ const BibleViewer = ({
             verseGestureRef.current = { moved: false, target: null, suppressTarget: null, suppressUntil: 0 };
             return;
         }
-        const isSameSelectionContext = selectionContextRef.current === selectionContextKey;
-        selectionContextRef.current = selectionContextKey;
+        const isSameSelectionContext = selectedVersesContextRef.current === selectionContextKey;
+        selectedVersesContextRef.current = selectionContextKey;
         lastSelectedVerseRef.current = e.currentTarget;
         setSelectedVerses(prev => toggleSelectedVerse(
             isSameSelectionContext ? prev : [],
@@ -349,49 +433,64 @@ const BibleViewer = ({
         }
     };
 
-    const handleMemoSubmit = async () => {
-        if (!popup.memoInput.trim()) return;
+    const handleComposerDraftChange = (change) => {
+        commitComposerSession(previous => previous ? {
+            ...previous,
+            draft: { ...previous.draft, ...change },
+            status: previous.status === 'error' ? 'idle' : previous.status,
+            error: null
+        } : previous);
+    };
 
-        const finalContent = popup.quoteEnabled
-            ? `"${popup.quoteText}"\n\n${popup.memoInput} `
-            : popup.memoInput;
+    const handleComposerSubmit = async () => {
+        const session = composerSessionRef.current;
+        if (!session || !session.draft.memo.trim() || composerSaveRef.current) return;
 
-        // Use selected verses for range if available, otherwise fall back to existing range in popup
-        const rangeString = selectedVerses.length > 1
-            ? formatVerseRange(selectedVerses)
-            : (popup.verseRange || null);
+        const requestToken = ++composerRequestRef.current;
+        const sessionId = session.id;
+        composerSaveRef.current = requestToken;
+        commitComposerSession(previous => previous?.id === sessionId
+            ? { ...previous, status: 'saving', error: null }
+            : previous);
 
-        const primaryVerse = selectedVerses.length > 0 ? selectedVerses[0] : popup.verseNum;
-
-        const noteData = {
-            date: popup.editTargetDate || format(new Date(), 'yyyy-MM-dd'),
-            book: book || currentBook, // Use currentBook if book prop is empty
-            chapter: chapter || currentChapter,
-            verse: primaryVerse,
-            verse_range: rangeString,
-            content: finalContent
-        };
-
+        const noteData = buildVerseNotePayload(session, format(new Date(), 'yyyy-MM-dd'));
         try {
             await saveVerseNote(noteData);
-            setPopup(prev => ({ ...prev, visible: false, verseRange: null, editTargetDate: null })); // Clear range & date
-            setSelectedVerses([]);
-
-            // Refresh notes
-            const targetBook = book || currentBook; // Consistent with noteData
-            const notes = await getVerseNotesByChapter(targetBook, chapter || currentChapter);
-            setChapterNotes(notes);
-            try {
-                await onVerseNoteSaved?.();
-            } catch (refreshError) {
-                console.error('Failed to refresh reading logs after verse note save:', refreshError);
-            }
-            onToast?.('묵상을 저장했습니다.', 'success');
-
-            // Optional: alert or toast success
         } catch (error) {
             console.error('Failed to save note:', error);
-            alert('묵상 저장 실패');
+            if (composerSaveRef.current === requestToken && composerSessionRef.current?.id === sessionId) {
+                composerSaveRef.current = null;
+                commitComposerSession(previous => previous?.id === sessionId
+                    ? { ...previous, status: 'error', error: '묵상을 저장하지 못했습니다. 내용을 유지했으니 다시 시도해 주세요.' }
+                    : previous);
+            }
+            return;
+        }
+
+        if (composerSaveRef.current !== requestToken || composerSessionRef.current?.id !== sessionId) return;
+
+        closeComposerSession({ force: true });
+        if (isCurrentSelectionContext(selectionContextRef.current, session.selectionSnapshot)) {
+            closeVerseSelection();
+        }
+        onToast?.(session.mode === 'edit' ? '묵상을 수정했습니다.' : '묵상을 저장했습니다.', 'success');
+
+        const [notesResult, readingLogResult] = await runComposerRefreshes(
+            () => getVerseNotesByChapter(
+                session.selectionSnapshot.book,
+                session.selectionSnapshot.chapter
+            ),
+            async () => onVerseNoteSaved?.()
+        );
+        if (notesResult.status === 'fulfilled') {
+            if (isCurrentSelectionContext(selectionContextRef.current, session.selectionSnapshot)) {
+                setChapterNotes(notesResult.value);
+            }
+        } else {
+            console.error('Failed to refresh verse notes after save:', notesResult.reason);
+        }
+        if (readingLogResult.status === 'rejected') {
+            console.error('Failed to refresh reading logs after verse note save:', readingLogResult.reason);
         }
     };
 
@@ -429,36 +528,36 @@ const BibleViewer = ({
     };
 
     const handleEditNote = (note) => {
-        // Parse content to check for quote
-        const quoteMatch = note.content.match(/^"([\s\S]+?)"\n\n([\s\S]+)$/);
-        let quoteText = '';
-        let memoInput = note.content;
-        let quoteEnabled = false;
-
-        if (quoteMatch) {
-            quoteText = quoteMatch[1];
-            memoInput = quoteMatch[2];
-            quoteEnabled = true;
-        } else {
-            // Try to find verse text if not in note, but for edit just init empty or basic
-            const v = verses.find(v => v.verse === note.verse);
-            quoteText = v?.text || v?.content || '';
-        }
-
-        setSelectedVerses([]); // Clear any selection
-        setPopup({
-            visible: true,
-            x: window.innerWidth / 2 - 180, // Center horizontally
-            y: window.innerHeight / 2 - 200, // Center vertically
-            verseNum: note.verse,
-            verseRange: note.verse_range, // [NEW] Set range
-            verseText: verses.find(v => v.verse === note.verse)?.text || '',
-            mode: 'memo',
-            memoInput: memoInput,
-            quoteEnabled: quoteEnabled,
-            quoteText: quoteText,
-            editTargetDate: note.date // [NEW] Keep original date
+        const verseNumbers = parseVerseRange(note.verse_range, note.verse);
+        const verseItems = verseNumbers.map(verseNumber => {
+            const verse = verses.find(item => Number(item.verse) === verseNumber);
+            return { verse: verseNumber, text: verse?.text || verse?.content || '' };
         });
+        const fallbackQuote = verseItems.length === 1
+            ? verseItems[0].text
+            : verseItems.map(item => `${item.verse} ${item.text}`).join('\n');
+        const snapshot = createSelectionSnapshot({
+            book: note.book || book || currentBook,
+            bookName,
+            chapter: note.chapter || chapter || currentChapter,
+            version: currentVersion,
+            versionLabel: currentVersionLabel,
+            verseNumbers,
+            verseItems,
+            verseRange: note.verse_range || formatVerseRange(verseNumbers)
+        });
+
+        setSelectedVerses([]);
+        setPopup(previous => ({ ...previous, visible: false }));
+        commitComposerSession(createComposerSession({
+            mode: 'edit',
+            source: 'existing-note',
+            noteId: note.id,
+            originalDate: note.date,
+            originalVerseRange: note.verse_range || null,
+            selectionSnapshot: snapshot,
+            draft: parseStoredContent(note.content, fallbackQuote)
+        }));
     };
 
     const getNotesForVerse = (verseNum) => chapterNotes.filter(n => n.verse === verseNum);
@@ -473,20 +572,8 @@ const BibleViewer = ({
             y: Math.max(20, window.innerHeight / 2 - 180),
             verseNum: verse.verse,
             verseText,
-            mode: 'view-notes',
-            memoInput: '',
-            quoteEnabled: false,
-            quoteText: verseText,
-            editTargetDate: null
+            verseRange: chapterNotes.find(note => Number(note.verse) === Number(verse.verse))?.verse_range || null
         });
-    };
-
-    const closeComposer = () => {
-        if (popup.mode === 'memo' && popup.memoInput.trim()) {
-            const shouldClose = window.confirm('작성 중인 묵상이 있습니다. 닫으시겠습니까?');
-            if (!shouldClose) return;
-        }
-        closeVersePopup();
     };
 
     const scrollToVerse = (verseNum) => {
@@ -506,10 +593,11 @@ const BibleViewer = ({
     const rightNotes = chapterNotes.filter(n => n.verse > midVerse);
 
     // [⑤] 팝업 헤더용 구절 표시 로직 (다중 선택 및 기존 묵상 범위 대응)
-    const popupVerseRef = popup.verseRange ||
-        (selectedVerses.length > 1 ? formatVerseRange(selectedVerses) :
-            (chapterNotes.find(n => n.verse === popup.verseNum)?.verse_range || popup.verseNum));
-    const selectedVerseRange = formatVerseRange(activeSelectedVerses).replaceAll('-', '–');
+    const popupVerseRef = popup.verseRange
+        || chapterNotes.find(n => n.verse === popup.verseNum)?.verse_range
+        || popup.verseNum;
+    const selectedVerseStorageRange = formatVerseRange(activeSelectedVerses);
+    const selectedVerseRange = selectedVerseStorageRange.replaceAll('-', '–');
     const selectedVerseItems = activeSelectedVerses
         .map(verseNumber => {
             const verse = verses.find(item => Number(item.verse) === verseNumber);
@@ -529,7 +617,7 @@ const BibleViewer = ({
         versionLabel: currentVersionLabel,
         verseNumbers: activeSelectedVerses,
         verseItems: selectedVerseItems,
-        verseRange: selectedVerseRange
+        verseRange: selectedVerseStorageRange
     };
     const selectedHighlightedVerses = activeSelectedVerses.filter(verseNumber =>
         highlights.some(highlight => Number(highlight.verse) === verseNumber)
@@ -602,19 +690,14 @@ const BibleViewer = ({
         const quoteText = selectedVerseItems.length === 1
             ? primaryVerse.text
             : selectedVerseItems.map(item => `${item.verse} ${item.text}`).join('\n');
-        setPopup({
-            visible: true,
-            x: Math.max(20, window.innerWidth / 2 - 210),
-            y: Math.max(20, window.innerHeight / 2 - 200),
-            verseNum: primaryVerse.verse,
-            verseRange: formatVerseRange(activeSelectedVerses),
-            verseText: primaryVerse.text,
-            mode: 'memo',
-            memoInput: '',
-            quoteEnabled: false,
-            quoteText,
-            editTargetDate: null
-        });
+        const snapshot = createSelectionSnapshot(selectionPayload);
+        const scrollTop = mainContentRef.current?.scrollTop || 0;
+        setPopup(previous => ({ ...previous, visible: false }));
+        commitComposerSession(createComposerSession({
+            selectionSnapshot: snapshot,
+            draft: { memo: '', quoteEnabled: false, quoteText }
+        }));
+        restoreReadingScroll(scrollTop);
     };
 
     // Helper to render note content with optional quote styling
@@ -699,8 +782,8 @@ const BibleViewer = ({
             </aside>
 
             {/* 중앙 본문 영역 */}
-            <main className={`bible-main-content${isSelectionMode ? ' selection-active' : ''}`} style={{ '--bible-text-scale': bibleTextScale / 100 }}>
-                <header className={`bible-nav-header${popup.visible ? ' selection-mode' : ''}`}>
+            <main ref={mainContentRef} className={`bible-main-content${isSelectionMode ? ' selection-active' : ''}`} style={{ '--bible-text-scale': bibleTextScale / 100 }}>
+                <header className={`bible-nav-header${popup.visible || composerSession ? ' selection-mode' : ''}`}>
                     <div className="mobile-context-row">
                         <button
                             className="mobile-context-trigger"
@@ -735,7 +818,7 @@ const BibleViewer = ({
                             <div className="nav-select-wrapper version-select-wrapper">
                                 <select
                                     value={currentVersion}
-                                    onChange={(e) => onVersionChange(e.target.value)}
+                                    onChange={(e) => runWithComposerGuard(() => onVersionChange(e.target.value))}
                                     className="nav-select version-select"
                                 >
                                     <option value="krv">개역한글</option>
@@ -748,7 +831,7 @@ const BibleViewer = ({
                             <div className="nav-select-wrapper">
                                 <select
                                     value={currentBook}
-                                    onChange={(e) => onBookChange(e.target.value)}
+                                    onChange={(e) => runWithComposerGuard(() => onBookChange(e.target.value))}
                                     className="nav-select book-select"
                                 >
                                     {books.map(b => (
@@ -761,7 +844,7 @@ const BibleViewer = ({
                             <div className="nav-select-wrapper">
                                 <select
                                     value={currentChapter}
-                                    onChange={(e) => onChapterChange(Number(e.target.value))}
+                                    onChange={(e) => runWithComposerGuard(() => onChapterChange(Number(e.target.value)))}
                                     className="nav-select chapter-select"
                                 >
                                     {chapters.map(ch => (
@@ -834,7 +917,7 @@ const BibleViewer = ({
                             <div className="mobile-selector-fields">
                                 <label>
                                     <span>역본</span>
-                                    <select value={currentVersion} onChange={(e) => onVersionChange(e.target.value)}>
+                                    <select value={currentVersion} onChange={(e) => runWithComposerGuard(() => onVersionChange(e.target.value))}>
                                         <option value="krv">개역한글</option>
                                         <option value="web">WEB</option>
                                         <option value="bbe">BBE</option>
@@ -842,7 +925,7 @@ const BibleViewer = ({
                                 </label>
                                 <label>
                                     <span>성경</span>
-                                    <select value={currentBook} onChange={(e) => onBookChange(e.target.value)}>
+                                    <select value={currentBook} onChange={(e) => runWithComposerGuard(() => onBookChange(e.target.value))}>
                                         {books.map(b => (
                                             <option key={b.id} value={b.id}>{b.name}</option>
                                         ))}
@@ -850,7 +933,7 @@ const BibleViewer = ({
                                 </label>
                                 <label>
                                     <span>장</span>
-                                    <select value={currentChapter} onChange={(e) => onChapterChange(Number(e.target.value))}>
+                                    <select value={currentChapter} onChange={(e) => runWithComposerGuard(() => onChapterChange(Number(e.target.value)))}>
                                         {chapters.map(ch => (
                                             <option key={ch} value={ch}>{ch}장</option>
                                         ))}
@@ -1011,111 +1094,41 @@ const BibleViewer = ({
                 {popup.visible && (
                     <div
                         ref={popupRef}
-                        className={`verse-popup verse-popup--${popup.mode}`}
+                        className="verse-popup verse-popup--view-notes"
                         style={{ left: popup.x, top: popup.y, cursor: 'move' }}
                         onMouseDown={handleMouseDown}
                     >
-                        {popup.mode === 'view-notes' ? (
-                            <div className="popup-menu-v2">
-                                <div className="popup-header">
-                                    <span className="popup-title">
-                                        {bookName} {chapter}:{popupVerseRef} 묵상 ({getNotesForVerse(popup.verseNum).length}개)
-                                    </span>
-                                    <button
-                                        onClick={closeVersePopup}
-                                        className="popup-close-btn"
-                                        title="닫기"
-                                        aria-label="묵상 보기 닫기"
-                                    >
-                                        <X size={18} />
-                                    </button>
+                        <div className="popup-menu-v2">
+                            <div className="popup-header">
+                                <span className="popup-title">
+                                    {bookName} {chapter}:{popupVerseRef} 묵상 ({getNotesForVerse(popup.verseNum).length}개)
+                                </span>
+                                <button
+                                    onClick={closeVersePopup}
+                                    className="popup-close-btn"
+                                    title="닫기"
+                                    aria-label="묵상 보기 닫기"
+                                >
+                                    <X size={18} />
+                                </button>
+                            </div>
+                            {popup.verseText && (
+                                <div className="view-notes-verse-text">
+                                    &ldquo;{popup.verseText}&rdquo;
                                 </div>
-                                {popup.verseText && (
-                                    <div className="view-notes-verse-text">
-                                        &ldquo;{popup.verseText}&rdquo;
-                                    </div>
-                                )}
-                                <div className="popup-notes-list" style={{ maxHeight: '200px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                    {getNotesForVerse(popup.verseNum).map(note => (
-                                        <div key={note.id} className="verse-note-card-v2" style={{ padding: '0.75rem', fontSize: '0.9rem' }}>
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '4px' }}>
-                                                <div className="note-date">{new Date(note.created_at || note.date).toLocaleDateString()}</div>
-                                                {renderNoteActions(note)}
-                                            </div>
-                                            {renderNoteContent(note.content)}
+                            )}
+                            <div className="popup-notes-list" style={{ maxHeight: '200px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                {getNotesForVerse(popup.verseNum).map(note => (
+                                    <div key={note.id} className="verse-note-card-v2" style={{ padding: '0.75rem', fontSize: '0.9rem' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '4px' }}>
+                                            <div className="note-date">{new Date(note.created_at || note.date).toLocaleDateString()}</div>
+                                            {renderNoteActions(note)}
                                         </div>
-                                    ))}
-                                </div>
+                                        {renderNoteContent(note.content)}
+                                    </div>
+                                ))}
                             </div>
-                        ) : (
-                            <div className="memo-composer">
-                                <div className="popup-header">
-                                    <span className="popup-title">
-                                        {bookName} {chapter}:{popupVerseRef} 묵상
-                                    </span>
-                                    <button
-                                        onClick={closeComposer}
-                                        className="popup-close-btn"
-                                        aria-label="작성 닫기"
-                                    >
-                                        <X size={18} />
-                                    </button>
-                                </div>
-                                <div className="composer-selected-verse">
-                                    <div className="composer-selected-ref">{bookName} {chapter}:{popupVerseRef}</div>
-                                    <div className="composer-selected-text">&ldquo;{popup.quoteText || popup.verseText}&rdquo;</div>
-                                </div>
-                                {
-                                    /* v2.1: Quote Checkbox & Editable Area */
-                                }
-                                <div className="quote-toggle-row">
-                                    <input
-                                        type="checkbox"
-                                        id="quote-check"
-                                        checked={popup.quoteEnabled}
-                                        onChange={(e) => setPopup(prev => ({ ...prev, quoteEnabled: e.target.checked }))}
-                                    />
-                                    <label htmlFor="quote-check">
-                                        말씀 인용
-                                    </label>
-                                </div>
-
-                                {popup.quoteEnabled && (
-                                    <textarea
-                                        className="quote-textarea"
-                                        value={popup.quoteText}
-                                        onChange={(e) => setPopup(prev => ({ ...prev, quoteText: e.target.value }))}
-                                    />
-                                )}
-                                <textarea
-                                    className="memo-textarea"
-                                    autoFocus
-                                    value={popup.memoInput}
-                                    onChange={(e) => setPopup(prev => ({ ...prev, memoInput: e.target.value }))}
-                                    placeholder="이 구절을 통해 주신 마음을 적어보세요..."
-                                    onKeyDown={(e) => {
-                                        if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
-                                            handleMemoSubmit();
-                                        }
-                                    }}
-                                />
-                                <div className="memo-composer-actions">
-                                    <button
-                                        onClick={handleMemoSubmit}
-                                        className="memo-save-btn"
-                                    >
-                                        <Send size={16} />
-                                        저장
-                                    </button>
-                                    <button
-                                        onClick={closeComposer}
-                                        className="memo-cancel-btn"
-                                    >
-                                        취소
-                                    </button>
-                                </div>
-                            </div>
-                        )}
+                        </div>
                     </div>
                 )}
 
@@ -1127,7 +1140,7 @@ const BibleViewer = ({
                     ) : ''}
                 </div>
 
-                {isSelectionMode ? (
+                {isSelectionMode && !composerSession ? (
                     <div
                         className="verse-selection-bar"
                         aria-label="선택한 구절 도구"
@@ -1206,7 +1219,7 @@ const BibleViewer = ({
                         </div>
                     </div>
                 ) : (
-                    <nav className={`mobile-reading-action-bar${popup.visible ? ' selection-hidden' : ''}`} aria-label="성경 읽기 작업">
+                    <nav className={`mobile-reading-action-bar${popup.visible || composerSession ? ' selection-hidden' : ''}`} aria-label="성경 읽기 작업">
                         <button
                             className="mobile-reading-nav-btn"
                             onClick={handlePrevChapter}
@@ -1238,6 +1251,15 @@ const BibleViewer = ({
                 )}
 
             </main>
+
+            {composerSession && (
+                <ReflectionComposer
+                    session={composerSession}
+                    onDraftChange={handleComposerDraftChange}
+                    onSubmit={handleComposerSubmit}
+                    onClose={() => closeComposerSession()}
+                />
+            )}
 
             {/* 우측 사이드바: 중간절+1 ~ 마지막절 묵상 */}
             <aside className="bible-side-panel right">
@@ -1273,26 +1295,6 @@ const toggleSelectedVerse = (selectedVerses, verseNumber) => {
     }
 
     return [...nextSelection].sort((a, b) => a - b);
-};
-
-const formatVerseRange = (verses) => {
-    if (!verses.length) return '';
-    const sorted = [...verses].sort((a, b) => a - b);
-    let result = [];
-    let start = sorted[0];
-    let prev = start;
-
-    for (let i = 1; i < sorted.length; i++) {
-        if (sorted[i] === prev + 1) {
-            prev = sorted[i];
-        } else {
-            result.push(start === prev ? `${start}` : `${start}-${prev}`);
-            start = sorted[i];
-            prev = start;
-        }
-    }
-    result.push(start === prev ? `${start}` : `${start}-${prev}`);
-    return result.join(', ');
 };
 
 export default React.memo(BibleViewer);

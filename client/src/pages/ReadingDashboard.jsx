@@ -11,7 +11,7 @@ import { parseDateInput } from '../utils/dateOnly';
 import './ReadingDashboard.css';
 
 const ReadingDashboard = () => {
-    const { activeTab, setActiveTab } = useTab();
+    const { activeTab, setActiveTab, runWithNavigationGuard } = useTab();
     // Global State
     const [currentDate, setCurrentDate] = useState(new Date());
     const [currentBook, setCurrentBook] = useState('Gen');
@@ -370,17 +370,29 @@ const ReadingDashboard = () => {
     };
 
     const handleBookChange = (bookId, chapterId = 1) => {
-        setCurrentBook(bookId);
-        setCurrentChapter(chapterId);
+        runWithNavigationGuard(() => {
+            setCurrentBook(bookId);
+            setCurrentChapter(chapterId);
+        });
+    };
+
+    const handleChapterChange = (nextChapter) => {
+        runWithNavigationGuard(() => setCurrentChapter(nextChapter));
+    };
+
+    const handleVersionChange = (nextVersion) => {
+        runWithNavigationGuard(() => setCurrentVersion(nextVersion));
     };
 
     const handleNavigateToJournal = (targetDate = null) => {
-        if (targetDate) {
-            // '오늘' 문자열 처리 또는 YYYY-MM-DD 파싱
-            const d = targetDate === '오늘' ? new Date() : parseDateInput(targetDate);
-            if (d) setCurrentDate(d);
-        }
-        setActiveTab('journal');
+        runWithNavigationGuard(() => {
+            if (targetDate) {
+                // '오늘' 문자열 처리 또는 YYYY-MM-DD 파싱
+                const d = targetDate === '오늘' ? new Date() : parseDateInput(targetDate);
+                if (d) setCurrentDate(d);
+            }
+            setActiveTab('journal');
+        });
     };
 
     const handleNavigateToBible = (book, chapter) => {
@@ -401,12 +413,14 @@ const ReadingDashboard = () => {
                             compact={true}
                             selectedDate={currentDate}
                             onDateClick={(date, logs) => {
-                                setCurrentDate(date);
-                                if (logs && logs.length > 0) {
-                                    const log = logs[0];
-                                    setCurrentBook(log.book);
-                                    setCurrentChapter(log.chapter_from || log.chapter || 1);
-                                }
+                                runWithNavigationGuard(() => {
+                                    setCurrentDate(date);
+                                    if (logs && logs.length > 0) {
+                                        const log = logs[0];
+                                        setCurrentBook(log.book);
+                                        setCurrentChapter(log.chapter_from || log.chapter || 1);
+                                    }
+                                });
                             }}
                         />
                     </div>
@@ -428,8 +442,8 @@ const ReadingDashboard = () => {
                             currentChapter={currentChapter}
                             currentVersion={currentVersion}
                             onBookChange={handleBookChange}
-                            onChapterChange={setCurrentChapter}
-                            onVersionChange={setCurrentVersion}
+                            onChapterChange={handleChapterChange}
+                            onVersionChange={handleVersionChange}
                         />
                     </div>
                 </aside>
@@ -464,8 +478,8 @@ const ReadingDashboard = () => {
                             currentChapter={currentChapter}
                             currentVersion={currentVersion}
                             onBookChange={handleBookChange}
-                            onChapterChange={setCurrentChapter}
-                            onVersionChange={setCurrentVersion}
+                            onChapterChange={handleChapterChange}
+                            onVersionChange={handleVersionChange}
                         />
                     </div>
                 ) : (
