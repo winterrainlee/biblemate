@@ -3,7 +3,8 @@
 **Branch**: `feature/v3.0-context-toolbar` → `feature/v3.0`
 **Date**: 2026-09-09
 **Version**: v3.0.0
-**Status**: PR 준비 완료 — 모바일 우선 완료 기준 승인
+**Status**: PR #5 리뷰 대기 — 모바일 우선 완료 기준 승인
+**PR**: https://github.com/winterrainlee/biblemate/pull/5
 
 ## 1. 주요 변경 사항
 
