@@ -1,17 +1,20 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import { Check, MessageSquare, Copy, X, Loader, ChevronLeft, ChevronRight, Trash2, Edit2, Eraser } from 'lucide-react';
 import { getVerseNotesByChapter, saveVerseNote, deleteVerseNote } from '../services/journalApi';
 import { format } from 'date-fns';
+import { useTab } from '../contexts/TabContext';
 import ReflectionComposer from './ReflectionComposer';
 import {
     buildVerseNotePayload,
     createComposerSession,
     createSelectionSnapshot,
     formatVerseRange,
+    isCurrentSelectionContext,
     isComposerDirty,
     parseStoredContent,
-    parseVerseRange
+    parseVerseRange,
+    runComposerRefreshes
 } from './reflectionComposerModel';
 import './BibleViewer.css';
 
@@ -44,6 +47,8 @@ const BibleViewer = ({
     onChapterChange,
     onVersionChange
 }) => {
+
+    const { registerNavigationGuard } = useTab();
 
 
     // Derived state for navigation
@@ -88,8 +93,9 @@ const BibleViewer = ({
     const [isLoadingNotes, setIsLoadingNotes] = useState(false);
     const selectionContextKey = `${currentBook}:${currentChapter}:${currentVersion}`;
     const selectionContextRef = useRef(selectionContextKey);
+    const selectedVersesContextRef = useRef(selectionContextKey);
     const [selectedVerses, setSelectedVerses] = useState([]);
-    const activeSelectedVerses = selectionContextRef.current === selectionContextKey
+    const activeSelectedVerses = selectedVersesContextRef.current === selectionContextKey
         ? selectedVerses
         : [];
     const isSelectionMode = activeSelectedVerses.length > 0;
@@ -129,11 +135,10 @@ const BibleViewer = ({
     };
 
     const commitComposerSession = (update) => {
-        setComposerSession(previous => {
-            const next = typeof update === 'function' ? update(previous) : update;
-            composerSessionRef.current = next;
-            return next;
-        });
+        const previous = composerSessionRef.current;
+        const next = typeof update === 'function' ? update(previous) : update;
+        composerSessionRef.current = next;
+        setComposerSession(next);
     };
 
     const restoreReadingScroll = (scrollTop) => {
@@ -165,6 +170,21 @@ const BibleViewer = ({
         return true;
     };
     closeComposerSessionRef.current = closeComposerSession;
+
+    useEffect(() => registerNavigationGuard(
+        () => closeComposerSessionRef.current?.({ restoreFocus: false }) ?? true
+    ), [registerNavigationGuard]);
+
+    useEffect(() => {
+        const handleBeforeUnload = (event) => {
+            const session = composerSessionRef.current;
+            if (!session || !isComposerDirty(session)) return;
+            event.preventDefault();
+            event.returnValue = '';
+        };
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+    }, []);
 
     const runWithComposerGuard = (action) => {
         if (!composerSessionRef.current || closeComposerSession({ restoreFocus: false })) {
@@ -329,7 +349,7 @@ const BibleViewer = ({
     }, [bibleTextScale]);
 
     useEffect(() => {
-        selectionContextRef.current = selectionContextKey;
+        selectedVersesContextRef.current = selectionContextKey;
         toolbarActionRef.current = null;
         setToolbarAction(null);
         setSelectedVerses([]);
@@ -337,6 +357,10 @@ const BibleViewer = ({
         touchEndRef.current = null;
         lastSelectedVerseRef.current = null;
         verseGestureRef.current = { moved: false, target: null, suppressTarget: null, suppressUntil: 0 };
+    }, [selectionContextKey]);
+
+    useLayoutEffect(() => {
+        selectionContextRef.current = selectionContextKey;
     }, [selectionContextKey]);
 
     // Check if a verse has a highlight
@@ -365,8 +389,8 @@ const BibleViewer = ({
             verseGestureRef.current = { moved: false, target: null, suppressTarget: null, suppressUntil: 0 };
             return;
         }
-        const isSameSelectionContext = selectionContextRef.current === selectionContextKey;
-        selectionContextRef.current = selectionContextKey;
+        const isSameSelectionContext = selectedVersesContextRef.current === selectionContextKey;
+        selectedVersesContextRef.current = selectionContextKey;
         lastSelectedVerseRef.current = e.currentTarget;
         setSelectedVerses(prev => toggleSelectedVerse(
             isSameSelectionContext ? prev : [],
@@ -429,30 +453,9 @@ const BibleViewer = ({
             ? { ...previous, status: 'saving', error: null }
             : previous);
 
+        const noteData = buildVerseNotePayload(session, format(new Date(), 'yyyy-MM-dd'));
         try {
-            const noteData = buildVerseNotePayload(session, format(new Date(), 'yyyy-MM-dd'));
             await saveVerseNote(noteData);
-            if (composerSaveRef.current !== requestToken || composerSessionRef.current?.id !== sessionId) return;
-
-            const notes = await getVerseNotesByChapter(
-                session.selectionSnapshot.book,
-                session.selectionSnapshot.chapter
-            );
-            if (selectionContextKey === session.selectionSnapshot.contextKey) {
-                setChapterNotes(notes);
-            }
-            try {
-                await onVerseNoteSaved?.();
-            } catch (refreshError) {
-                console.error('Failed to refresh reading logs after verse note save:', refreshError);
-            }
-            if (composerSaveRef.current !== requestToken || composerSessionRef.current?.id !== sessionId) return;
-
-            closeComposerSession({ force: true });
-            if (selectionContextKey === session.selectionSnapshot.contextKey) {
-                closeVerseSelection();
-            }
-            onToast?.(session.mode === 'edit' ? '묵상을 수정했습니다.' : '묵상을 저장했습니다.', 'success');
         } catch (error) {
             console.error('Failed to save note:', error);
             if (composerSaveRef.current === requestToken && composerSessionRef.current?.id === sessionId) {
@@ -461,10 +464,33 @@ const BibleViewer = ({
                     ? { ...previous, status: 'error', error: '묵상을 저장하지 못했습니다. 내용을 유지했으니 다시 시도해 주세요.' }
                     : previous);
             }
-        } finally {
-            if (composerSaveRef.current === requestToken) {
-                composerSaveRef.current = null;
+            return;
+        }
+
+        if (composerSaveRef.current !== requestToken || composerSessionRef.current?.id !== sessionId) return;
+
+        closeComposerSession({ force: true });
+        if (isCurrentSelectionContext(selectionContextRef.current, session.selectionSnapshot)) {
+            closeVerseSelection();
+        }
+        onToast?.(session.mode === 'edit' ? '묵상을 수정했습니다.' : '묵상을 저장했습니다.', 'success');
+
+        const [notesResult, readingLogResult] = await runComposerRefreshes(
+            () => getVerseNotesByChapter(
+                session.selectionSnapshot.book,
+                session.selectionSnapshot.chapter
+            ),
+            async () => onVerseNoteSaved?.()
+        );
+        if (notesResult.status === 'fulfilled') {
+            if (isCurrentSelectionContext(selectionContextRef.current, session.selectionSnapshot)) {
+                setChapterNotes(notesResult.value);
             }
+        } else {
+            console.error('Failed to refresh verse notes after save:', notesResult.reason);
+        }
+        if (readingLogResult.status === 'rejected') {
+            console.error('Failed to refresh reading logs after verse note save:', readingLogResult.reason);
         }
     };
 

@@ -1,10 +1,12 @@
-import React, { useId } from 'react';
+import React, { useEffect, useId, useRef, useState } from 'react';
 import { Loader, Send, X } from 'lucide-react';
 import { isComposerDirty, toDisplayVerseRange } from './reflectionComposerModel';
 import './ReflectionComposer.css';
 
 const ReflectionComposer = ({ session, onDraftChange, onSubmit, onClose }) => {
     const quoteId = useId();
+    const dialogRef = useRef(null);
+    const [isWorkspace, setIsWorkspace] = useState(() => window.matchMedia('(min-width: 900px)').matches);
     const { selectionSnapshot, draft, status, error, mode } = session;
     const displayRange = toDisplayVerseRange(selectionSnapshot.verseRange);
     const selectedText = selectionSnapshot.verseItems
@@ -13,15 +15,41 @@ const ReflectionComposer = ({ session, onDraftChange, onSubmit, onClose }) => {
     const isSaving = status === 'saving';
     const canSubmit = draft.memo.trim().length > 0 && !isSaving;
 
+    useEffect(() => {
+        const mediaQuery = window.matchMedia('(min-width: 900px)');
+        const handleChange = (event) => setIsWorkspace(event.matches);
+        mediaQuery.addEventListener('change', handleChange);
+        return () => mediaQuery.removeEventListener('change', handleChange);
+    }, []);
+
+    const handleDialogKeyDown = (event) => {
+        if (isWorkspace || event.key !== 'Tab') return;
+        const focusable = [...dialogRef.current.querySelectorAll(
+            'button:not(:disabled), input:not(:disabled), textarea:not(:disabled), select:not(:disabled), [tabindex]:not([tabindex="-1"])'
+        )];
+        if (focusable.length === 0) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (event.shiftKey && document.activeElement === first) {
+            event.preventDefault();
+            last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+            event.preventDefault();
+            first.focus();
+        }
+    };
+
     return (
         <div className="reflection-composer-layer">
             <div className="reflection-composer-backdrop" onMouseDown={onClose} aria-hidden="true" />
             <section
+                ref={dialogRef}
                 className="reflection-composer"
                 role="dialog"
-                aria-modal="true"
+                aria-modal={isWorkspace ? undefined : true}
                 aria-labelledby="reflection-composer-title"
                 aria-busy={isSaving}
+                onKeyDown={handleDialogKeyDown}
             >
                 <header className="reflection-composer__header">
                     <div>

@@ -120,6 +120,15 @@ export const isComposerDirty = (session) => Boolean(session) && (
     || session.draft.quoteText !== session.initialDraft.quoteText
 );
 
+export const isCurrentSelectionContext = (currentContextKey, selectionSnapshot) => (
+    currentContextKey === selectionSnapshot.contextKey
+);
+
+export const runComposerRefreshes = (loadNotes, refreshReadingLog) => Promise.allSettled([
+    loadNotes(),
+    refreshReadingLog()
+]);
+
 export const buildVerseNotePayload = (session, today) => {
     const { selectionSnapshot, draft } = session;
     const content = draft.quoteEnabled

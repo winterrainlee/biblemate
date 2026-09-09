@@ -16,21 +16,27 @@
 - 저장 요청 token과 session id가 다른 응답은 무시하여 종료된 세션에 결과가 반영되지 않게 했다.
 - 저장 성공 후 해당 장의 묵상과 읽음 상태를 갱신하고 선택 모드를 종료한다.
 - Composer 개폐 전후 본문 `scrollTop`을 복원한다.
-- 닫기·취소·Escape·책/장/역본 이동에 동일한 dirty guard를 적용한다.
+- 닫기·취소·Escape·책/장/역본 이동과 헤더 탭·라우트·사이드바 전환에 동일한 dirty guard를 적용한다.
+- 저장 API 성공을 commit point로 사용하고, 후속 묵상/읽음 목록 refresh 실패는 재저장을 유도하지 않는다.
+- 최신 context ref와 snapshot을 비교해 이전 장의 refresh 결과가 현재 장에 적용되지 않게 했다.
+- Compact/Reading dialog는 focus를 가두고, Workspace inline 패널은 `aria-modal`을 사용하지 않는다.
 
 ## 파일별 변경
 
 - `client/src/components/ReflectionComposer.jsx`: 반응형 공용 Composer UI
 - `client/src/components/ReflectionComposer.css`: Compact/Reading/Workspace 레이아웃과 safe-area 처리
 - `client/src/components/reflectionComposerModel.js`: snapshot, 범위 변환, dirty 판정, 저장 payload 순수 모델
-- `client/src/components/reflectionComposerModel.test.js`: 순수 모델 focused test 5건
+- `client/src/components/reflectionComposerModel.test.js`: 순수 모델 focused test 7건
 - `client/src/components/BibleViewer.jsx`: 기존 popup memo 상태를 Composer session으로 교체하고 Context Toolbar 진입점 연결
+- `client/src/contexts/TabContext.jsx`, `navigationGuard.js`: 외부 전환용 단일 guard 등록/실행 계약
+- `client/src/contexts/navigationGuard.test.js`: guard 승인/거부 focused test 2건
+- `client/src/components/Header.jsx`, `client/src/pages/ReadingDashboard.jsx`: 탭·라우트·사이드바 전환을 공용 guard로 연결
 
 ## 자동 검증
 
 | 명령 | 결과 |
 |---|---|
-| `cd client && node --test src/components/reflectionComposerModel.test.js` | PASS — 5/5 |
+| `cd client && node --test src/components/reflectionComposerModel.test.js src/contexts/navigationGuard.test.js` | PASS — 9/9 |
 | `cd client && npm run lint` | PASS — 오류·경고 없음 |
 | `cd client && npm run build` | PASS — Vite production build 성공 |
 | `git diff --check` | PASS |
@@ -42,6 +48,10 @@
 3. create payload의 복합 범위 및 `"인용문"\n\n묵상내용` 형식
 4. edit payload의 원래 날짜 및 `verse_range` 보존
 5. draft 구조 기반 dirty 판정
+6. 최신 context와 snapshot context의 stale 판정
+7. 저장 후 refresh 실패가 저장 요청 결과로 다시 throw되지 않음
+8. navigation guard 거부 시 화면 전환 action 미실행
+9. guard 미등록/승인 시 action 1회 실행
 
 ## 통합 검수에서 확인할 항목
 
@@ -54,5 +64,5 @@
 ## 보호 사항
 
 - 원본 `server/data/bible.db`를 읽기·복사·수정·스테이징하지 않았다.
-- push, PR, merge를 실행하지 않았다.
+- 리뷰 수정 커밋은 기존 PR 브랜치에 push하며, merge는 실행하지 않는다.
 - 사용자 요청에 따라 검수 서버를 실행하지 않았다.

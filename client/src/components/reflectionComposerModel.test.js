@@ -5,9 +5,11 @@ import {
     createComposerSession,
     createSelectionSnapshot,
     formatVerseRange,
+    isCurrentSelectionContext,
     isComposerDirty,
     parseStoredContent,
     parseVerseRange,
+    runComposerRefreshes,
     toDisplayVerseRange
 } from './reflectionComposerModel.js';
 
@@ -87,4 +89,19 @@ test('dirty 판정은 draft 구조 변경만 비교한다', () => {
     assert.equal(isComposerDirty(session), true);
     session.draft.quoteEnabled = false;
     assert.equal(isComposerDirty(session), false);
+});
+
+test('현재 context와 snapshot context가 다르면 stale 결과로 판정한다', () => {
+    const snapshot = createSnapshot([3]);
+    assert.equal(isCurrentSelectionContext('gen:1:krv', snapshot), true);
+    assert.equal(isCurrentSelectionContext('gen:2:krv', snapshot), false);
+});
+
+test('저장 후 refresh 실패는 rejected 결과로 격리하고 다시 throw하지 않는다', async () => {
+    const results = await runComposerRefreshes(
+        async () => { throw new Error('notes refresh failed'); },
+        async () => { throw new Error('reading log refresh failed'); }
+    );
+
+    assert.deepEqual(results.map(result => result.status), ['rejected', 'rejected']);
 });
