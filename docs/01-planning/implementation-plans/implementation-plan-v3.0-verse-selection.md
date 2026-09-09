@@ -103,7 +103,7 @@ NoteDetail
 - [x] `cd client && npm run lint`
 - [x] `cd client && npm run build`
 - [x] `git diff --check` (working tree)
-- [ ] `git diff --check origin/feature/v3.0...HEAD` (커밋 후)
+- [x] `git diff --check origin/feature/v3.0...HEAD` (커밋 후)
 
 현재 별도 unit/e2e 테스트 러너가 없으므로 선택 상태 전이는 브라우저 시나리오로 직접 검증한다. 테스트 기반을 새로 도입하는 것은 이번 feature 범위에 포함하지 않는다.
 

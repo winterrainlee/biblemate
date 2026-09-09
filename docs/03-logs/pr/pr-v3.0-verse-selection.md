@@ -28,7 +28,7 @@
 - [ ] 375×812 / 650×900 / 1280×900 Desktop UI 검증 — 후속 hotfix 후보
 - [ ] Desktop Enter/Space/Escape 및 focus 복귀 — 후속 hotfix 후보
 - [ ] Light / Dark × 기존 하이라이트 4색 시각 검증 — 후속 hotfix 후보
-- [ ] 커밋 후 `git diff --check origin/feature/v3.0...HEAD`
+- [x] 커밋 후 `git diff --check origin/feature/v3.0...HEAD`
 
 ## 3. Review Point
 

@@ -23,7 +23,7 @@
 - [x] `cd client && npm run lint`
 - [x] `cd client && npm run build`
 - [x] `git diff --check` (working tree)
-- [ ] `git diff --check origin/feature/v3.0...HEAD` (커밋 후)
+- [x] `git diff --check origin/feature/v3.0...HEAD` (커밋 후)
 
 ## 3. iPhone 실기기 검수
 
