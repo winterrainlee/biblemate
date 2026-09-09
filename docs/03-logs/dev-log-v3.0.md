@@ -124,3 +124,11 @@
 - 중간에는 검수 서버를 열지 않고 lint/build와 임시 DB 검증을 수행하며, 최종 통합 후 한 번의 실기기 검수 세션으로 묶기로 결정
 - 원본 `server/data/bible.db`는 사용자 검수 데이터로 보존하고 모든 자동 CRUD·backup/restore에서 제외
 - 사용자 Wave 1 세부 계획 승인 후 세 트랙을 각각 독립 브랜치·worktree에서 병렬 착수
+
+#### [Implementation] Wave 1 병렬 구현 완료
+
+- Reflection Composer `7394f00`: 선택 snapshot, 작성·수정 공용 Composer, dirty/save/stale response 보호, 순수 모델 테스트 5건 추가
+- Visual Cleanup `381b406`: Chart/Login/Settings/Journal 보조 화면을 허용된 파일 범위에서 정리하고 전역 CSS class를 페이지별 namespace로 격리
+- Regression Harness `15379bf`: 임시 DB·임의 포트에서 v2.x API·백업·마이그레이션 8개 회귀 묶음을 자동 검증
+- 세 커밋을 임시 detached worktree에 결합해 lint, production build, Composer 5/5, Regression 8/8 통과 확인
+- 원본 `server/data/bible.db`와 사용자 검수 서버는 사용하지 않음

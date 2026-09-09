@@ -30,11 +30,18 @@
 - 하이라이트나 복사가 성공하면 읽던 위치에서 Reading 상태로 돌아갑니다.
 - 선택 범위와 인용문을 기존 묵상 작성 화면으로 전달합니다.
 
+### Wave 1 구현 완료 — 통합 대기
+
+- 선택한 말씀을 고정 snapshot으로 보존하는 반응형 Reflection Composer를 구현했습니다.
+- 저장 실패 시 작성 내용을 유지하고, 변경된 draft의 이탈과 중복 저장을 방지합니다.
+- Chart, Login, Settings와 Journal 보조 화면을 Reading 중심 제품 언어로 정리했습니다.
+- 원본 사용자 DB를 사용하지 않는 임시 DB 기반 회귀 Harness를 추가했습니다.
+
 ## 호환성
 
 - 기존 데이터와 API 계약을 유지합니다.
 - 기존 묵상·하이라이트·장 이동 기능을 유지합니다.
-- Reflection Composer 재설계는 후속 작업이며 아직 포함되지 않았습니다.
+- Wave 1 기능은 개별 브랜치에서 자동 검증을 완료했으며 `feature/v3.0` 통합 전입니다.
 
 ## 검증
 
@@ -44,5 +51,6 @@
 - iPhone 13 mini Safari 실기기 검수 및 사용자 승인
 - Verse Selection lint/build 및 iPhone Safari 실기기 검수·사용자 승인
 - Context Toolbar lint/build 및 iPhone Safari 7버튼 실기기 검수·사용자 승인
+- Wave 1 결합 lint/build, Composer 모델 테스트 5/5, 격리 회귀 검사 8/8 통과
 
 전체 v3.0 릴리즈 노트는 후속 기능 완료에 맞춰 계속 갱신합니다.
