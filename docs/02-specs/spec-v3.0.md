@@ -3,7 +3,7 @@
 - 작성일: 2026-09-08
 - 목표 버전: v3.0.0
 - 기준 버전: v2.3.3
-- 상태: 기획 초안 / 사용자 검토 대기
+- 상태: 승인됨 / 구현 준비
 
 ---
 
@@ -101,7 +101,7 @@ v3.0 성경 읽기 UX는 화면 페이지보다 상태를 중심으로 설계한
 - 화면의 대부분을 성경 본문이 차지한다.
 - 책/장/역본과 `Aa` 같은 최소한의 문맥 조작만 노출한다.
 - 기존 양쪽 묵상 사이드바는 기본 Reading 상태에서 제거한다.
-- 하이라이트와 묘상 존재 표시는 본문 자체에 조용히 남는다.
+- 하이라이트와 묵상 존재 표시는 본문 자체에 조용히 남는다.
 
 예시:
 
@@ -135,9 +135,11 @@ v3.0 성경 읽기 UX는 화면 페이지보다 상태를 중심으로 설계한
 Context Toolbar 기본 액션:
 
 1. 하이라이트 4색
-2. 묵상
-3. 복사
-4. 더보기
+2. 하이라이트 지우기
+3. 묵상
+4. 복사
+
+모바일에서는 위 7개 액션을 `더보기` 없이 직접 노출한다.
 
 ### 4.3 Composer
 
@@ -442,7 +444,8 @@ v2.3의 Paper & Ink / Candlelight 방향은 유지할 수 있다.
 
 ### P1 — Existing Notes Integration
 
-- 이 장의 묵상 접근 경로 재설계
+- 상단 `기존 묵상`에서 현재 장 전체 기록 접근
+- 선택 메뉴 `관련 묵상`에서 선택 구절과 하나라도 범위가 겹치는 기록만 표시
 - 묵상 존재 표시 단순화
 - 넓은 화면 묵상 패널
 - 묵상 보기/수정/삭제 액션 재배치
@@ -528,6 +531,30 @@ master
 
 각 단계는 별도 Implementation Plan, Walkthrough, PR 초안을 갖는다.
 
+### Verse Selection 검증 예외 (2026-09-09 승인)
+
+- 현재 개발 환경에서는 모바일 검수를 우선하며, Verse Selection 단계는 iPhone Safari 실기기 정상 확인을 완료 조건으로 사용한다.
+- 375 / 650 / 1280px Desktop emulation, Desktop keyboard, Light / Dark × 하이라이트 4색 조합은 이 단계의 통합 차단 조건에서 제외한다.
+- 이후 Desktop 환경에서 문제가 확인되면 v3.0 개발 중 후속 보완 또는 별도 hotfix로 처리한다.
+- 이 예외는 Verse Selection 단계에만 적용하며, v3.0 전체 Responsive 통합 회귀 기준을 제거하지 않는다.
+
+### Context Toolbar 검증 예외 (2026-09-09 승인)
+
+- Context Toolbar + Highlight + Copy 단계도 iPhone Safari 실기기 정상 확인을 통합 완료 조건으로 사용한다.
+- 375 / 650 / 1280px Desktop emulation, Desktop keyboard, Light / Dark 조합은 이 단계의 통합 차단 조건에서 제외한다.
+- 이후 Desktop 환경에서 문제가 확인되면 v3.0 개발 중 후속 보완 또는 별도 hotfix로 처리한다.
+- 이 예외는 Context Toolbar 단계에 한정하며, v3.0 전체 Responsive 통합 회귀 기준은 유지한다.
+
+### 병렬 구현 및 단일 검수 배치 (2026-09-09 승인)
+
+- B안에 따라 Reflection Composer, Surrounding Screens Visual Cleanup, 격리 회귀 Harness를 Wave 1에서 병렬 진행한다.
+- `BibleViewer*`를 함께 사용하는 Reflection Composer와 Existing Notes Integration은 같은 핵심 트랙에서 순차 진행한다.
+- Header/Layout/공유 폭 정리는 선행 트랙 통합 후 Responsive 통합 단계에서 한 번 수행한다.
+- 각 기능의 Implementation Plan, Walkthrough, PR 승인 게이트는 유지한다.
+- 중간 검증은 lint/build와 임시 DB 기반 자동 검증으로 수행하고, 사용자 검수 서버는 최종 통합 후 한 번만 연다.
+- 자동 CRUD, backup/restore, 최종 검수 서버는 원본 `server/data/bible.db`가 아닌 임시 DB를 사용한다.
+- 세부 실행·파일 소유권은 `docs/01-planning/parallel-batch-plan-v3.0.md`를 따른다.
+
 ---
 
 ## 17. Prototype 승인 게이트
@@ -545,6 +572,8 @@ master
 이 단계에서는 다음 질문에 답해야 한다.
 
 > **이 화면에서 20~30분 동안 성경을 읽고 싶은가?**
+
+Desktop responsive emulation만으로 승인하지 않는다. iPhone 13 mini 실기기에서 실제 읽기/스크롤/터치 검수를 거쳐 사용자 승인을 받아야 한다.
 
 사용자 승인 전에는 Selection / Composer 등 다음 단계 구현으로 넘어가지 않는다.
 
@@ -595,7 +624,7 @@ master
 - `cd client && npm run build`
 - 기존 서버/API 테스트 유지
 
-### 수동 검증
+### Desktop / Emulation 검증
 
 필수 뷰포트:
 
@@ -619,8 +648,50 @@ master
 필수 환경:
 
 - Light / Dark
-- iOS Safari 또는 PWA
 - Desktop browser
+
+### 실기기 검수 — 필수
+
+실기기 검수는 Desktop responsive emulation을 대체하지 않고 그 다음 단계로 수행한다.
+
+개발 작업은 Codex Remote Control을 통해 원격으로 진행할 수 있다. 실기기 검수가 필요한 시점에만 개발 머신에서 BibleMate 개발 서버를 외부 접근 가능하게 실행한다.
+
+기본 검수 경로:
+
+```text
+Codex Remote Control로 개발
+        ↓
+자동 검증
+        ↓
+Desktop responsive emulation
+        ↓
+개발 서버 외부 접근 실행
+        ↓
+Tailscale
+        ↓
+iPhone 13 mini 실제 Safari/PWA 검수
+        ↓
+사용자 승인
+```
+
+운영 원칙:
+
+- 개발 서버는 검수 시점에 `0.0.0.0`에서 접근 가능하도록 실행한다.
+- 개발 머신과 iPhone이 연결된 Tailscale 네트워크를 기본 실기기 연결 경로로 사용한다.
+- Reading Canvas처럼 레이아웃/읽기/스크롤 중심 검수는 Tailscale HTTP 접근으로 충분하다.
+- Clipboard, PWA, 기타 secure-context API를 검증하는 feature에서는 필요 시 Tailscale HTTPS/Serve를 사용한다.
+- 실기기 검수 결과는 각 feature walkthrough에 기기, 접근 방식, 관찰 결과, 사용자 승인 여부와 함께 기록한다.
+- Codex는 자동 검증과 emulation만으로 실기기 검수 게이트를 통과했다고 간주하지 않는다.
+
+실기기에서 특히 확인할 항목:
+
+- 실제 safe-area
+- Safari 주소창 변화에 따른 viewport 높이
+- 실제 손가락 터치 hit area
+- 세로 스크롤과 장 이동 스와이프 충돌
+- Composer 단계의 iOS 키보드와 저장 버튼 가림
+- PWA standalone 모드에서의 레이아웃 차이
+- 장시간 읽을 때 본문 폭, 행간, 절 간격의 체감
 
 ---
 
@@ -636,19 +707,21 @@ v3.0은 화면이 새로워졌다는 이유만으로 완료하지 않는다.
 4. 기존 사용자 데이터가 유지된다.
 5. v3.0에 필요하지 않은 신규 기능을 추가하지 않는다.
 6. 각 기능 브랜치의 implementation plan, walkthrough, PR 기록이 완성된다.
-7. 최종 회귀 검증과 release notes가 완료된다.
+7. 주요 모바일 feature가 iPhone 13 mini 실기기 검수와 사용자 승인을 통과한다.
+8. 최종 회귀 검증과 release notes가 완료된다.
 
 ---
 
 ## 21. 다음 단계
 
-이 문서를 사용자와 검토하여 v3.0 Scope를 확정한다.
+v3.0 Scope는 사용자 승인을 받았다.
 
-확정 후:
+다음 순서로 진행한다.
 
-1. `docs/01-planning/roadmap.md`에 v3.0 항목을 추가한다.
-2. `feature/v3.0` 통합 브랜치를 만든다.
-3. 첫 작업 `feature/v3.0-reading-canvas`의 Implementation Plan을 작성한다.
-4. Reading Canvas prototype 승인 후 다음 기능으로 진행한다.
+1. `feature/v3.0` 통합 브랜치를 기준으로 개발한다.
+2. 첫 작업 `feature/v3.0-reading-canvas`의 Implementation Plan을 승인한다.
+3. Reading Canvas prototype을 구현한다.
+4. Desktop/emulation 검증 후 Tailscale을 통해 iPhone 13 mini 실기기 검수를 수행한다.
+5. Reading Canvas 사용자 승인 후 다음 feature로 진행한다.
 
 **구현 계획 승인 전에는 애플리케이션 코드를 수정하지 않는다.**

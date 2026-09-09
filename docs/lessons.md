@@ -1,6 +1,6 @@
 ﻿# Lessons Learned & Best Practices
 
-> **마지막 업데이트: 2026-06-24**
+> **마지막 업데이트: 2026-09-09**
 
 Bible Reading Mate 프로젝트를 진행하며 각 버전(v1.0 ~ v2.1)에서 습득한 기술적 교훈과 베스트 프랙티스를 정리한 문서입니다.
 
@@ -341,3 +341,122 @@ Bible Reading Mate 프로젝트를 진행하며 각 버전(v1.0 ~ v2.1)에서 �
 ### 📚 장 범위 기록은 포함 관계로 판정한다
 - **문제**: 읽기 기록이 `chapter_from`/`chapter_to` 범위를 지원하는데 UI가 `chapter` alias만 보면 범위 안의 장을 읽지 않은 것처럼 표시할 수 있다.
 - **Lesson**: 읽음 여부 판정은 단일 장 값 비교가 아니라 `chapter_from <= currentChapter <= chapter_to` 포함 관계로 계산해, 단일 장과 장 범위 기록을 같은 규칙으로 다뤄야 한다.
+
+---
+
+## 20. Reading Canvas와 실기기 승인 `v3.0`
+
+### 📐 기기 이름보다 실제 가용 폭을 기준으로 설계한다
+- **문제**: 데스크톱 3컬럼이나 `mobile/tablet/desktop` 이름에 맞춘 분기만으로는 iPad와 데스크톱 1:1 Split View 같은 중간 폭에서 본문이 쉽게 눌린다.
+- **Lesson**: Compact / Reading / Workspace를 실제 가용 폭으로 정의하고, 동일한 장을 375px·600~700px·1000px 이상에서 비교해야 한다. 본문 최대 폭과 좌우 여백은 기기 종류가 아니라 한 줄 읽기 길이를 기준으로 결정한다.
+
+### 📖 본문 표식은 정보 위계와 클릭 영역을 함께 검증한다
+- **문제**: 작은 위첨자 절 번호 옆에 묵상 점을 붙이면 두 의미가 뭉치고 절 번호가 지나치게 약해진다. 반대로 보이는 표식만 떼어 놓아도 44px hit area가 절 번호를 덮을 수 있다.
+- **Lesson**: 절 번호는 본문 기준선에 두고 묵상 표식은 마진으로 분리하되, 보이는 간격뿐 아니라 z-index·pointer target·대비까지 함께 측정한다.
+
+### 📱 에뮬레이션 통과와 실기기 만족은 별개의 게이트다
+- **문제**: 375px 브라우저 에뮬레이션은 iOS Safari의 safe-area, 주소창 변화, 손가락 스크롤 감각과 장시간 읽기 피로를 대신하지 못한다.
+- **Lesson**: 자동 검증과 세 기준 폭 스크린샷 이후 실제 iPhone에서 읽게 하고, “이 화면에서 20~30분 동안 읽고 싶은가?”에 대한 사용자 답을 완료 조건으로 기록한다.
+
+---
+
+## 21. 구절 선택 상태와 입력 경계 `v3.0`
+
+### 🧭 일시적 UI 상태에도 본문 context를 묶는다
+
+- **문제**: 절 번호 배열만 선택 상태로 저장하면 책·장·역본 전환 직후 같은 절 번호가 새 본문에서 잠깐 재사용될 수 있다.
+- **Lesson**: 선택 상태는 현재 본문 context key와 함께 판정하고, key가 다르면 렌더 단계와 첫 입력 단계 모두에서 이전 배열을 버려야 한다.
+
+### 👆 scroll 뒤 합성 click은 시간과 대상을 함께 추적한다
+
+- **문제**: touch 이동 flag를 `touchend` 직후 해제하면 Safari/WebView의 지연 click이 스크롤을 구절 탭으로 오인할 수 있다.
+- **Lesson**: 이동 gesture의 시작 target과 짧은 억제 시간을 유지하고, 동일 target의 후속 click에서 직접 소비한다. 다음 정상 touch 시작에서는 억제 상태를 초기화한다.
+
+### ♿ `aria-label`이 보이는 본문을 덮지 않게 한다
+
+- **문제**: 성경 구절 전체를 button으로 만들면서 행동 중심 `aria-label`을 주면 스크린리더의 accessible name에서 실제 본문이 사라진다.
+- **Lesson**: 보이는 절 번호와 본문을 accessible name으로 유지하고 `aria-pressed`, persistent live status 등 상태 속성으로 선택 여부를 별도 전달한다.
+
+---
+
+## 22. Context Toolbar의 직접 행동과 비동기 경계 `v3.0`
+
+### 🎨 같은 색 선택과 삭제는 같은 동작이 아니다
+
+- **문제**: 기존 toggle 핸들러를 다중 선택에 반복 적용하면 같은 색인 절은 삭제되고 다른 절은 새 색으로 바뀌어 결과를 예측하기 어렵다.
+- **Lesson**: 다중 편집에서는 색상 버튼을 명시적인 `set`으로 만들고 삭제를 독립 액션으로 분리하라. 여러 요청 중 일부가 실패하면 서버를 다시 조회하고 사용자의 선택을 유지해야 재시도가 가능하다.
+
+### 👆 단일 항목 더보기보다 직접 행동이 낫다
+
+- **문제**: `더보기` 안에 지우기 하나만 넣으면 작은 화면에서 공간은 절약하지만 사용자는 삭제를 위해 불필요한 단계를 거친다.
+- **Lesson**: 목표 폭에서 44px 터치 영역을 모두 확보할 수 있다면 `4색 + 지우기 + 묵상 + 복사`처럼 핵심 행동을 직접 노출하라. 단, 최소 지원 폭의 실제 계산과 safe-area 검증을 함께 수행해야 한다.
+
+---
+
+## 23. 병렬 UI 구현의 파일 소유권과 데이터 격리 `v3.0`
+
+### 🧱 병렬 작업은 기능 이름보다 실제 파일 접점으로 나눈다
+
+- **문제**: 기능이 달라도 같은 상태 container와 전역 CSS를 수정하면 병렬 작업의 merge 비용이 커지고 동작 계약이 엇갈릴 수 있다.
+- **Lesson**: 병렬화 전에 소유 파일과 통합 전용 파일을 명시하고, 공유 상태를 사용하는 기능은 한 트랙에서 순차 처리하라. 전역 CSS는 페이지 root namespace로 격리한다.
+
+### 🧪 회귀 검증은 사용자 DB와 물리적으로 분리한다
+
+- **문제**: 자동 CRUD·backup/restore 검증을 실제 사용자 DB에서 수행하면 정상 테스트 자체가 데이터 변경을 일으킨다.
+- **Lesson**: 임시 디렉터리 DB와 임의 포트 서버를 사용하고, 실행 전후 DB hash·inode·크기·Git 상태를 비교하라. 실패나 signal에서도 child process와 fixture를 정리해야 한다.
+
+---
+
+## 24. 기존 기록 목록의 commit point와 재조회 `v3.0`
+
+### 🔄 작업 성공과 후속 재조회 성공을 같은 결과로 취급하지 않는다
+
+- **문제**: 삭제 API가 성공한 뒤 목록 재조회가 실패했을 때 전체 작업을 삭제 실패로 표시하면 사용자는 이미 삭제된 기록을 다시 시도하거나 화면에 되살아난 것으로 오해할 수 있다.
+- **Lesson**: 저장·삭제의 서버 commit point에서 로컬 목록을 먼저 확정하고, 후속 재조회는 별도 동기화 단계로 취급하라. 재조회 실패는 기존 항목을 보존한 채 재시도 가능 상태로 표현해야 한다.
+
+### 🧭 장별 비동기 목록은 context와 request 순서를 함께 검증한다
+
+- **문제**: 빠른 장 이동이나 연속 refresh에서 늦게 도착한 이전 장 응답이 현재 장의 목록과 본문 표시를 덮을 수 있다.
+- **Lesson**: `book:chapter` context key와 단조 증가 request id가 모두 최신일 때만 응답을 적용하라. 화면에 표시할 파생 목록도 현재 context가 일치할 때만 노출한다.
+
+---
+
+## 25. Responsive 통합의 scroll owner와 stacking context `v3.0`
+
+### 📏 높이는 최상위 viewport부터 실제 scroll owner까지 연속해서 정의한다
+
+- **문제**: `100vh`, flex item의 기본 `min-height:auto`, 중첩 overflow가 섞이면 Safari 주소창·키보드 변화에서 본문과 하단 액션이 서로 다른 높이를 기준으로 배치된다.
+- **Lesson**: dynamic viewport와 safe-area를 root에서 정의하고 모든 중간 flex container에 `min-height: 0`을 전달한 뒤, 실제 콘텐츠 한 곳만 주 스크롤 영역으로 지정하라.
+
+### 🪟 `isolation`은 fixed overlay의 큰 z-index도 부모 안에 가둘 수 있다
+
+- **문제**: 읽기 container에 stacking context를 만들자 `z-index: 1300`인 전체 화면 Composer도 상위 앱 Header의 `z-index: 50` 아래에 표시됐다.
+- **Lesson**: overlay를 포함한 container에 `isolation`, transform, opacity 같은 stacking context 생성 속성을 추가할 때는 viewport 모서리의 `elementFromPoint`와 실제 screenshot으로 전역 Header 위 표시 여부를 확인하라.
+
+### 🔤 breakpoint는 기능 상태와 Header 수용 폭을 분리해 관리한다
+
+- **문제**: Reading 상태가 시작되는 600px 직후에 데스크톱 전체 라벨과 전역 글자 조절을 모두 유지하면 큰 글자에서 Header가 먼저 넘친다.
+- **Lesson**: 기능 breakpoint는 유지하되 Header는 실제 control 합산 폭에 따라 중간 축약 구간을 둘 수 있다. 기능 구조 변경과 단순 표기 축약을 같은 breakpoint로 강제하지 않는다.
+
+---
+
+## 26. 전체 목록과 선택 문맥 목록의 역할 분리 `v3.0`
+
+### 🎯 같은 데이터라도 진입 문맥에 따라 범위를 명시한다
+
+- **문제**: 장 전체 묵상 진입점이 선택 상태에서 숨고, 선택 도구의 `묵상`은 새 작성만 열어 사용자가 기존 기록을 찾을 수 없었다.
+- **Lesson**: 상단 진입점은 장 전체 목록, 선택 문맥 진입점은 선택 범위와 하나라도 겹치는 관련 목록으로 역할을 분리하라. 필터를 열기 전에 선택 snapshot을 보존해야 선택 UI를 닫아도 결과 범위가 바뀌지 않는다.
+
+---
+
+## 27. Release 버전 표기와 자동 배포 경계 `v3.0`
+
+### 🧾 사용자 표시와 backup metadata도 같은 버전 표면이다
+
+- **문제**: package와 Settings만 올리면 README와 backup export의 `app_version`이 이전 버전으로 남을 수 있다.
+- **Lesson**: root/client/server manifest와 lockfile뿐 아니라 사용자 표시, README, export metadata를 활성 버전 표면으로 함께 감사하라. 의존성의 우연히 같은 버전은 제품 버전으로 오인해 바꾸지 않는다.
+
+### 🚀 master push와 배포 승인을 하나의 게이트로 취급한다
+
+- **문제**: master push가 GitHub Actions 배포를 즉시 시작하는 저장소에서 merge 승인과 배포 승인을 분리하지 않으면 의도보다 일찍 운영 변경이 발생한다.
+- **Lesson**: release commit은 깨끗한 worktree에서 먼저 준비하고 diff·tag 대상을 제출하라. master/tag push는 자동 배포가 시작된다는 사실을 명시한 별도 승인 이후에만 수행한다.

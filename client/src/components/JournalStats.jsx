@@ -91,7 +91,7 @@ const JournalStats = ({
 
     return (
         <div className="journal-stats">
-            <div className="stats-section no-padding">
+            <div className="journal-stats-section journal-stats-section--calendar">
                 <Calendar
                     readingLogs={readingLogs}
                     compact={true}
@@ -100,63 +100,42 @@ const JournalStats = ({
                 />
             </div>
 
-            <div className="stats-section">
-                <h3 className="stats-title">── 이번 달 통계 ──</h3>
-                <div className="stats-grid">
-                    <div className="stats-item">
-                        <span className="stats-icon">📖</span>
-                        <div className="stats-info">
-                            <span className="stats-label">읽은 장</span>
-                            <span className="stats-value">{currentMonthData.logs.length}</span>
+            <div className="journal-stats-section">
+                <h3 className="journal-stats-title">이번 달 통계</h3>
+                <div className="journal-stats-grid">
+                    <div className="journal-stats-item">
+                        <span className="journal-stats-icon">📖</span>
+                        <div className="journal-stats-info">
+                            <span className="journal-stats-label">읽은 장</span>
+                            <span className="journal-stats-value">{currentMonthData.logs.length}</span>
                         </div>
                     </div>
-                    <div className="stats-item">
-                        <span className="stats-icon">✏️</span>
-                        <div className="stats-info">
-                            <span className="stats-label">묵상</span>
-                            <span className="stats-value">{currentMonthData.vNotes.length + currentMonthData.fNotes.length}</span>
+                    <div className="journal-stats-item">
+                        <span className="journal-stats-icon">✏️</span>
+                        <div className="journal-stats-info">
+                            <span className="journal-stats-label">묵상</span>
+                            <span className="journal-stats-value">{currentMonthData.vNotes.length + currentMonthData.fNotes.length}</span>
                         </div>
                     </div>
                 </div>
             </div>
 
             {monthlyBooks.length > 0 && (
-                <div className="stats-section">
-                    <h3 className="stats-title">── 이번 달 읽은 책 ──</h3>
-                    <div className="top-books-list">
+                <div className="journal-stats-section">
+                    <h3 className="journal-stats-title">이번 달 읽은 책</h3>
+                    <div className="journal-stats-books">
                         {monthlyBooks.map((book, idx) => (
-                            <div key={idx} className="top-book-item" style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '8px',
-                                padding: '6px 0'
-                            }}>
-                                <span className="book-icon" title={book.type}>{book.color}</span>
-                                <span className="book-type-badge" style={{
-                                    fontSize: '0.7rem',
-                                    padding: '2px 4px',
-                                    borderRadius: '4px',
-                                    backgroundColor: 'var(--pk-color-bg-secondary)',
-                                    color: 'var(--pk-color-text-tertiary)',
-                                    whiteSpace: 'nowrap'
-                                }}>
+                            <div key={idx} className="journal-stats-book-item">
+                                <span className="journal-stats-book-icon" title={book.type}>{book.color}</span>
+                                <span className="journal-stats-book-badge">
                                     {book.type}
                                 </span>
-                                <span className="book-name" style={{
-                                    whiteSpace: 'nowrap',
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis',
-                                    fontWeight: '600'
-                                }}>
+                                <span className="journal-stats-book-name">
                                     {book.name}
                                 </span>
-                                <span className="book-count" style={{
-                                    fontSize: '0.85rem',
-                                    color: 'var(--pk-color-text-secondary)',
-                                    whiteSpace: 'nowrap'
-                                }}>
+                                <span className="journal-stats-book-count">
                                     {book.count}장
-                                    {book.isCompleted && <span title="완독" style={{ marginLeft: '4px', cursor: 'help' }}>✅</span>}
+                                    {book.isCompleted && <span className="journal-stats-complete" title="완독">✅</span>}
                                 </span>
                             </div>
                         ))}

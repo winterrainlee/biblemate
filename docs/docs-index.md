@@ -1,13 +1,23 @@
 # 📚 Documentation Index
 
-> BibleMate 프로젝트 문서 목차입니다. (최초 생성일: 2026-01-05 | 최신 수정일: 2026-07-07)
+> BibleMate 프로젝트 문서 목차입니다. (최초 생성일: 2026-01-05 | 최신 수정일: 2026-09-09)
 
 ---
 
 ## 🚀 01. Planning (기획)
 - [Roadmap](01-planning/roadmap.md): 차기 버전 로드맵 및 기능 목록
+- [v3.0 Parallel Batch Plan](01-planning/parallel-batch-plan-v3.0.md): B안 병렬 구현, 파일 소유권, 단일 검수 서버 계획
 - [Visual Redesign Proposal](01-planning/proposal-visual-redesign.md): v2.3 시각 디자인 재구성 제안서
 - [Implementation Plans](01-planning/implementation-plans/): 버전별 구현 계획서
+  - [Implementation Plan v3.0 Reflection Composer](01-planning/implementation-plans/implementation-plan-v3.0-reflection-composer.md): 선택 snapshot 기반 묵상 작성·수정 상태 구현 계획
+  - [Implementation Plan v3.0 Existing Notes Integration](01-planning/implementation-plans/implementation-plan-v3.0-existing-notes.md): 기존 묵상 목록·본문 이동·수정·삭제 통합 계획
+  - [Implementation Plan v3.0 Responsive Integration](01-planning/implementation-plans/implementation-plan-v3.0-responsive-integration.md): 핵심 읽기 흐름의 폭·높이·safe-area·공용 패널 통합 계획
+  - [Implementation Plan v3.0 Release](01-planning/implementation-plans/implementation-plan-v3.0-release.md): 버전·문서·최종 회귀·master/tag·배포 계획
+  - [Implementation Plan v3.0 Visual Cleanup](01-planning/implementation-plans/implementation-plan-v3.0-visual-cleanup.md): 주변 화면 시각 정리와 병렬 파일 소유권 계획
+  - [Implementation Plan v3.0 Regression Harness](01-planning/implementation-plans/implementation-plan-v3.0-regression-harness.md): 임시 DB 기반 v2.x 데이터·API 회귀 검증 계획
+  - [Implementation Plan v3.0 Verse Selection](01-planning/implementation-plans/implementation-plan-v3.0-verse-selection.md): 단일·비연속 다중 구절 선택 모델 구현 계획
+  - [Implementation Plan v3.0 Context Toolbar](01-planning/implementation-plans/implementation-plan-v3.0-context-toolbar.md): 선택 구절 하이라이트·지우기·묵상·복사 도구 구현 계획
+  - [Implementation Plan v3.0 Reading Canvas](01-planning/implementation-plans/implementation-plan-v3.0-reading-canvas.md): 장시간 읽기 중심 Reading Canvas 구현 계획
   - [Implementation Plan v2.3.3 Auto Read from Verse Note](01-planning/implementation-plans/implementation-plan-v2.3.3-auto-read-from-verse-note.md): 구절 묵상 기반 읽음 자동 표시 구현 계획
   - [Implementation Plan v2.3.2 Mobile Verse Selection Hotfix](01-planning/implementation-plans/implementation-plan-v2.3.2-mobile-verse-selection-hotfix.md): 모바일 구절 선택 화면 및 로그인 문구 핫픽스 구현 계획
   - [Implementation Plan v2.3.1 App Icon & Favicon](01-planning/implementation-plans/implementation-plan-v2.3.1-app-icon-favicon.md): 앱 아이콘/파비콘 정리 구현 계획
@@ -17,6 +27,7 @@
 ---
 
 ## 📋 02. Specs (명세서)
+- [Project Spec v3.0](02-specs/spec-v3.0.md): v3.0 읽기·선택·묵상 기록 경험 명세서
 - [Project Spec v2.3](02-specs/spec-v2.3.md): v2.3 시각 디자인 재구성 명세서
 - [Project Spec v2.3.3](02-specs/spec-v2.3.3.md): 구절 묵상 기반 읽음 자동 표시 명세서
 - [Project Spec v2.3.2](02-specs/spec-v2.3.2.md): 모바일 구절 선택 화면 및 로그인 문구 핫픽스 명세서
@@ -34,6 +45,7 @@
 ## 📝 03. Logs (개발/검증 로그)
 
 ### Development Logs
+- [Dev Log v3.0](03-logs/dev-log-v3.0.md): v3.0 Reading UX 전체 구현·검수·릴리즈 기록
 - [Dev Log v2.3.3](03-logs/dev-log-v2.3.3.md): 구절 묵상 기반 읽음 자동 표시
 - [Dev Log v2.3.2](03-logs/dev-log-v2.3.2.md): 모바일 구절 선택 화면 및 로그인 문구 핫픽스
 - [Dev Log v2.3.1](03-logs/dev-log-v2.3.1.md): 앱 아이콘/파비콘 정리
@@ -52,6 +64,11 @@
 
 ### Pull Requests
 - [PR Drafts](03-logs/pr/): 버전별 PR 초안
+  - [PR Draft v3.0 Context Toolbar](03-logs/pr/pr-v3.0-context-toolbar.md): v3.0 Context Toolbar + Highlight + Copy PR 초안
+  - [PR Draft v3.0 Responsive Integration](03-logs/pr/pr-v3.0-responsive-integration.md): Existing Notes + 반응형 통합 PR #9 기록
+  - [PR Draft v3.0 Release](03-logs/pr/pr-v3.0-release.md): v3.0.0 버전·문서·최종 검증 Release PR 초안
+  - [PR Draft v3.0 Verse Selection](03-logs/pr/pr-v3.0-verse-selection.md): v3.0 Verse Selection PR 초안
+  - [PR Draft v3.0 Reading Canvas](03-logs/pr/pr-v3.0-reading-canvas.md): v3.0 Reading Canvas PR 초안
   - [PR Draft v2.3.3 Auto Read from Verse Note](03-logs/pr/pr-v2.3.3-auto-read-from-verse-note.md): v2.3.3 구절 묵상 기반 읽음 자동 표시 PR 초안
   - [PR Draft v2.3.2 Mobile Verse Selection Hotfix](03-logs/pr/pr-v2.3.2-mobile-verse-selection-hotfix.md): v2.3.2 모바일 구절 선택 화면 및 로그인 문구 핫픽스 PR 초안
   - [PR Draft v2.3.1 App Icon & Favicon](03-logs/pr/pr-v2.3.1-app-icon-favicon.md): v2.3.1 앱 아이콘/파비콘 PR 초안
@@ -68,6 +85,12 @@
 
 ### Walkthroughs
 - [Walkthroughs](03-logs/walkthroughs/): 구현/검증 과정 기록
+  - [Walkthrough v3.0 Responsive Integration](03-logs/walkthroughs/walkthrough-v3.0-responsive-integration.md): 높이·scroll·safe-area·공용 우측 패널 통합과 폭별 검증 기록
+  - [Walkthrough v3.0 Release](03-logs/walkthroughs/walkthrough-v3.0-release.md): 버전 정합·최종 자동 회귀·DB 보호·배포 전 점검 기록
+  - [Walkthrough v3.0 Existing Notes Integration](03-logs/walkthroughs/walkthrough-v3.0-existing-notes.md): 기존 묵상 단일 목록 구현과 자동 검증 기록
+  - [Walkthrough v3.0 Context Toolbar](03-logs/walkthroughs/walkthrough-v3.0-context-toolbar.md): Context Toolbar 구현·자동 검증·iPhone 실기기 승인 기록
+  - [Walkthrough v3.0 Verse Selection](03-logs/walkthroughs/walkthrough-v3.0-verse-selection.md): Verse Selection 구현·자동 검증·iPhone 실기기 확인 기록
+  - [Walkthrough v3.0 Reading Canvas](03-logs/walkthroughs/walkthrough-v3.0-reading-canvas.md): Reading Canvas 구현·반응형·실기기 검증 기록
   - [Walkthrough v2.3.3 Auto Read from Verse Note](03-logs/walkthroughs/walkthrough-v2.3.3-auto-read-from-verse-note.md): v2.3.3 구절 묵상 기반 읽음 자동 표시 구현/검증 기록
   - [Walkthrough v2.3.2 Mobile Verse Selection Hotfix](03-logs/walkthroughs/walkthrough-v2.3.2-mobile-verse-selection-hotfix.md): v2.3.2 모바일 구절 선택 화면 및 로그인 문구 핫픽스 구현/검증 기록
   - [Walkthrough v2.3.1 App Icon & Favicon](03-logs/walkthroughs/walkthrough-v2.3.1-app-icon-favicon.md): v2.3.1 앱 아이콘/파비콘 구현/검증 기록
@@ -86,6 +109,7 @@
 ---
 
 ## 📦 04. Releases (배포 노트)
+- [v3.0.0](04-releases/release-notes-v3.0.0.md): Reading First 반응형 UX Release Candidate
 - [v2.3.3](04-releases/release-notes-v2.3.3.md): 구절 묵상 기반 읽음 자동 표시 (2026-07-07)
 - [v2.3.2](04-releases/release-notes-v2.3.2.md): 모바일 구절 선택 화면 및 로그인 문구 핫픽스 (2026-06-28)
 - [v2.3.1](04-releases/release-notes-v2.3.1.md): 앱 아이콘/파비콘 정리 (2026-06-24)

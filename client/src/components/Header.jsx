@@ -8,7 +8,7 @@ import './Header.css';
 const Header = () => {
     const navigate = useNavigate();
     const { theme, setTheme, fontSize, setFontSize } = useTheme();
-    const { activeTab, setActiveTab } = useTab();
+    const { activeTab, setActiveTab, runWithNavigationGuard } = useTab();
     const isDarkMode = theme === 'dark';
     const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark');
 
@@ -30,14 +30,14 @@ const Header = () => {
     };
 
     return (
-        <header className="main-header">
+        <header className={`main-header ${activeTab === 'bible' ? 'reading-active' : ''}`}>
             <div className="header-container">
                 <div className="header-left">
                     <div
                         className="header-logo"
-                        onClick={() => {
+                        onClick={() => runWithNavigationGuard(() => {
                             window.location.href = '/';
-                        }}
+                        })}
                         style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}
                         title="메인으로 이동"
                     >
@@ -49,14 +49,14 @@ const Header = () => {
                     <nav className="header-tabs">
                         <button
                             className={`header-tab ${activeTab === 'bible' ? 'active' : ''}`}
-                            onClick={() => setActiveTab('bible')}
+                            onClick={() => activeTab !== 'bible' && setActiveTab('bible')}
                         >
                             <span className="full-label">📖 성경 읽기</span>
                             <span className="short-label">성경</span>
                         </button>
                         <button
                             className={`header-tab ${activeTab === 'journal' ? 'active' : ''}`}
-                            onClick={() => setActiveTab('journal')}
+                            onClick={() => activeTab !== 'journal' && setActiveTab('journal')}
                         >
                             <span className="full-label">📝 묵상일지</span>
                             <span className="short-label">묵상</span>
@@ -67,7 +67,7 @@ const Header = () => {
                 <div className="header-actions">
                     <button
                         className="header-action-btn mobile-only-chart-btn"
-                        onClick={() => navigate('/chart')}
+                        onClick={() => runWithNavigationGuard(() => navigate('/chart'))}
                         title="읽기표"
                         aria-label="읽기표"
                     >
@@ -128,7 +128,7 @@ const Header = () => {
 
                     <button
                         className="header-action-btn"
-                        onClick={() => navigate('/settings')}
+                        onClick={() => runWithNavigationGuard(() => navigate('/settings'))}
                         title="설정"
                         aria-label="설정"
                     >

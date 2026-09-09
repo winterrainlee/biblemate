@@ -407,7 +407,7 @@ const JournalPage = ({ date, onDateChange, readingLogs = [], books = [], onNavig
                     {/* Header */}
                     <header className="journal-header">
                         <div className="date-nav">
-                            <button className="nav-btn" onClick={handlePrevDay} title="이전 날짜">
+                            <button className="journal-nav-btn" onClick={handlePrevDay} title="이전 날짜">
                                 <ChevronLeft size={24} />
                             </button>
                             <div className="date-info">
@@ -416,7 +416,7 @@ const JournalPage = ({ date, onDateChange, readingLogs = [], books = [], onNavig
                                 </button>
                                 {isToday(date) && <span className="today-badge-static">오늘</span>}
                             </div>
-                            <button className="nav-btn" onClick={handleNextDay} title="다음 날짜">
+                            <button className="journal-nav-btn" onClick={handleNextDay} title="다음 날짜">
                                 <ChevronRight size={24} />
                             </button>
                         </div>
@@ -607,7 +607,7 @@ const JournalPage = ({ date, onDateChange, readingLogs = [], books = [], onNavig
                     )}
 
                     {/* Section: 자유 묵상 */}
-                    <section className="journal-section">
+                    <section className="journal-section journal-section--free-note">
                         <div className="section-header">
                             <h3 className="section-title">💭 자유 묵상</h3>
                             {freeNote && !editingFreeNote && (
@@ -643,7 +643,7 @@ const JournalPage = ({ date, onDateChange, readingLogs = [], books = [], onNavig
                     </section>
 
                     {/* Section: 오늘의 기도 */}
-                    <section className="journal-section">
+                    <section className="journal-section journal-section--prayer">
                         <div className="section-header">
                             <h3 className="section-title">🙏 기도로 마무리</h3>
                             {prayer && !editingPrayer && (

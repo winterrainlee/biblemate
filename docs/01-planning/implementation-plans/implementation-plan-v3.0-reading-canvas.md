@@ -3,7 +3,8 @@
 - 목표 버전: v3.0.0
 - 작업: Reading Canvas prototype
 - 기준 명세: `docs/02-specs/spec-v3.0.md`
-- 상태: 초안 / 사용자 승인 전
+- 상태: **구현·검증 및 사용자 실기기 승인 완료**
+- 구현계획 승인일: 2026-09-08
 
 ## Goal
 
@@ -11,11 +12,14 @@
 
 ## User Review Required
 
-- [ ] 본문 최대 폭, 여백, 행간, 절 간격의 방향 승인
-- [ ] 절 번호와 묵상 존재 표시 방식 승인
-- [ ] 장/역본/Aa 컨트롤의 위치와 시각적 무게 승인
-- [ ] Compact / Reading / Workspace에서 본문이 한 화면의 주역으로 보이는지 승인
-- [ ] prototype 승인 전 Selection/Composer 구현으로 넘어가지 않음
+> 아래 항목은 구현계획 자체의 승인 항목이 아니라, 구현된 prototype을 실제로 보고 판단하는 최종 검수 항목이다.
+
+- [x] 본문 최대 폭, 여백, 행간, 절 간격의 방향 승인
+- [x] 절 번호와 묵상 존재 표시 방식 승인
+- [x] 장/역본/Aa 컨트롤의 위치와 시각적 무게 승인
+- [x] Compact / Reading / Workspace에서 본문이 한 화면의 주역으로 보이는지 승인
+- [x] iPhone 13 mini 실기기에서 실제 읽기/스크롤/터치 검수 승인
+- [x] prototype 승인 전 Selection/Composer 구현으로 넘어가지 않음
 
 ## Proposed Changes
 
@@ -51,26 +55,71 @@
 
 ### Automated Tests
 
-- [ ] `cd client && npm run lint`
-- [ ] `cd client && npm run build`
+- [x] `cd client && npm run lint`
+- [x] `cd client && npm run build`
 
-### Manual Verification
+### Desktop / Emulation Verification
 
-- [ ] 약 375px: iPhone 13 mini급 폭
-- [ ] 약 600~700px: iPad/desktop 1:1 Split View급 폭
-- [ ] 1000px 이상: Desktop Workspace
-- [ ] Light mode
-- [ ] Dark mode
-- [ ] 긴 절/짧은 절 혼합 장에서 줄바꿈 확인
-- [ ] 하이라이트 4색이 본문 가독성을 해치지 않는지 확인
-- [ ] 기존 묵상 표시가 레이아웃을 깨뜨리지 않는지 확인
-- [ ] 이전/다음 장 이동 등 기존 기능이 prototype 때문에 깨지지 않았는지 확인
+- [x] 약 375px: iPhone 13 mini급 폭
+- [x] 약 600~700px: iPad/desktop 1:1 Split View급 폭
+- [x] 1000px 이상: Desktop Workspace
+- [x] Light mode
+- [x] Dark mode
+- [x] 긴 절/짧은 절 혼합 장에서 줄바꿈 확인
+- [x] 하이라이트 4색이 본문 가독성을 해치지 않는지 확인
+- [x] 기존 묵상 표시가 레이아웃을 깨뜨리지 않는지 확인
+- [x] 이전/다음 장 이동 등 기존 기능이 prototype 때문에 깨지지 않았는지 확인
+
+### Real-device Verification — Required Gate
+
+실기기 검수는 Desktop responsive emulation을 대체하지 않고 그 다음 단계로 수행한다.
+
+개발 작업은 Codex Remote Control을 통해 원격으로 진행할 수 있다. 실기기 검수 시점에만 개발 머신에서 BibleMate를 외부 접근 가능하게 실행한다.
+
+권장 절차:
+
+1. 자동 검증과 Desktop/Emulation 검증을 먼저 통과한다.
+2. 사용자가 실기기 검수를 요청하면 개발 서버를 `0.0.0.0`에서 접근 가능하도록 실행한다.
+3. 개발 머신과 iPhone이 연결된 Tailscale 네트워크를 이용해 iPhone 13 mini에서 접속한다.
+4. Reading Canvas 단계에서는 Tailscale HTTP 접근만으로도 기본 레이아웃/읽기/스크롤 검수가 가능하다.
+5. Clipboard, PWA, secure-context API를 다루는 후속 feature에서는 필요 시 Tailscale HTTPS/Serve 환경을 사용한다.
+6. 검수 완료 후 walkthrough에 사용 기기, 접근 방식, 관찰 결과와 사용자 승인 여부를 기록한다.
+
+실기기 필수 확인 항목:
+
+- [x] iPhone 13 mini 실제 Safari에서 본문을 자연스럽게 읽을 수 있음
+- [x] 실제 safe-area에서 헤더/본문/하단 영역이 잘리지 않음
+- [x] 주소창 변화와 실제 viewport 높이 변화가 읽기 흐름을 깨뜨리지 않음
+- [x] 세로 스크롤이 자연스럽고 장 이동 제스처와 충돌하지 않음
+- [x] 구절 row의 실제 터치 감각과 오터치 가능성을 확인함
+- [x] 20~30분 읽기를 상정했을 때 행간, 절 간격, 좌우 여백이 편안함
+
+최종 실기기 결과는 개별 계측이 아니라 iPhone Safari에서의 사용자 읽기·스크롤·터치 검수와 최종 만족 승인으로 판정했다. 별도 문제는 보고되지 않았다.
+
+### Verification Layers
+
+```text
+1. Automated
+   lint / build
+        ↓
+2. Desktop Emulation
+   375px / 600~700px / 1000px+
+        ↓
+3. Real Device
+   iPhone 13 mini via Tailscale
+        ↓
+4. User Approval
+        ↓
+다음 feature 진행
+```
 
 ## Prototype Acceptance Gate
 
-다음 질문에 사용자가 긍정적으로 답하기 전에는 다음 feature로 넘어가지 않는다.
+다음 질문에 사용자가 긍정적으로 답하고 iPhone 13 mini 실기기 검수를 승인하기 전에는 다음 feature로 넘어가지 않는다.
 
 > **이 화면에서 20~30분 동안 성경을 읽고 싶은가?**
+
+Codex는 자동/에뮬레이션 검증만으로 이 게이트를 통과한 것으로 간주하지 않는다. 실기기 검수가 필요한 상태가 되면 개발 서버를 띄울 준비를 하고 사용자 검수를 기다린다.
 
 ---
 
@@ -80,21 +129,25 @@
 
 - 세 기준 폭에서 동일 본문을 비교할 수 있도록 고정 검증 장을 정하는 것이 좋다.
 - 기능 구현보다 시각 회귀를 보는 단계이므로 screenshot 기준점을 남기는 것을 권장한다.
+- iOS 실기기 결과는 Desktop emulation과 별도 항목으로 walkthrough에 기록한다.
 
 ### 🎨 UI/UX Review
 
 - 본문을 카드에서 꺼내는 것만으로 끝내지 말고, 한 줄 길이와 행간을 핵심 품질 지표로 삼아야 한다.
 - 장 제목, 절 번호, 묵상 마커가 본문과 경쟁하지 않도록 위계를 낮춰야 한다.
+- 최종 Reading Canvas 승인에는 실제 iPhone에서의 장시간 읽기 감각을 포함한다.
 
 ### ✨ Interaction Design Review
 
 - 이번 단계에서는 선택 인터랙션을 확장하지 않고, 기존 클릭 가능성이 읽기 흐름을 방해하는지만 관찰한다.
 - 이후 Selection 도입을 고려해 각 verse row의 hit area와 hover/active 피드백 공간은 남겨둔다.
+- 실제 손가락 터치와 스크롤 감각은 실기기에서 확인한다.
 
 ### 💻 Frontend Review
 
 - `BibleViewer.jsx`가 이미 많은 상태와 기능을 포함하므로 Reading Canvas 단계에서 대규모 컴포넌트 분리는 피한다.
 - CSS 구조를 먼저 정리하고, 다음 feature에서 interaction state 분리를 검토하는 편이 안전하다.
+- 실기기 검수 요청 시 Vite 개발 서버를 Tailscale에서 접근 가능한 방식으로 실행할 수 있도록 한다.
 
 ### 🔧 Backend Review
 

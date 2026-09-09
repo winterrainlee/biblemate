@@ -7,8 +7,10 @@
     display: flex;
     flex-direction: column;
     height: 100%;
-    background-color: var(--pk-color-bg-secondary);
+    background-color: var(--pk-color-bg);
     overflow: hidden;
+    min-width: 0;
+    min-height: 0;
 }
 
 .dashboard-sidebar {
@@ -37,6 +39,8 @@
     /* Removed padding to fix whitespace */
     /* Contain children */
     gap: 0;
+    min-width: 0;
+    min-height: 0;
     /* v1.4.1: 모바일 공백 버그 수정 */
 }
 
@@ -47,9 +51,15 @@
     max-width: 1400px;
     margin: 0 auto;
     width: 100%;
-    width: 100%;
+    min-width: 0;
+    min-height: 0;
     overflow-y: hidden;
     /* Allow scroll inside wrapper if needed */
+}
+
+.dashboard-container.bible-mode-active .bible-viewer-wrapper {
+    max-width: none;
+    padding: 0;
 }
 
 .note-editor-wrapper {

@@ -4,7 +4,7 @@ import { getDB, saveDB } from '../db/init.js';
 const router = express.Router();
 
 // Constants
-const APP_VERSION = '2.0.0';
+const APP_VERSION = '3.0.0';
 const CURRENT_SCHEMA_VERSION = 3;
 const SUPPORTED_SCHEMA_VERSIONS = [1, 2, 3];
 

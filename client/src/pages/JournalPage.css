@@ -139,7 +139,7 @@
     display: none;
 }
 
-.nav-btn {
+.journal-nav-btn {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -153,7 +153,7 @@
     transition: all 0.2s;
 }
 
-.nav-btn:hover {
+.journal-nav-btn:hover {
     background-color: var(--pk-color-bg-secondary);
     color: var(--pk-color-primary);
 }
@@ -190,7 +190,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 3rem 1rem;
+    padding: 2.5rem 1rem;
     text-align: center;
     color: var(--text-secondary);
     background: var(--pk-color-bg-elevated);
@@ -215,7 +215,8 @@
 }
 
 .journal-empty .empty-actions button {
-    padding: 0.5rem 1rem;
+    min-height: 44px;
+    padding: 0 1rem;
     border: 1px solid var(--primary-color, var(--pk-color-primary));
     background: transparent;
     color: var(--primary-color, var(--pk-color-primary));
@@ -268,6 +269,28 @@
     border: 1px solid var(--pk-color-border);
     border-radius: var(--pk-radius-lg);
     box-shadow: 0 4px 16px var(--pk-color-shadow);
+}
+
+.journal-section--free-note,
+.journal-section--prayer {
+    box-shadow: none;
+}
+
+.journal-section--free-note .section-content,
+.journal-section--prayer .section-content,
+.journal-section--free-note textarea,
+.journal-section--prayer textarea {
+    font-family: var(--pk-font-serif);
+}
+
+.journal-section--free-note .icon-btn,
+.journal-section--prayer .icon-btn,
+.journal-section--free-note .btn-save,
+.journal-section--free-note .btn-cancel,
+.journal-section--prayer .btn-save,
+.journal-section--prayer .btn-cancel {
+    min-width: 44px;
+    min-height: 44px;
 }
 
 .section-header {
@@ -512,7 +535,7 @@
         margin-top: 0.5rem;
     }
 
-    .nav-btn {
+    .journal-nav-btn {
         width: 44px;
         height: 44px;
     }
@@ -526,7 +549,7 @@
         padding: 0.85rem;
         border: 1px solid var(--pk-color-border);
         border-radius: var(--pk-radius-md);
-        background-color: var(--pk-color-bg-secondary);
+        background-color: var(--pk-color-bg-elevated);
     }
 
     .mobile-journal-summary>div {

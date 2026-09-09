@@ -1,12 +1,13 @@
 {
     "name": "biblemate-server",
-    "version": "2.3.3",
+    "version": "3.0.0",
     "description": "BibleMate backend server",
     "main": "index.js",
     "type": "module",
     "scripts": {
         "dev": "node --watch --env-file=.env index.js",
-        "start": "node --env-file=.env index.js"
+        "start": "node --env-file=.env index.js",
+        "verify:v3-regression": "node scripts/verify-v3-regression.js"
     },
     "keywords": [
         "bible",
