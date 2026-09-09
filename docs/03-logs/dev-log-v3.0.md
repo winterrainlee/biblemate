@@ -6,7 +6,7 @@
 - **기간**: 2026-09-08 ~ 진행 중
 - **목표**: 성경 읽기와 묵상 기록의 핵심 경험을 실제 사용 흐름 중심으로 재구성
 - **통합 브랜치**: `feature/v3.0`
-- **현재 작업 브랜치**: `feature/v3.0-reading-canvas`
+- **현재 작업 브랜치**: `feature/v3.0-verse-selection`
 
 ## 변경 내역
 
@@ -20,6 +20,17 @@
 - `client/src/pages/ReadingDashboard.css`: Reading Canvas 중심 레이아웃으로 보조 패널 전제 완화
 - 사용자 피드백에 따라 위첨자형 절 번호와 인접한 묵상 점을 본문 기준선 번호 + 왼쪽 마진 선으로 수정
 - PR 리뷰에서 절 번호·묵상선 대비, 클릭 우선순위, Compact 조작 영역과 기본 dialog semantics 보강
+
+#### [Feature] Verse Selection — 구현 및 자동 검증
+
+- 구절 첫 탭에서 중앙 액션 popup을 열지 않고 단일·비연속 다중 선택 상태만 시작하도록 분리
+- 함수형 상태 업데이트, 절 번호 정규화, 중복 제거와 오름차순 정렬 적용
+- 기존 하이라이트 색 위에 선택 overlay와 안쪽 인디케이터를 별도 합성
+- 구절 선택 button과 묵상 마진 button을 sibling control로 분리하고 `aria-pressed`, focus 표시, 상태 알림 추가
+- 약 10px 이상 touch 이동 시 선택 click을 억제하고 Selection 상태의 장 이동 swipe 차단
+- 선택 개수·범위와 닫기만 제공하는 최소 selection bar 추가
+- 책·장·역본 변경, Escape, 닫기, 묵상 상세 진입 시 선택 상태 정리
+- 사용자 요청에 따라 검수 서버와 수동·실기기 검수는 아직 실행하지 않음
 
 ## 이슈 및 해결
 
@@ -39,8 +50,33 @@
 - [x] Light / Dark 및 하이라이트 4색 대비 검증
 - [x] 이전·다음 장, 기존 묵상 열기, 하이라이트 레이아웃 회귀 확인
 - [x] iPhone 13 mini Safari + Tailscale HTTP 실기기 검수 및 사용자 승인
+- [x] Verse Selection 구현 후 `cd client && npm run lint`
+- [x] Verse Selection 구현 후 `cd client && npm run build`
+- [x] Verse Selection working tree `git diff --check`
+- [ ] Verse Selection 브라우저 반응형·실기기 검수
 
 ## 다음 계획
 
 - Reading Canvas는 PR #3으로 `feature/v3.0` 통합 완료
-- Verse Selection은 별도 구현계획 승인 전 시작하지 않음
+- Verse Selection 구현 및 자동 검증 완료
+- 사용자 요청 시에만 검수 서버를 열고 반응형·실기기 검수 진행
+- Responsive 최종 확정은 핵심 Reading 흐름 연결 후 통합 회귀 단계에서 수행
+
+### 2026-09-09
+
+#### [Verification] Verse Selection iPhone 실기기 검수
+
+- Tailscale HTTP 검수용 Vite 서버를 별도 포트로 실행하고 frontend/API HTTP 200 확인
+- iPhone Safari에서 단일·비연속 다중 선택, 개별·전체 해제, 스크롤 오선택 방지, 선택 중 장 swipe 억제 확인
+- 기존 하이라이트 합성, 선택 bar 위치, 묵상 마진 선 진입, 책·장·역본 전환 시 초기화 항목 정상 확인
+- 사용자 정상 확인 후 검수용 서버 종료
+- 기존 localhost 전용 frontend/backend 프로세스는 유지
+
+#### [Review] Verse Selection PR 준비
+
+- Security / QA / UI·UX / Interaction / Frontend / Backend 리뷰 수행
+- 최초 리뷰에서 touch 후속 click, context 전환 race, 본문 accessible name, persistent live status, 조건부 하단 padding 문제 발견
+- target + 700ms click 억제, context key 이중 gate, `aria-label` 제거, 상시 live region, 고정 하단 여백 구조로 수정
+- 재검토 결과 Critical 0건, Warning 0건
+- Browser 제어 런타임이 없어 Desktop 3폭·키보드·Light/Dark 시각 검증은 PR 전 게이트로 유지
+- 사용자 결정으로 Verse Selection은 모바일 실기기 승인을 완료 기준으로 확정하고 Desktop 관련 문제는 후속 hotfix 후보로 이관

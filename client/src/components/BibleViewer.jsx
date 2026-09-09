@@ -75,7 +75,13 @@ const BibleViewer = ({
     };
     const [chapterNotes, setChapterNotes] = useState([]);
     const [isLoadingNotes, setIsLoadingNotes] = useState(false);
+    const selectionContextKey = `${currentBook}:${currentChapter}:${currentVersion}`;
+    const selectionContextRef = useRef(selectionContextKey);
     const [selectedVerses, setSelectedVerses] = useState([]);
+    const activeSelectedVerses = selectionContextRef.current === selectionContextKey
+        ? selectedVerses
+        : [];
+    const isSelectionMode = activeSelectedVerses.length > 0;
     const [copiedNoteId, setCopiedNoteId] = useState(null);
     const [isMobileSelectorOpen, setIsMobileSelectorOpen] = useState(false);
     const [isChapterNotesOpen, setIsChapterNotesOpen] = useState(false);
@@ -98,15 +104,23 @@ const BibleViewer = ({
     });
     const popupRef = useRef(null);
     const copyTimeoutRef = useRef(null);
+    const lastSelectedVerseRef = useRef(null);
+    const verseGestureRef = useRef({ moved: false, target: null, suppressTarget: null, suppressUntil: 0 });
+    const touchStartRef = useRef(null);
+    const touchEndRef = useRef(null);
     const dragRef = useRef({ isDragging: false, startX: 0, startY: 0, initialLeft: 0, initialTop: 0 });
     const closeVersePopup = () => {
         setPopup(prev => ({ ...prev, visible: false, verseRange: null, editTargetDate: null }));
+    };
+
+    const closeVerseSelection = (restoreFocus = true) => {
         setSelectedVerses([]);
+        if (restoreFocus) {
+            window.requestAnimationFrame(() => lastSelectedVerseRef.current?.focus());
+        }
     };
 
     // [NEW] Swipe handlers for mobile chapter navigation
-    const [touchStart, setTouchStart] = useState(null);
-    const [touchEnd, setTouchEnd] = useState(null);
     const minSwipeDistance = 50;
     const isInteractiveTouchTarget = (target) => {
         return Boolean(target?.closest?.(
@@ -115,19 +129,47 @@ const BibleViewer = ({
     };
 
     const onTouchStart = (e) => {
-        if (popup.visible || isInteractiveTouchTarget(e.target)) {
-            setTouchStart(null);
-            setTouchEnd(null);
+        const isVerseTarget = Boolean(e.target?.closest?.('.verse-select-target'));
+        if (popup.visible || (isInteractiveTouchTarget(e.target) && !isVerseTarget)) {
+            touchStartRef.current = null;
+            touchEndRef.current = null;
+            verseGestureRef.current = { moved: false, target: null, suppressTarget: null, suppressUntil: 0 };
             return;
         }
-        setTouchEnd(null);
-        setTouchStart({ x: e.targetTouches[0].clientX, y: e.targetTouches[0].clientY });
+        verseGestureRef.current = {
+            moved: false,
+            target: e.target?.closest?.('.verse-select-target') || null,
+            suppressTarget: null,
+            suppressUntil: 0
+        };
+        touchEndRef.current = null;
+        touchStartRef.current = { x: e.targetTouches[0].clientX, y: e.targetTouches[0].clientY };
     };
-    const onTouchMove = (e) => setTouchEnd({ x: e.targetTouches[0].clientX, y: e.targetTouches[0].clientY });
+    const onTouchMove = (e) => {
+        if (!touchStartRef.current) return;
+        const nextTouch = { x: e.targetTouches[0].clientX, y: e.targetTouches[0].clientY };
+        const distance = Math.hypot(
+            nextTouch.x - touchStartRef.current.x,
+            nextTouch.y - touchStartRef.current.y
+        );
+        if (distance >= 10) {
+            verseGestureRef.current.moved = true;
+        }
+        touchEndRef.current = nextTouch;
+    };
     const onTouchEnd = () => {
-        if (!touchStart || !touchEnd) return;
-        const distX = touchStart.x - touchEnd.x;
-        const distY = Math.abs(touchStart.y - touchEnd.y);
+        const start = touchStartRef.current;
+        const end = touchEndRef.current;
+        touchStartRef.current = null;
+        touchEndRef.current = null;
+        if (verseGestureRef.current.moved) {
+            verseGestureRef.current.suppressTarget = verseGestureRef.current.target;
+            verseGestureRef.current.suppressUntil = Date.now() + 700;
+        }
+
+        if (!start || !end || isSelectionMode || popup.visible) return;
+        const distX = start.x - end.x;
+        const distY = Math.abs(start.y - end.y);
         // Ignore if vertical movement is greater (scrolling, not swiping)
         if (Math.abs(distX) < minSwipeDistance || distY > Math.abs(distX)) return;
 
@@ -136,6 +178,11 @@ const BibleViewer = ({
         } else {
             handlePrevChapter();
         }
+    };
+    const onTouchCancel = () => {
+        touchStartRef.current = null;
+        touchEndRef.current = null;
+        verseGestureRef.current = { moved: false, target: null, suppressTarget: null, suppressUntil: 0 };
     };
 
     // Drag handlers
@@ -177,23 +224,25 @@ const BibleViewer = ({
     useEffect(() => {
         const handleKeyDown = (e) => {
             if (e.key === 'Escape') {
-                setPopup(prev => ({ ...prev, visible: false }));
-                setSelectedVerses([]);
-                setIsMobileSelectorOpen(false);
-                setIsChapterNotesOpen(false);
-                setIsReadingSettingsOpen(false);
+                if (popup.visible || isMobileSelectorOpen || isChapterNotesOpen || isReadingSettingsOpen) {
+                    setPopup(prev => ({ ...prev, visible: false }));
+                    setIsMobileSelectorOpen(false);
+                    setIsChapterNotesOpen(false);
+                    setIsReadingSettingsOpen(false);
+                } else if (isSelectionMode) {
+                    closeVerseSelection();
+                }
             }
         };
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, []);
+    }, [isChapterNotesOpen, isMobileSelectorOpen, isReadingSettingsOpen, isSelectionMode, popup.visible]);
 
     // Close popup when clicking outside
     useEffect(() => {
         const handleClickOutside = (e) => {
             if (popupRef.current && !popupRef.current.contains(e.target)) {
                 setPopup(prev => ({ ...prev, visible: false }));
-                setSelectedVerses([]);
             }
         };
         if (popup.visible) {
@@ -214,6 +263,15 @@ const BibleViewer = ({
         localStorage.setItem('bibleTextScale', String(bibleTextScale));
     }, [bibleTextScale]);
 
+    useEffect(() => {
+        selectionContextRef.current = selectionContextKey;
+        setSelectedVerses([]);
+        touchStartRef.current = null;
+        touchEndRef.current = null;
+        lastSelectedVerseRef.current = null;
+        verseGestureRef.current = { moved: false, target: null, suppressTarget: null, suppressUntil: 0 };
+    }, [selectionContextKey]);
+
     // Check if a verse has a highlight
     const getHighlightStyle = (verseNum) => {
         const hl = highlights.find(h => h.verse === verseNum);
@@ -232,66 +290,21 @@ const BibleViewer = ({
     };
 
     const handleVerseClick = (e, verse) => {
-        e.stopPropagation(); // Prevent popup from closing (outside click detection)
-
-        let newSelected = [];
-        if (popup.visible) {
-            // Toggle selection if popup is open
-            if (selectedVerses.includes(verse.verse)) {
-                newSelected = selectedVerses.filter(v => v !== verse.verse);
-            } else {
-                newSelected = [...selectedVerses, verse.verse];
-            }
-        } else {
-            // Start new selection
-            newSelected = [verse.verse];
-        }
-
-        newSelected.sort((a, b) => a - b);
-        setSelectedVerses(newSelected);
-
-        // If nothing selected (all deselected), close popup
-        if (newSelected.length === 0) {
-            setPopup(prev => ({ ...prev, visible: false }));
+        e.stopPropagation();
+        const isSuppressedTouchClick = e.detail !== 0
+            && verseGestureRef.current.suppressTarget === e.currentTarget
+            && Date.now() <= verseGestureRef.current.suppressUntil;
+        if (isSuppressedTouchClick) {
+            verseGestureRef.current = { moved: false, target: null, suppressTarget: null, suppressUntil: 0 };
             return;
         }
-
-        // Aggregate Text for Quote
-        const selectedText = verses
-            .filter(v => newSelected.includes(v.verse))
-            .map(v => newSelected.length > 1 ? `(${v.verse}) ${v.text || v.content}` : (v.text || v.content))
-            .join(' ');
-
-        // Primary verse (first one)
-        const primaryVerseNum = newSelected[0];
-
-        if (!popup.visible) {
-            // Center popup initially (Desktop & Mobile)
-            const popupWidth = Math.min(420, window.innerWidth * 0.9);
-            const popupHeight = 300; // approx
-            const centerX = (window.innerWidth - popupWidth) / 2;
-            const centerY = (window.innerHeight - popupHeight) / 2;
-
-            setPopup({
-                visible: true,
-                x: centerX,
-                y: Math.max(20, centerY), // Avoid top cut off
-                verseNum: primaryVerseNum,
-                verseText: selectedText,
-                mode: 'menu',
-                memoInput: '',
-                quoteEnabled: false,
-                quoteText: selectedText
-            });
-        } else {
-            // Update popup context
-            setPopup(prev => ({
-                ...prev,
-                verseNum: primaryVerseNum,
-                verseText: selectedText,
-                quoteText: selectedText
-            }));
-        }
+        const isSameSelectionContext = selectionContextRef.current === selectionContextKey;
+        selectionContextRef.current = selectionContextKey;
+        lastSelectedVerseRef.current = e.currentTarget;
+        setSelectedVerses(prev => toggleSelectedVerse(
+            isSameSelectionContext ? prev : [],
+            verse.verse
+        ));
     };
 
     const handleCopyClick = () => {
@@ -451,7 +464,7 @@ const BibleViewer = ({
     const openVerseNotes = (verse, event = null) => {
         event?.stopPropagation();
         const verseText = verse?.text || verse?.content || popup.verseText || '';
-        setSelectedVerses([verse.verse]);
+        setSelectedVerses([]);
         setPopup({
             visible: true,
             x: Math.max(20, window.innerWidth / 2 - 210),
@@ -498,6 +511,7 @@ const BibleViewer = ({
     const popupVerseRef = popup.verseRange ||
         (selectedVerses.length > 1 ? formatVerseRange(selectedVerses) :
             (chapterNotes.find(n => n.verse === popup.verseNum)?.verse_range || popup.verseNum));
+    const selectedVerseRange = formatVerseRange(activeSelectedVerses).replaceAll('-', '–');
 
     // Helper to render note content with optional quote styling
     const renderNoteContent = (content) => {
@@ -558,6 +572,7 @@ const BibleViewer = ({
             onTouchStart={onTouchStart}
             onTouchMove={onTouchMove}
             onTouchEnd={onTouchEnd}
+            onTouchCancel={onTouchCancel}
         >
             {/* 좌측 사이드바: 1절 ~ 중간절 묵상 */}
             <aside className="bible-side-panel left">
@@ -809,24 +824,17 @@ const BibleViewer = ({
                         verses.map(v => {
                             const hlColor = getHighlightStyle(v.verse);
                             const hasNote = chapterNotes.some(n => n.verse == v.verse);
-                            const isSelected = selectedVerses.includes(v.verse);
+                            const isSelected = activeSelectedVerses.includes(Number(v.verse));
                             return (
                                 <div
                                     id={`verse-${v.verse}`}
                                     key={v.verse}
-                                    className={`verse-row ${hlColor ? 'has-highlight' : ''}`}
-                                    style={{
-                                        ...(hlColor ? { backgroundColor: hlColor } : {}),
-                                        ...(isSelected ? {
-                                            backgroundColor: 'var(--pk-color-primary-light)',
-                                            boxShadow: 'inset 3px 0 0 var(--pk-color-primary)'
-                                        } : {})
-                                    }}
-                                    onClick={(e) => handleVerseClick(e, v)}
-                                    onMouseDown={(e) => e.stopPropagation()} // Prevent document click outside
+                                    className={`verse-row${hlColor ? ' has-highlight' : ''}${isSelected ? ' is-selected' : ''}`}
+                                    style={hlColor ? { backgroundColor: hlColor } : undefined}
                                 >
                                     {hasNote && (
                                         <button
+                                            type="button"
                                             className="note-indicator"
                                             onClick={(e) => openVerseNotes(v, e)}
                                             aria-label={`${bookName} ${chapter}:${v.verse} 묵상 보기`}
@@ -834,12 +842,20 @@ const BibleViewer = ({
                                             <span className="note-indicator-line" aria-hidden="true" />
                                         </button>
                                     )}
-                                    <span className="verse-meta">
-                                        <span className="verse-num">{v.verse}</span>
-                                    </span>
-                                    <span className={`verse-content ${hasNote ? 'has-note' : ''}`}>
-                                        {v.text || v.content || ''}
-                                    </span>
+                                    <button
+                                        type="button"
+                                        className="verse-select-target"
+                                        aria-pressed={isSelected}
+                                        onClick={(e) => handleVerseClick(e, v)}
+                                        onMouseDown={(e) => e.stopPropagation()}
+                                    >
+                                        <span className="verse-meta">
+                                            <span className="verse-num">{v.verse}</span>
+                                        </span>
+                                        <span className={`verse-content ${hasNote ? 'has-note' : ''}`}>
+                                            {v.text || v.content || ''}
+                                        </span>
+                                    </button>
                                 </div>
                             );
                         })
@@ -902,12 +918,12 @@ const BibleViewer = ({
                                         {bookName} {chapter}:{popupVerseRef} 묵상 ({getNotesForVerse(popup.verseNum).length}개)
                                     </span>
                                     <button
-                                        onClick={() => setPopup(prev => ({ ...prev, mode: 'menu' }))}
+                                        onClick={closeVersePopup}
                                         className="popup-close-btn"
-                                        title="뒤로가기"
-                                        aria-label="구절 메뉴로 돌아가기"
+                                        title="닫기"
+                                        aria-label="묵상 보기 닫기"
                                     >
-                                        <ChevronLeft size={18} />
+                                        <X size={18} />
                                     </button>
                                 </div>
                                 {popup.verseText && (
@@ -1090,35 +1106,56 @@ const BibleViewer = ({
                     </div>
                 )}
 
-                <nav className={`mobile-reading-action-bar${popup.visible ? ' selection-hidden' : ''}`} aria-label="성경 읽기 작업">
-                    <button
-                        className="mobile-reading-nav-btn"
-                        onClick={handlePrevChapter}
-                        disabled={!currentBook || (currentBook === books[0]?.id && currentChapter === 1)}
-                    >
-                        <ChevronLeft size={20} />
-                        이전
-                    </button>
-                    {isReadOnCurrentDate ? (
-                        <button className="mobile-reading-primary-btn completed" onClick={onNavigateToJournal}>
-                            <Check size={18} />
-                            묵상일지 보기
+                <div className="selection-live-status" role="status" aria-live="polite" aria-atomic="true">
+                    {isSelectionMode ? `${activeSelectedVerses.length}개 구절 선택됨, ${bookName} ${chapter}장 ${selectedVerseRange}절` : ''}
+                </div>
+
+                {isSelectionMode ? (
+                    <div className="verse-selection-bar" aria-label="선택한 구절" role="region">
+                        <div className="verse-selection-status">
+                            <strong>{activeSelectedVerses.length}개 구절 선택됨</strong>
+                            <span>{bookName} {chapter}:{selectedVerseRange}</span>
+                        </div>
+                        <button
+                            type="button"
+                            className="verse-selection-close"
+                            onClick={() => closeVerseSelection()}
+                            aria-label="구절 선택 종료"
+                        >
+                            <X size={20} />
                         </button>
-                    ) : (
-                        <button className="mobile-reading-primary-btn" onClick={onComplete} disabled={completionStatus === 'loading'}>
-                            {completionStatus === 'loading' ? <Loader size={18} className="animate-spin" /> : <Check size={18} />}
-                            {isToday ? '오늘의 말씀 완료' : '읽음 표시'}
+                    </div>
+                ) : (
+                    <nav className={`mobile-reading-action-bar${popup.visible ? ' selection-hidden' : ''}`} aria-label="성경 읽기 작업">
+                        <button
+                            className="mobile-reading-nav-btn"
+                            onClick={handlePrevChapter}
+                            disabled={!currentBook || (currentBook === books[0]?.id && currentChapter === 1)}
+                        >
+                            <ChevronLeft size={20} />
+                            이전
                         </button>
-                    )}
-                    <button
-                        className="mobile-reading-nav-btn"
-                        onClick={handleNextChapter}
-                        disabled={!currentBook || (currentBook === books[books.length - 1]?.id && currentChapter === totalChapters)}
-                    >
-                        다음
-                        <ChevronRight size={20} />
-                    </button>
-                </nav>
+                        {isReadOnCurrentDate ? (
+                            <button className="mobile-reading-primary-btn completed" onClick={onNavigateToJournal}>
+                                <Check size={18} />
+                                묵상일지 보기
+                            </button>
+                        ) : (
+                            <button className="mobile-reading-primary-btn" onClick={onComplete} disabled={completionStatus === 'loading'}>
+                                {completionStatus === 'loading' ? <Loader size={18} className="animate-spin" /> : <Check size={18} />}
+                                {isToday ? '오늘의 말씀 완료' : '읽음 표시'}
+                            </button>
+                        )}
+                        <button
+                            className="mobile-reading-nav-btn"
+                            onClick={handleNextChapter}
+                            disabled={!currentBook || (currentBook === books[books.length - 1]?.id && currentChapter === totalChapters)}
+                        >
+                            다음
+                            <ChevronRight size={20} />
+                        </button>
+                    </nav>
+                )}
 
             </main>
 
@@ -1143,6 +1180,19 @@ const BibleViewer = ({
             </aside>
         </div>
     );
+};
+
+const toggleSelectedVerse = (selectedVerses, verseNumber) => {
+    const normalizedVerse = Number(verseNumber);
+    const nextSelection = new Set(selectedVerses.map(Number));
+
+    if (nextSelection.has(normalizedVerse)) {
+        nextSelection.delete(normalizedVerse);
+    } else {
+        nextSelection.add(normalizedVerse);
+    }
+
+    return [...nextSelection].sort((a, b) => a - b);
 };
 
 const formatVerseRange = (verses) => {

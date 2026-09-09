@@ -209,13 +209,13 @@ feature/v3.0 통합
 
 ## 실제 구현 순서
 
-1. [ ] `v3.0-reading-canvas` — 기능 연결 전 Reading Canvas prototype
-2. [ ] 세 기준 폭에서 prototype 사용자 승인
-3. [ ] `v3.0-responsive-layout` — Compact / Reading / Workspace 기반 확정
-4. [ ] `v3.0-verse-selection` — Selection model만 먼저 검증
-5. [ ] `v3.0-context-toolbar` — Highlight / Copy 연결
-6. [ ] `v3.0-reflection-composer` — 묵상 작성 연결
-7. [ ] Existing Notes Integration
+1. [x] `v3.0-reading-canvas` — 기능 연결 전 Reading Canvas prototype
+2. [x] 세 기준 폭에서 prototype 사용자 승인
+3. [ ] `v3.0-verse-selection` — Selection model만 먼저 검증
+4. [ ] `v3.0-context-toolbar` — Highlight / Copy 연결
+5. [ ] `v3.0-reflection-composer` — 묵상 작성 연결
+6. [ ] Existing Notes Integration
+7. [ ] Responsive 통합 / 회귀 — Compact / Reading / Workspace 최종 확정
 8. [ ] Visual System Cleanup
 9. [ ] 주변 화면 정리
 10. [ ] v2.x 데이터/기능 회귀 테스트
@@ -239,6 +239,6 @@ feature/v3.0 통합
 
 ## 다음 작업
 
-첫 실제 개발 작업은 `feature/v3.0-reading-canvas`다.
+Reading Canvas와 세 기준 폭 사용자 승인은 완료했다.
 
-먼저 Implementation Plan을 작성하고 사용자 승인을 받은 뒤에만 애플리케이션 코드를 수정한다.
+다음 작업은 `feature/v3.0-verse-selection`이며, Implementation Plan을 작성하고 사용자 승인을 받은 뒤에만 애플리케이션 코드를 수정한다. Responsive 기반의 최종 확정은 핵심 Reading 흐름을 연결한 후 통합 회귀 단계에서 수행한다.
