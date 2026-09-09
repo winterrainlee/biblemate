@@ -3,7 +3,7 @@
 - 작업 브랜치: `feature/v3.0-release`
 - 기준 브랜치: `feature/v3.0`
 - 검증일: 2026-09-09
-- 상태: Phase 1·2 완료 / Release PR 준비
+- 상태: v3.0.0 배포 완료
 
 ## 버전 정합
 
@@ -39,10 +39,10 @@ PASS git diff --check
 - release seed DB SHA-256: 검증 전후 `b7178e71dfac6b07077a802e1e473a22e74f1f02115faad47e818b5ab247a7bc`
 - `master...feature/v3.0-release`의 DB 파일 차이가 없어야 Release PR과 squash commit을 진행한다.
 
-## 배포 전 남은 게이트
+## 배포 결과
 
-1. Release PR push·생성 사용자 승인
-2. PR 리뷰 및 `feature/v3.0` 통합 승인
-3. 깨끗한 master worktree의 squash release commit 검토
-4. `master`·`v3.0.0` tag push와 자동 Fly.io 배포 승인
-5. GitHub Actions와 운영 read-only smoke test 확인
+1. Release PR #10을 `feature/v3.0`에 병합했다.
+2. 깨끗한 master worktree에서 squash release commit `1099e00`을 생성했다.
+3. annotated tag `v3.0.0`과 `master`를 push했다.
+4. GitHub Actions `Deploy to Fly.io` run `34341974449`가 1분 2초 만에 성공했다.
+5. 운영 health·정적 앱은 HTTP 200, 보호 API는 미인증 요청에 HTTP 401로 정상 응답했다.

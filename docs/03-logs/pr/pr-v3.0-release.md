@@ -3,7 +3,7 @@
 **Branch**: `feature/v3.0-release` → `feature/v3.0`
 **Date**: 2026-09-09
 **Version**: v3.0.0
-**Status**: 로컬 검증 완료 / push 및 PR 생성 승인 대기
+**Status**: PR #10 병합 완료
 
 ## 1. 주요 변경 사항
 

@@ -1,6 +1,6 @@
 # 차기 작업 Roadmap
-- 최신 배포 버전: v2.3.3
-- 최신 배포일자: 2026년 7월 7일
+- 최신 배포 버전: v3.0.0
+- 최신 배포일자: 2026년 9월 9일
 - 목표 버전: v3.0.0
 - 목표 개발일자: 2026년 9월
 - 플로우 다이어그램: [flow-diagrams.md](flow-diagrams.md)
@@ -28,7 +28,7 @@
 - [x] `🟡 Medium` **주변 화면 정리**: Journal·Chart·Settings·Login의 시각 언어 통합
 - [x] `🟡 Medium` **격리 회귀 Harness**: 임시 DB 기반 v2.x API·backup·migration 8개 검사
 - [x] `🟢 Easy` **모바일 실기기 승인**: iPhone Safari + Tailscale 최종 검수
-- [ ] `🟢 Easy` **Release 마감**: 버전·문서·최종 회귀·master/tag·배포
+- [x] `🟢 Easy` **Release 마감**: 버전·문서·최종 회귀·master/tag·배포
 
 ---
 

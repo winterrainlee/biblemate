@@ -4,7 +4,7 @@
 - 목표 버전: v3.0.0
 - 기획 승인일: 2026-09-08
 - 기준 명세: [`../02-specs/spec-v3.0.md`](../02-specs/spec-v3.0.md)
-- 상태: 기능 통합·실기기 승인 완료 / Release Candidate 준비
+- 상태: v3.0.0 배포 완료
 
 > v3.0은 기능 확장이 아니라 성경 읽기 경험을 중심으로 프론트엔드 UX를 재설계하는 Major Release다.
 
@@ -219,7 +219,7 @@ feature/v3.0 통합
 8. [x] Visual System Cleanup
 9. [x] 주변 화면 정리
 10. [x] v2.x 데이터/기능 회귀 테스트
-11. [ ] v3.0 release 문서 및 배포
+11. [x] v3.0 release 문서 및 배포
 
 ---
 
@@ -233,7 +233,7 @@ feature/v3.0 통합
 - [x] Backup/Restore 호환성 유지.
 - [x] 각 feature별 Implementation Plan / Walkthrough / PR 기록 완료.
 - [x] 최종 lint/build 및 회귀 검증 완료.
-- [ ] `release-notes-v3.0.0.md` 최종 배포 상태 확정.
+- [x] `release-notes-v3.0.0.md` 최종 배포 상태 확정.
 
 ---
 
@@ -241,4 +241,4 @@ feature/v3.0 통합
 
 Reading Canvas부터 Existing Notes와 Responsive 통합까지 구현·자동 검증·iPhone 실기기 승인을 완료했다.
 
-다음 작업은 `feature/v3.0-release`에서 버전·문서를 마감하고 최종 회귀를 통과한 뒤 Release PR을 준비하는 것이다. iPad 실제 Split View, Desktop keyboard, PWA standalone의 비차단 미세 문제는 v3.0.x hotfix 후보로 유지한다.
+v3.0.0은 `master` commit/tag `1099e00`으로 배포를 완료했다. 이후에는 iPad 실제 Split View, Desktop keyboard, PWA standalone에서 발견되는 비차단 미세 문제만 v3.0.x hotfix 후보로 다룬다.

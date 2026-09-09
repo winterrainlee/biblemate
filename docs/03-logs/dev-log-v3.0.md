@@ -3,10 +3,10 @@
 ## 개요
 
 - **버전**: v3.0.0
-- **기간**: 2026-09-08 ~ 2026-09-09 (Release Candidate 준비)
+- **기간**: 2026-09-08 ~ 2026-09-09 (배포 완료)
 - **목표**: 성경 읽기와 묵상 기록의 핵심 경험을 실제 사용 흐름 중심으로 재구성
 - **통합 브랜치**: `feature/v3.0`
-- **현재 작업 브랜치**: `feature/v3.0-release`
+- **최종 배포 브랜치**: `master`
 
 ## 변경 내역
 
@@ -210,3 +210,12 @@
 - 활성 버전 표기와 backup export metadata를 교차 감사하고 PWA manifest에는 별도 앱 버전 필드가 없음을 확인
 - 모델/navigation guard 테스트 16/16, ESLint, Vite production build, 임시 DB 회귀 Harness 8/8 통과
 - 사용자 기본 DB와 release seed DB의 SHA-256이 검증 전후 동일하고 master 대비 DB diff가 없음을 확인
+
+#### [Release] v3.0.0 배포 완료
+
+- Release PR #10을 merge commit `81370db`로 `feature/v3.0`에 통합
+- 깨끗한 master worktree에서 v3.0 전체를 squash하고 release commit `1099e00` 생성
+- annotated tag `v3.0.0`과 `master`를 원격에 push
+- GitHub Actions `Deploy to Fly.io` run `34341974449` 성공
+- 운영 `/api/health`와 정적 앱 HTTP 200, 보호 API 미인증 HTTP 401 확인
+- 사용자 DB와 release seed DB 무변경 재확인

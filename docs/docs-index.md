@@ -109,7 +109,7 @@
 ---
 
 ## 📦 04. Releases (배포 노트)
-- [v3.0.0](04-releases/release-notes-v3.0.0.md): Reading First 반응형 UX Release Candidate
+- [v3.0.0](04-releases/release-notes-v3.0.0.md): Reading First 반응형 UX 배포 완료
 - [v2.3.3](04-releases/release-notes-v2.3.3.md): 구절 묵상 기반 읽음 자동 표시 (2026-07-07)
 - [v2.3.2](04-releases/release-notes-v2.3.2.md): 모바일 구절 선택 화면 및 로그인 문구 핫픽스 (2026-06-28)
 - [v2.3.1](04-releases/release-notes-v2.3.1.md): 앱 아이콘/파비콘 정리 (2026-06-24)

@@ -1,8 +1,8 @@
 # Release Notes v3.0.0
 
-**배포일**: 2026-09-09 예정
+**배포일**: 2026-09-09
 **버전**: v3.0.0
-**상태**: Release Candidate
+**상태**: 배포 완료
 
 ## 주요 변경
 
@@ -75,6 +75,8 @@
 - Release Candidate에서 모델/navigation guard 테스트 16/16, ESLint, production build, 격리 API 회귀 8/8 재통과
 - root/client/server 및 backup export metadata의 앱 버전 `3.0.0` 정합 확인
 - 사용자 DB와 release seed DB의 검증 전후 SHA-256 무변경 확인
+- `master` release commit/tag `1099e00`, GitHub Actions/Fly.io 배포 성공
+- 운영 health·정적 앱 HTTP 200, 보호 API 인증 경계 HTTP 401 확인
 
 ## 알려진 비차단 항목
 

@@ -4,7 +4,7 @@
 - 기준 브랜치: `feature/v3.0`
 - 예정 작업 브랜치: `feature/v3.0-release`
 - 대상 배포 브랜치: `master`
-- 상태: **Phase 1·2 완료 / Release PR 준비**
+- 상태: **완료 / v3.0.0 배포 확인**
 
 ## 1. 목표
 
@@ -119,3 +119,11 @@
 5. `master`의 release commit과 `v3.0.0` tag가 동일한 검증 결과를 가리킨다.
 6. GitHub Actions/Fly.io 배포와 운영 read-only smoke test가 성공한다.
 7. 비차단 실기기 항목은 후속 hotfix 목록으로 명시된다.
+
+## 9. 실행 결과
+
+- Release PR #10을 `feature/v3.0`에 병합했다.
+- `master` squash release commit과 annotated tag `v3.0.0`은 모두 `1099e00`을 가리킨다.
+- GitHub Actions `Deploy to Fly.io` run `34341974449`가 성공했다.
+- 운영 `/api/health`와 정적 앱은 HTTP 200, 보호 API는 미인증 요청에 HTTP 401로 응답했다.
+- 사용자 DB와 release seed DB는 검증 전후 변경되지 않았다.
