@@ -100,3 +100,10 @@
 - `npm run lint`, `npm run build`, working tree `git diff --check` 통과
 - 사용자 요청 전까지 검수 서버는 실행하지 않고 iPhone 실기기 검수 대기
 - 1차 모바일 확인 후 사용자 승인으로 단일 항목뿐인 `더보기`를 제거하고 지우개를 포함한 7개 직접 버튼으로 조정
+
+#### [Verification] Context Toolbar iPhone 실기기 승인
+
+- Tailscale HTTP 환경에서 하이라이트 적용·지우기, 복사 범위·역본, 묵상 전달, safe-area와 읽기 복귀 확인
+- 사용자 1차 확인 후 7개 직접 버튼으로 수정하고 동일 검수 서버에서 재확인
+- 사용자 최종 승인 완료
+- Desktop 3폭·키보드·Light/Dark 조합은 승인된 B안에 따라 후속 hotfix 후보로 유지

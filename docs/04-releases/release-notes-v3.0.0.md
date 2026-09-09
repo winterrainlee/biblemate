@@ -22,11 +22,19 @@
 - 모바일 스크롤과 장 이동 swipe가 구절 선택과 충돌하지 않도록 gesture 경계를 분리했습니다.
 - 구절 본문 keyboard toggle, 선택 상태 알림과 focus 복귀를 지원합니다.
 
+### Context Toolbar + Highlight + Copy
+
+- 선택한 말씀 아래에서 하이라이트 4색, 지우기, 묵상, 복사를 7개 직접 버튼으로 사용할 수 있습니다.
+- 여러 절의 기존 색이 달라도 선택한 색으로 일관되게 적용하며, 삭제는 독립된 지우개로 실행합니다.
+- 단일·연속·비연속 선택 범위와 현재 역본을 정확한 출처로 복사합니다.
+- 하이라이트나 복사가 성공하면 읽던 위치에서 Reading 상태로 돌아갑니다.
+- 선택 범위와 인용문을 기존 묵상 작성 화면으로 전달합니다.
+
 ## 호환성
 
 - 기존 데이터와 API 계약을 유지합니다.
 - 기존 묵상·하이라이트·장 이동 기능을 유지합니다.
-- Context Toolbar, Reflection Composer는 후속 작업이며 아직 포함되지 않았습니다.
+- Reflection Composer 재설계는 후속 작업이며 아직 포함되지 않았습니다.
 
 ## 검증
 
@@ -35,5 +43,6 @@
 - Light / Dark와 기존 묵상·하이라이트 표시 검증
 - iPhone 13 mini Safari 실기기 검수 및 사용자 승인
 - Verse Selection lint/build 및 iPhone Safari 실기기 검수·사용자 승인
+- Context Toolbar lint/build 및 iPhone Safari 7버튼 실기기 검수·사용자 승인
 
 전체 v3.0 릴리즈 노트는 후속 기능 완료에 맞춰 계속 갱신합니다.

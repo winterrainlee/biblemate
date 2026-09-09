@@ -5,7 +5,7 @@
 - 기준 명세: `docs/02-specs/spec-v3.0.md`
 - 기준 브랜치: `feature/v3.0`
 - 작업 브랜치: `feature/v3.0-context-toolbar`
-- 상태: **구현·자동 검증 완료 — 모바일 실기기 검수 대기**
+- 상태: **구현·자동 검증 및 모바일 실기기 승인 완료**
 - 작성일: 2026-09-09
 - 구현계획 승인일: 2026-09-09
 
@@ -216,11 +216,12 @@ Selection
 
 ### Real-device Verification — Required Gate
 
-- [ ] iPhone 13 mini Safari에서 색상, 묵상, 복사, 더보기, 닫기를 한 손으로 누르기 쉬움
-- [ ] toolbar가 주소창 변화와 safe-area에서 가려지지 않음
-- [ ] 하이라이트 적용 후 원래 읽던 위치에서 계속 읽을 수 있음
-- [ ] HTTP fallback 복사 결과가 외부 기록 앱에 정확히 붙여넣어짐
-- [ ] 사용자 최종 승인
+- [x] iPhone Safari에서 하이라이트 4색, 지우기, 묵상, 복사, 닫기를 한 손으로 누르기 쉬움
+- [x] toolbar가 주소창 변화와 safe-area에서 가려지지 않음
+- [x] 하이라이트 적용 후 원래 읽던 위치에서 계속 읽을 수 있음
+- [x] HTTP fallback 복사 결과가 외부 기록 앱에 정확히 붙여넣어짐
+- [x] 7개 직접 버튼 재배치 사용자 확인
+- [x] 사용자 최종 승인 (2026-09-09)
 
 ## Acceptance Gate
 
