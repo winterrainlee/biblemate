@@ -99,3 +99,4 @@
 - 선택 범위와 결합 인용문을 기존 묵상 작성 popup으로 전달하되 Composer 재설계는 다음 단계로 유지
 - `npm run lint`, `npm run build`, working tree `git diff --check` 통과
 - 사용자 요청 전까지 검수 서버는 실행하지 않고 iPhone 실기기 검수 대기
+- 1차 모바일 확인 후 사용자 승인으로 단일 항목뿐인 `더보기`를 제거하고 지우개를 포함한 7개 직접 버튼으로 조정

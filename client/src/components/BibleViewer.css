@@ -457,13 +457,12 @@
 
 .verse-selection-actions {
     display: grid;
-    grid-template-columns: repeat(6, minmax(44px, 1fr));
+    grid-template-columns: repeat(7, minmax(44px, 1fr));
     gap: 0.25rem;
 }
 
 .verse-selection-action,
 .verse-selection-color-action,
-.verse-selection-more,
 .verse-selection-close {
     min-width: 44px;
     min-height: 44px;
@@ -502,51 +501,9 @@
     border-radius: 50%;
 }
 
-.verse-selection-more {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 44px;
-    height: 44px;
-    padding: 0;
-    border-radius: 50%;
-    background-color: transparent;
-    color: var(--pk-color-text-secondary);
-}
-
-.verse-selection-more-menu {
-    position: absolute;
-    right: 2.8rem;
-    bottom: calc(100% + 0.35rem);
-    min-width: 12rem;
-    padding: 0.35rem;
-    border: 1px solid var(--pk-color-border);
-    border-radius: var(--pk-radius-md);
-    background-color: var(--pk-color-bg-elevated);
-    box-shadow: 0 10px 28px var(--pk-color-shadow);
-}
-
-.verse-selection-more-menu button {
-    display: flex;
-    align-items: center;
-    gap: 0.55rem;
-    width: 100%;
-    min-height: 44px;
-    padding: 0.55rem 0.7rem;
-    border: 0;
-    border-radius: var(--pk-radius-sm);
-    background-color: transparent;
-    color: var(--pk-color-text);
-    font: inherit;
-    font-size: 0.85rem;
-    font-weight: 700;
-}
-
 @media (hover: hover) {
     .verse-selection-action:hover,
-    .verse-selection-color-action:hover,
-    .verse-selection-more:hover,
-    .verse-selection-more-menu button:hover:not(:disabled) {
+    .verse-selection-color-action:hover {
         background-color: var(--pk-color-bg-secondary);
         color: var(--pk-color-primary);
     }
@@ -554,8 +511,7 @@
 
 .verse-selection-action:focus-visible,
 .verse-selection-color-action:focus-visible,
-.verse-selection-more:focus-visible,
-.verse-selection-more-menu button:focus-visible {
+.verse-selection-close:focus-visible {
     outline: 2px solid var(--pk-color-primary);
     outline-offset: 2px;
 }

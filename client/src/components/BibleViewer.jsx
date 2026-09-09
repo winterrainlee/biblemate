@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Check, MessageSquare, Copy, X, Send, Loader, ChevronLeft, ChevronRight, Trash2, Edit2, Eraser, MoreHorizontal } from 'lucide-react';
+import { Check, MessageSquare, Copy, X, Send, Loader, ChevronLeft, ChevronRight, Trash2, Edit2, Eraser } from 'lucide-react';
 import { getVerseNotesByChapter, saveVerseNote, deleteVerseNote } from '../services/journalApi';
 import { format } from 'date-fns';
 import './BibleViewer.css';
@@ -85,7 +85,6 @@ const BibleViewer = ({
     const isSelectionMode = activeSelectedVerses.length > 0;
     const [copiedNoteId, setCopiedNoteId] = useState(null);
     const [toolbarAction, setToolbarAction] = useState(null);
-    const [isToolbarMoreOpen, setIsToolbarMoreOpen] = useState(false);
     const [isMobileSelectorOpen, setIsMobileSelectorOpen] = useState(false);
     const [isChapterNotesOpen, setIsChapterNotesOpen] = useState(false);
     const [isReadingSettingsOpen, setIsReadingSettingsOpen] = useState(false);
@@ -120,7 +119,6 @@ const BibleViewer = ({
     const closeVerseSelection = (restoreFocus = true) => {
         toolbarActionRef.current = null;
         setToolbarAction(null);
-        setIsToolbarMoreOpen(false);
         setSelectedVerses([]);
         if (restoreFocus) {
             window.requestAnimationFrame(() => lastSelectedVerseRef.current?.focus());
@@ -231,9 +229,7 @@ const BibleViewer = ({
     useEffect(() => {
         const handleKeyDown = (e) => {
             if (e.key === 'Escape') {
-                if (isToolbarMoreOpen) {
-                    setIsToolbarMoreOpen(false);
-                } else if (popup.visible || isMobileSelectorOpen || isChapterNotesOpen || isReadingSettingsOpen) {
+                if (popup.visible || isMobileSelectorOpen || isChapterNotesOpen || isReadingSettingsOpen) {
                     setPopup(prev => ({ ...prev, visible: false }));
                     setIsMobileSelectorOpen(false);
                     setIsChapterNotesOpen(false);
@@ -245,7 +241,7 @@ const BibleViewer = ({
         };
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [isChapterNotesOpen, isMobileSelectorOpen, isReadingSettingsOpen, isSelectionMode, isToolbarMoreOpen, popup.visible, toolbarAction]);
+    }, [isChapterNotesOpen, isMobileSelectorOpen, isReadingSettingsOpen, isSelectionMode, popup.visible, toolbarAction]);
 
     // Close popup when clicking outside
     useEffect(() => {
@@ -276,7 +272,6 @@ const BibleViewer = ({
         selectionContextRef.current = selectionContextKey;
         toolbarActionRef.current = null;
         setToolbarAction(null);
-        setIsToolbarMoreOpen(false);
         setSelectedVerses([]);
         touchStartRef.current = null;
         touchEndRef.current = null;
@@ -551,7 +546,6 @@ const BibleViewer = ({
         const actionContextKey = selectionContextKey;
         toolbarActionRef.current = action;
         setToolbarAction(action);
-        setIsToolbarMoreOpen(false);
 
         try {
             await operation(selectionPayload);
@@ -608,7 +602,6 @@ const BibleViewer = ({
         const quoteText = selectedVerseItems.length === 1
             ? primaryVerse.text
             : selectedVerseItems.map(item => `${item.verse} ${item.text}`).join('\n');
-        setIsToolbarMoreOpen(false);
         setPopup({
             visible: true,
             x: Math.max(20, window.innerWidth / 2 - 210),
@@ -1151,16 +1144,6 @@ const BibleViewer = ({
                             <div className="verse-selection-header-actions">
                                 <button
                                     type="button"
-                                    className="verse-selection-more"
-                                    onClick={() => setIsToolbarMoreOpen(open => !open)}
-                                    aria-label="선택 도구 더보기"
-                                    aria-expanded={isToolbarMoreOpen}
-                                    disabled={Boolean(toolbarAction)}
-                                >
-                                    <MoreHorizontal size={20} />
-                                </button>
-                                <button
-                                    type="button"
                                     className="verse-selection-close"
                                     onClick={() => closeVerseSelection()}
                                     aria-label="구절 선택 종료"
@@ -1168,19 +1151,6 @@ const BibleViewer = ({
                                 >
                                     <X size={20} />
                                 </button>
-                                {isToolbarMoreOpen && (
-                                    <div className="verse-selection-more-menu" role="menu">
-                                        <button
-                                            type="button"
-                                            role="menuitem"
-                                            onClick={handleRemoveSelectionHighlights}
-                                            disabled={selectedHighlightedVerses.length === 0 || Boolean(toolbarAction)}
-                                        >
-                                            <Eraser size={18} />
-                                            하이라이트 지우기
-                                        </button>
-                                    </div>
-                                )}
                             </div>
                         </div>
                         <div className="verse-selection-actions" aria-label="선택한 구절 작업">
@@ -1206,6 +1176,15 @@ const BibleViewer = ({
                                     </button>
                                 );
                             })}
+                            <button
+                                type="button"
+                                className="verse-selection-action verse-selection-erase-action"
+                                onClick={handleRemoveSelectionHighlights}
+                                disabled={selectedHighlightedVerses.length === 0 || Boolean(toolbarAction)}
+                            >
+                                {toolbarAction === 'remove-highlight' ? <Loader size={19} className="animate-spin" /> : <Eraser size={19} />}
+                                <span>지우기</span>
+                            </button>
                             <button
                                 type="button"
                                 className="verse-selection-action"
