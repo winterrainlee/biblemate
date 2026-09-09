@@ -186,3 +186,14 @@
 - 최대 전역 글자 20px, Dark mode, 하이라이트 4색, 긴 묵상·다중 범위에서도 가로 overflow 없음 확인
 - 모델/navigation guard 테스트 15/15, ESLint, production build, 임시 DB 회귀 Harness 8/8과 원본 DB 보호 검사 통과
 - 자동 검사용 `127.0.0.1:5188` 서버와 synthetic fixture·브라우저 탭을 종료·삭제했으며 사용자용 5174/Tailscale 검수 서버는 열지 않음
+
+#### [Validation Fix] 모바일 기존 묵상 진입점
+
+- 실기기 검수에서 구절 선택 시 상단 Header와 함께 기존 묵상 진입점이 숨겨지는 탐색성 문제를 확인
+- 사용자 B안 승인에 따라 7개 Context Toolbar 액션은 유지하고 선택 제목 줄에 `기존 묵상 N개` 버튼을 추가
+- 평상시 `이 장의 묵상 N개` 문구도 `기존 묵상 N개`로 통일해 새 작성용 `묵상` 액션과 구분
+- 후속 승인에 따라 상단 버튼은 장 전체 묵상을, 선택 메뉴는 선택 구절 중 하나라도 `verse_range`와 겹치는 관련 묵상만 표시하도록 분리
+- 필터 결과가 없을 때 선택 구절 전용 empty state를 표시하고 단일·연속·비연속 범위 필터 테스트를 추가
+- 모델/navigation guard 테스트 16/16, ESLint, production build, `git diff --check` 재통과
+- 실제 묵상 DB 복제본을 Tailscale 인터페이스에만 바인딩해 iPhone 재검수를 완료하고 사용자 승인 후 서비스·5174 포트·복제본을 제거
+- 원본 `server/data/bible.db` SHA-256이 검수 시작 전후 동일함을 확인

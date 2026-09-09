@@ -9,6 +9,7 @@ import ChapterNotesPanel from './ChapterNotesPanel';
 import {
     applyChapterNoteDelete,
     applyChapterNotesFailure,
+    filterChapterNotesByVerses,
     removeChapterNote,
     shouldApplyNotesResponse,
     sortChapterNotes,
@@ -125,8 +126,14 @@ const BibleViewer = ({
         open: false,
         selectedNoteId: null,
         returnVerse: null,
-        pendingDeleteId: null
+        pendingDeleteId: null,
+        filterVerseNumbers: null
     });
+    const filteredSelectionNotes = filterChapterNotesByVerses(chapterNotes, activeSelectedVerses);
+    const isNotesSelectionFiltered = Array.isArray(notesSurface.filterVerseNumbers);
+    const visibleChapterNotes = isNotesSelectionFiltered
+        ? filterChapterNotesByVerses(chapterNotes, notesSurface.filterVerseNumbers)
+        : chapterNotes;
     const [isReadingSettingsOpen, setIsReadingSettingsOpen] = useState(false);
     const [bibleTextScale, setBibleTextScale] = useState(() => {
         const saved = localStorage.getItem('bibleTextScale');
@@ -328,7 +335,12 @@ const BibleViewer = ({
                 if (composerSessionRef.current) {
                     closeComposerSessionRef.current?.();
                 } else if (notesSurface.open || isMobileSelectorOpen || isReadingSettingsOpen) {
-                    setNotesSurface(previous => ({ ...previous, open: false, selectedNoteId: null }));
+                    setNotesSurface(previous => ({
+                        ...previous,
+                        open: false,
+                        selectedNoteId: null,
+                        filterVerseNumbers: null
+                    }));
                     setIsMobileSelectorOpen(false);
                     setIsReadingSettingsOpen(false);
                 } else if (isSelectionMode && !toolbarAction) {
@@ -379,7 +391,8 @@ const BibleViewer = ({
             ...previous,
             selectedNoteId: null,
             returnVerse: null,
-            pendingDeleteId: null
+            pendingDeleteId: null,
+            filterVerseNumbers: null
         }));
         refreshChapterNotes().catch(error => {
             console.error('Failed to load chapter notes:', error);
@@ -513,8 +526,8 @@ const BibleViewer = ({
     const handleDeleteNote = async (note) => {
         if (!window.confirm(`${bookName} ${notesChapter}:${toDisplayNoteRange(note)} 묵상을 삭제하시겠습니까?`)) return;
         const operationContextKey = chapterNotesContextKey;
-        const deletedIndex = chapterNotes.findIndex(item => Number(item.id) === Number(note.id));
-        const remainingNotes = removeChapterNote(chapterNotes, note.id);
+        const deletedIndex = visibleChapterNotes.findIndex(item => Number(item.id) === Number(note.id));
+        const remainingNotes = removeChapterNote(visibleChapterNotes, note.id);
         const nextFocusedNote = remainingNotes[Math.min(Math.max(deletedIndex, 0), remainingNotes.length - 1)];
         setNotesSurface(previous => ({ ...previous, pendingDeleteId: note.id }));
         try {
@@ -584,7 +597,8 @@ const BibleViewer = ({
             ...previous,
             open: true,
             selectedNoteId: selectedNote?.id ?? null,
-            returnVerse: Number(verse.verse)
+            returnVerse: Number(verse.verse),
+            filterVerseNumbers: null
         }));
     };
 
@@ -594,12 +608,40 @@ const BibleViewer = ({
             return;
         }
         closeVerseSelection(false);
-        setNotesSurface(previous => ({ ...previous, open: true, selectedNoteId: null, returnVerse: null }));
+        setNotesSurface(previous => ({
+            ...previous,
+            open: true,
+            selectedNoteId: null,
+            returnVerse: null,
+            filterVerseNumbers: null
+        }));
+    };
+
+    const openSelectedVerseNotes = () => {
+        if (toolbarActionRef.current) {
+            onToast?.('선택한 말씀 작업을 처리하고 있습니다.', 'error');
+            return;
+        }
+        const filterVerseNumbers = [...activeSelectedVerses];
+        closeVerseSelection(false);
+        setNotesSurface(previous => ({
+            ...previous,
+            open: true,
+            selectedNoteId: null,
+            returnVerse: null,
+            filterVerseNumbers
+        }));
     };
 
     const closeChapterNotes = ({ restoreFocus = true } = {}) => {
         const returnVerse = notesSurface.returnVerse;
-        setNotesSurface(previous => ({ ...previous, open: false, selectedNoteId: null, returnVerse: null }));
+        setNotesSurface(previous => ({
+            ...previous,
+            open: false,
+            selectedNoteId: null,
+            returnVerse: null,
+            filterVerseNumbers: null
+        }));
         if (!restoreFocus) return;
         window.requestAnimationFrame(() => {
             if (returnVerse != null) {
@@ -847,7 +889,7 @@ const BibleViewer = ({
                                 aria-haspopup="dialog"
                                 aria-expanded={notesSurface.open}
                             >
-                                이 장의 묵상 {chapterNotes.length}개
+                                기존 묵상 {chapterNotes.length}개
                             </button>
                             <button
                                 className="mobile-reading-settings-btn"
@@ -1043,6 +1085,16 @@ const BibleViewer = ({
                             <div className="verse-selection-header-actions">
                                 <button
                                     type="button"
+                                    className="verse-selection-existing-notes"
+                                    onClick={openSelectedVerseNotes}
+                                    aria-haspopup="dialog"
+                                    aria-expanded={notesSurface.open}
+                                    disabled={Boolean(toolbarAction)}
+                                >
+                                    관련 묵상 {filteredSelectionNotes.length}개
+                                </button>
+                                <button
+                                    type="button"
                                     className="verse-selection-close"
                                     onClick={() => closeVerseSelection()}
                                     aria-label="구절 선택 종료"
@@ -1151,12 +1203,13 @@ const BibleViewer = ({
                 <ChapterNotesPanel
                     bookName={bookName}
                     chapter={notesChapter}
-                    notes={chapterNotes}
+                    notes={visibleChapterNotes}
                     status={chapterNotesState.status}
                     error={chapterNotesState.error}
                     selectedNoteId={notesSurface.selectedNoteId}
                     pendingDeleteId={notesSurface.pendingDeleteId}
                     copiedNoteId={copiedNoteId}
+                    isSelectionFiltered={isNotesSelectionFiltered}
                     onClose={() => closeChapterNotes()}
                     onRetry={() => refreshChapterNotes().catch(retryError => {
                         console.error('Failed to retry chapter notes:', retryError);

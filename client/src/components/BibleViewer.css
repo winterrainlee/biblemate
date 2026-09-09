@@ -459,8 +459,35 @@
 .verse-selection-header-actions {
     position: relative;
     display: flex;
+    align-items: center;
     flex: 0 0 auto;
     gap: 0.2rem;
+}
+
+.verse-selection-existing-notes {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 0.35rem 0.55rem;
+    border: 0;
+    border-radius: var(--pk-radius-sm);
+    background-color: transparent;
+    color: var(--pk-color-text-secondary);
+    font: inherit;
+    font-size: 0.78rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.verse-selection-existing-notes:hover:not(:disabled),
+.verse-selection-existing-notes:focus-visible {
+    color: var(--pk-color-primary);
+    background-color: var(--pk-color-primary-light);
+}
+
+.verse-selection-existing-notes:disabled {
+    opacity: 0.55;
 }
 
 .verse-selection-actions {

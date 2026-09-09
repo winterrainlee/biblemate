@@ -1,3 +1,5 @@
+import { parseVerseRange } from './reflectionComposerModel.js';
+
 export const getNoteRange = (note) => String(note?.verse_range || note?.verse || '');
 
 export const toDisplayNoteRange = (note) => getNoteRange(note).replaceAll('-', '–');
@@ -15,6 +17,16 @@ export const sortChapterNotes = (notes = []) => [...notes].sort((left, right) =>
 export const removeChapterNote = (notes, noteId) => (
     notes.filter(note => Number(note.id) !== Number(noteId))
 );
+
+export const filterChapterNotesByVerses = (notes = [], selectedVerses = []) => {
+    const selectedVerseSet = new Set(selectedVerses.map(Number).filter(Number.isFinite));
+    if (selectedVerseSet.size === 0) return [];
+
+    return notes.filter(note => (
+        parseVerseRange(note?.verse_range, note?.verse)
+            .some(verse => selectedVerseSet.has(Number(verse)))
+    ));
+};
 
 export const applyChapterNoteDelete = (state, contextKey, noteId) => (
     state.contextKey === contextKey

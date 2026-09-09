@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {
     applyChapterNoteDelete,
     applyChapterNotesFailure,
+    filterChapterNotesByVerses,
     getNoteRange,
     removeChapterNote,
     shouldApplyNotesResponse,
@@ -25,6 +26,18 @@ test('다중 범위는 저장값을 유지하고 화면에서 en dash로 표시�
     assert.equal(getNoteRange(note), '3-5, 7');
     assert.equal(toDisplayNoteRange(note), '3–5, 7');
     assert.equal(toDisplayNoteRange({ verse: 9 }), '9');
+});
+
+test('선택 구절 중 하나라도 범위와 겹치는 묵상만 표시한다', () => {
+    const notes = [
+        { id: 1, verse: 2 },
+        { id: 2, verse: 4, verse_range: '4-6' },
+        { id: 3, verse: 8, verse_range: '8, 10-11' }
+    ];
+
+    assert.deepEqual(filterChapterNotesByVerses(notes, [3, 5, 10]).map(note => note.id), [2, 3]);
+    assert.deepEqual(filterChapterNotesByVerses(notes, [7]), []);
+    assert.deepEqual(filterChapterNotesByVerses(notes, []), []);
 });
 
 test('삭제 성공 항목만 immutable하게 제거한다', () => {

@@ -3,7 +3,7 @@
 - 작성일: 2026-09-09
 - 작업 브랜치: `feature/v3.0-responsive-integration`
 - 기준 브랜치: `feature/v3.0-existing-notes` 완료 결과
-- 상태: **구현·자동 검증 완료 / 단일 실기기 검수 대기**
+- 상태: **구현·자동 검증·iPhone 실기기 검수 완료**
 - 사용자 승인 기준: **iPhone Safari 정상 동작 필수, 비모바일 미세 조정은 후속 hotfix 허용**
 
 ## Goal

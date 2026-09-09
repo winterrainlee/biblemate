@@ -24,6 +24,7 @@ const ChapterNotesPanel = ({
     selectedNoteId,
     pendingDeleteId,
     copiedNoteId,
+    isSelectionFiltered = false,
     onClose,
     onRetry,
     onNavigate,
@@ -89,12 +90,14 @@ const ChapterNotesPanel = ({
                 className="chapter-notes-panel"
                 role={isWorkspace ? 'complementary' : 'dialog'}
                 aria-modal={isWorkspace ? undefined : true}
-                aria-label={`${bookName} ${chapter}장 묵상`}
+                aria-label={isSelectionFiltered ? `${bookName} ${chapter}장 선택 구절 묵상` : `${bookName} ${chapter}장 묵상`}
                 onKeyDown={handleKeyDown}
             >
                 <header className="chapter-notes-panel__header">
                     <div>
-                        <span className="chapter-notes-panel__eyebrow">이 장의 묵상</span>
+                        <span className="chapter-notes-panel__eyebrow">
+                            {isSelectionFiltered ? '선택한 구절의 묵상' : '이 장의 묵상'}
+                        </span>
                         <h2>{bookName} {chapter}장</h2>
                         <p>{notes.length}개의 기록</p>
                     </div>
@@ -124,7 +127,11 @@ const ChapterNotesPanel = ({
                         <div className="chapter-notes-panel__state"><Loader className="animate-spin" size={22} /> 묵상을 불러오는 중</div>
                     ) : notes.length === 0 ? (
                         <div className="chapter-notes-panel__empty">
-                            <strong>아직 이 장에 남긴 묵상이 없어요.</strong>
+                            <strong>
+                                {isSelectionFiltered
+                                    ? '선택한 구절에 기존 묵상이 없어요.'
+                                    : '아직 이 장에 남긴 묵상이 없어요.'}
+                            </strong>
                             <span>말씀을 선택한 뒤 묵상 버튼으로 기록할 수 있습니다.</span>
                         </div>
                     ) : (
