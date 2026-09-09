@@ -143,3 +143,12 @@
 - 병합 커밋: PR #8 `c19cfd7`, PR #7 `aa316c4`, PR #6 `074fcc8`
 - 통합 브랜치에서 lint, production build, Composer/navigation guard 테스트 9/9, 임시 DB 회귀 Harness 8/8 재통과
 - 사용자 검수 서버는 실행하지 않았으며 원본 `server/data/bible.db`의 기존 로컬 변경을 유지
+
+#### [Planning] Existing Notes Integration
+
+- Reflection Composer 통합 계약을 기준으로 기존 묵상 목록·마진 표시·본문 이동·수정·삭제의 단일 흐름을 설계
+- Compact 시트, Reading dialog, Workspace 우측 패널이 같은 `ChapterNotesPanel`과 장별 refresh 상태를 공유하도록 계획
+- 작성·수정·삭제 성공과 후속 목록 refresh 실패를 분리하고 context/request guard로 오래된 응답 적용을 차단
+- DB/API schema 변경 없이 기존 `verse_notes`와 격리 Regression Harness를 재사용
+- 구현계획 문서 작성 완료, 애플리케이션 코드 수정 전 사용자 승인 대기
+- 사용자 구현계획 승인 후 `feature/v3.0-existing-notes` 독립 브랜치 착수

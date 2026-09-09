@@ -10,6 +10,7 @@
 - [Visual Redesign Proposal](01-planning/proposal-visual-redesign.md): v2.3 시각 디자인 재구성 제안서
 - [Implementation Plans](01-planning/implementation-plans/): 버전별 구현 계획서
   - [Implementation Plan v3.0 Reflection Composer](01-planning/implementation-plans/implementation-plan-v3.0-reflection-composer.md): 선택 snapshot 기반 묵상 작성·수정 상태 구현 계획
+  - [Implementation Plan v3.0 Existing Notes Integration](01-planning/implementation-plans/implementation-plan-v3.0-existing-notes.md): 기존 묵상 목록·본문 이동·수정·삭제 통합 계획
   - [Implementation Plan v3.0 Visual Cleanup](01-planning/implementation-plans/implementation-plan-v3.0-visual-cleanup.md): 주변 화면 시각 정리와 병렬 파일 소유권 계획
   - [Implementation Plan v3.0 Regression Harness](01-planning/implementation-plans/implementation-plan-v3.0-regression-harness.md): 임시 DB 기반 v2.x 데이터·API 회귀 검증 계획
   - [Implementation Plan v3.0 Verse Selection](01-planning/implementation-plans/implementation-plan-v3.0-verse-selection.md): 단일·비연속 다중 구절 선택 모델 구현 계획
