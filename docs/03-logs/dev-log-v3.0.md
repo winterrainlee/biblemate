@@ -6,7 +6,7 @@
 - **기간**: 2026-09-08 ~ 진행 중
 - **목표**: 성경 읽기와 묵상 기록의 핵심 경험을 실제 사용 흐름 중심으로 재구성
 - **통합 브랜치**: `feature/v3.0`
-- **현재 작업 브랜치**: `feature/v3.0-verse-selection`
+- **현재 작업 브랜치**: `feature/v3.0`
 
 ## 변경 내역
 
@@ -57,9 +57,9 @@
 
 ## 다음 계획
 
-- Reading Canvas는 PR #3으로 `feature/v3.0` 통합 완료
-- Verse Selection 구현 및 자동 검증 완료
-- 사용자 요청 시에만 검수 서버를 열고 반응형·실기기 검수 진행
+- Reading Canvas는 PR #3, Verse Selection은 PR #4로 `feature/v3.0` 통합 완료
+- 다음 작업은 Context Toolbar + Highlight + Copy 구현계획 작성 및 사용자 승인
+- 구현계획 승인 전에는 다음 기능 코드를 수정하지 않음
 - Responsive 최종 확정은 핵심 Reading 흐름 연결 후 통합 회귀 단계에서 수행
 
 ### 2026-09-09
@@ -80,3 +80,10 @@
 - 재검토 결과 Critical 0건, Warning 0건
 - Browser 제어 런타임이 없어 Desktop 3폭·키보드·Light/Dark 시각 검증은 PR 전 게이트로 유지
 - 사용자 결정으로 Verse Selection은 모바일 실기기 승인을 완료 기준으로 확정하고 Desktop 관련 문제는 후속 hotfix 후보로 이관
+
+#### [Integration] Verse Selection
+
+- GitHub PR #4를 merge commit 방식으로 `feature/v3.0`에 병합
+- 병합 커밋: `f19cd764`
+- 모바일 우선 완료 범위와 Desktop 후속 hotfix 후보 기록을 그대로 유지
+- 통합 브랜치로 복귀했으며 다음 기능은 별도 구현계획 승인 후 시작

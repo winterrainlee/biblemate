@@ -79,3 +79,10 @@
 - Critical 없음, Warning 없음.
 - context key가 다른 첫 click은 이전 선택 배열을 버리고 빈 선택에서 시작한다.
 - popup과 Selection 상태가 분리됐으며 backend/API/schema 변경은 없다.
+
+## 7. 통합 결과
+
+- GitHub PR #4를 merge commit 방식으로 `feature/v3.0`에 병합했다.
+- 병합 커밋: `f19cd764`
+- Verse Selection 단계는 모바일 실기기 승인 범위로 완료 처리했다.
+- 미수행 Desktop 조합은 후속 hotfix 후보이며, v3.0 Responsive 통합 회귀 범위는 유지한다.

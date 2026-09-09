@@ -3,8 +3,9 @@
 **Branch**: `feature/v3.0-verse-selection` → `feature/v3.0`
 **Date**: 2026-09-09
 **Version**: v3.0.0
-**Status**: PR #4 리뷰 대기 — 모바일 우선 완료 기준 승인
+**Status**: PR #4 병합 완료 — 모바일 우선 완료 기준 승인
 **PR**: https://github.com/winterrainlee/biblemate/pull/4
+**Merge commit**: `f19cd764`
 
 ## 1. 주요 변경 사항
 
@@ -86,3 +87,4 @@
 - Reflection Composer 신규 흐름 없음
 - DB/API 변경 없음
 - Responsive breakpoint 변경 없음
+- PR #4로 `feature/v3.0` 통합 완료
