@@ -12,6 +12,7 @@
   - [Implementation Plan v3.0 Reflection Composer](01-planning/implementation-plans/implementation-plan-v3.0-reflection-composer.md): 선택 snapshot 기반 묵상 작성·수정 상태 구현 계획
   - [Implementation Plan v3.0 Existing Notes Integration](01-planning/implementation-plans/implementation-plan-v3.0-existing-notes.md): 기존 묵상 목록·본문 이동·수정·삭제 통합 계획
   - [Implementation Plan v3.0 Responsive Integration](01-planning/implementation-plans/implementation-plan-v3.0-responsive-integration.md): 핵심 읽기 흐름의 폭·높이·safe-area·공용 패널 통합 계획
+  - [Implementation Plan v3.0 Release](01-planning/implementation-plans/implementation-plan-v3.0-release.md): 버전·문서·최종 회귀·master/tag·배포 계획
   - [Implementation Plan v3.0 Visual Cleanup](01-planning/implementation-plans/implementation-plan-v3.0-visual-cleanup.md): 주변 화면 시각 정리와 병렬 파일 소유권 계획
   - [Implementation Plan v3.0 Regression Harness](01-planning/implementation-plans/implementation-plan-v3.0-regression-harness.md): 임시 DB 기반 v2.x 데이터·API 회귀 검증 계획
   - [Implementation Plan v3.0 Verse Selection](01-planning/implementation-plans/implementation-plan-v3.0-verse-selection.md): 단일·비연속 다중 구절 선택 모델 구현 계획
