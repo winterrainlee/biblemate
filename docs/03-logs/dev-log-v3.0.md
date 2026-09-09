@@ -132,3 +132,4 @@
 - Regression Harness `15379bf`: 임시 DB·임의 포트에서 v2.x API·백업·마이그레이션 8개 회귀 묶음을 자동 검증
 - 세 커밋을 임시 detached worktree에 결합해 lint, production build, Composer 5/5, Regression 8/8 통과 확인
 - 원본 `server/data/bible.db`와 사용자 검수 서버는 사용하지 않음
+- Reflection Composer PR #6, Visual Cleanup PR #7, Regression Harness PR #8 생성; 모두 `feature/v3.0` 대상이며 병합 대기
