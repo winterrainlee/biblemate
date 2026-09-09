@@ -163,3 +163,12 @@
 - 모델/navigation guard 테스트 15/15, ESLint, production build, 임시 DB 회귀 Harness 8/8 통과
 - 사용자 검수 서버는 열지 않았고 원본 `server/data/bible.db` 보호 검사 통과
 - Responsive 통합 이후 Composer·7버튼 Toolbar·Journal 결과와 함께 한 번의 실기기 검수 세션에서 확인 예정
+
+#### [Planning] Responsive 통합
+
+- Existing Notes 완료 결과를 포함해 Header, Layout, ReadingDashboard와 핵심 Reading surface의 breakpoint·높이·overflow 접점을 재점검
+- 기능 breakpoint는 Compact `<600px`, Reading `600–899px`, Workspace `≥900px`로 유지하고 Header 640px·legacy Dashboard 768px 규칙은 Bible mode 범위에서 충돌만 해소하도록 계획
+- Compact의 safe-area·키보드·7버튼, Reading의 단일 본문·modal, Workspace의 본문 2/3 + 공용 우측 작업면을 통합 검증 대상으로 확정
+- 사용자 결정에 따라 iPhone Safari를 필수 승인 게이트로 유지하고 650px·1280px은 자동 구조 검증하되 모바일 무관 미세 문제는 hotfix 이관 가능
+- 자동 검증 완료 전 검수 서버를 열지 않고 최종 한 세션에서 Composer, Existing Notes, 주변 화면과 지속성을 함께 확인
+- 구현계획 문서 작성 완료, 코드 수정 전 사용자 승인 대기
