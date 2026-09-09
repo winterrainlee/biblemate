@@ -45,7 +45,7 @@
 ## 📝 03. Logs (개발/검증 로그)
 
 ### Development Logs
-- [Dev Log v3.0](03-logs/dev-log-v3.0.md): v3.0 Reading Canvas 및 후속 기능 개발 기록
+- [Dev Log v3.0](03-logs/dev-log-v3.0.md): v3.0 Reading UX 전체 구현·검수·릴리즈 기록
 - [Dev Log v2.3.3](03-logs/dev-log-v2.3.3.md): 구절 묵상 기반 읽음 자동 표시
 - [Dev Log v2.3.2](03-logs/dev-log-v2.3.2.md): 모바일 구절 선택 화면 및 로그인 문구 핫픽스
 - [Dev Log v2.3.1](03-logs/dev-log-v2.3.1.md): 앱 아이콘/파비콘 정리
@@ -66,6 +66,7 @@
 - [PR Drafts](03-logs/pr/): 버전별 PR 초안
   - [PR Draft v3.0 Context Toolbar](03-logs/pr/pr-v3.0-context-toolbar.md): v3.0 Context Toolbar + Highlight + Copy PR 초안
   - [PR Draft v3.0 Responsive Integration](03-logs/pr/pr-v3.0-responsive-integration.md): Existing Notes + 반응형 통합 PR #9 기록
+  - [PR Draft v3.0 Release](03-logs/pr/pr-v3.0-release.md): v3.0.0 버전·문서·최종 검증 Release PR 초안
   - [PR Draft v3.0 Verse Selection](03-logs/pr/pr-v3.0-verse-selection.md): v3.0 Verse Selection PR 초안
   - [PR Draft v3.0 Reading Canvas](03-logs/pr/pr-v3.0-reading-canvas.md): v3.0 Reading Canvas PR 초안
   - [PR Draft v2.3.3 Auto Read from Verse Note](03-logs/pr/pr-v2.3.3-auto-read-from-verse-note.md): v2.3.3 구절 묵상 기반 읽음 자동 표시 PR 초안
@@ -85,6 +86,7 @@
 ### Walkthroughs
 - [Walkthroughs](03-logs/walkthroughs/): 구현/검증 과정 기록
   - [Walkthrough v3.0 Responsive Integration](03-logs/walkthroughs/walkthrough-v3.0-responsive-integration.md): 높이·scroll·safe-area·공용 우측 패널 통합과 폭별 검증 기록
+  - [Walkthrough v3.0 Release](03-logs/walkthroughs/walkthrough-v3.0-release.md): 버전 정합·최종 자동 회귀·DB 보호·배포 전 점검 기록
   - [Walkthrough v3.0 Existing Notes Integration](03-logs/walkthroughs/walkthrough-v3.0-existing-notes.md): 기존 묵상 단일 목록 구현과 자동 검증 기록
   - [Walkthrough v3.0 Context Toolbar](03-logs/walkthroughs/walkthrough-v3.0-context-toolbar.md): Context Toolbar 구현·자동 검증·iPhone 실기기 승인 기록
   - [Walkthrough v3.0 Verse Selection](03-logs/walkthroughs/walkthrough-v3.0-verse-selection.md): Verse Selection 구현·자동 검증·iPhone 실기기 확인 기록
@@ -107,7 +109,7 @@
 ---
 
 ## 📦 04. Releases (배포 노트)
-- [v3.0.0](04-releases/release-notes-v3.0.0.md): Reading Canvas 및 후속 기능 개발 중
+- [v3.0.0](04-releases/release-notes-v3.0.0.md): Reading First 반응형 UX Release Candidate
 - [v2.3.3](04-releases/release-notes-v2.3.3.md): 구절 묵상 기반 읽음 자동 표시 (2026-07-07)
 - [v2.3.2](04-releases/release-notes-v2.3.2.md): 모바일 구절 선택 화면 및 로그인 문구 핫픽스 (2026-06-28)
 - [v2.3.1](04-releases/release-notes-v2.3.1.md): 앱 아이콘/파비콘 정리 (2026-06-24)

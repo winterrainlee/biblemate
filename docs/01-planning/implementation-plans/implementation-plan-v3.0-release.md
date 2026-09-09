@@ -4,7 +4,7 @@
 - 기준 브랜치: `feature/v3.0`
 - 예정 작업 브랜치: `feature/v3.0-release`
 - 대상 배포 브랜치: `master`
-- 상태: **사용자 계획 승인 / Phase 1 진행**
+- 상태: **Phase 1·2 완료 / Release PR 준비**
 
 ## 1. 목표
 
