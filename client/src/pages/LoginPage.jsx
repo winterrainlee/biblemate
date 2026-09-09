@@ -35,7 +35,7 @@ function LoginPage({ onLogin }) {
 
     return (
         <div className="login-page">
-            <div className="login-container">
+            <main className="login-card">
                 <div className="login-header">
                     <div className="login-mark" aria-hidden="true">
                         <img src="/logo.png" alt="" />
@@ -46,24 +46,25 @@ function LoginPage({ onLogin }) {
                 </div>
 
                 <form onSubmit={handleSubmit} className="login-form">
-                    <div className="input-group">
+                    <div className="login-input-group">
                         <input
                             type="password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                        placeholder="암호를 입력하세요"
+                            placeholder="암호를 입력하세요"
+                            aria-label="암호"
                             autoFocus
                             disabled={loading}
                         />
                     </div>
 
-                    {error && <div className="error-message">{error}</div>}
+                    {error && <div className="login-error-message" role="alert">{error}</div>}
 
                     <button type="submit" disabled={loading || !password}>
                         {loading ? '확인 중...' : '들어가기'}
                     </button>
                 </form>
-            </div>
+            </main>
         </div>
     );
 }
