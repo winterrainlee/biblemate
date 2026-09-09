@@ -168,7 +168,7 @@ Selection
 - [x] `cd client && npm run lint`
 - [x] `cd client && npm run build`
 - [x] `git diff --check`
-- [ ] `git diff --check origin/feature/v3.0...HEAD` (커밋 후)
+- [x] `git diff --check origin/feature/v3.0...HEAD` (커밋 후)
 
 별도 unit/e2e 테스트 러너가 없으므로 순수 포맷 helper와 상태별 동작은 브라우저 시나리오로 검증한다. 테스트 기반 신규 도입은 이번 범위에 포함하지 않는다.
 

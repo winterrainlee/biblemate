@@ -31,7 +31,7 @@
 - [x] `cd client && npm run lint`
 - [x] `cd client && npm run build`
 - [x] working tree `git diff --check`
-- [ ] 커밋 후 `git diff --check origin/feature/v3.0...HEAD`
+- [x] 커밋 후 `git diff --check origin/feature/v3.0...HEAD`
 
 ## 4. 모바일 실기기 검수
 

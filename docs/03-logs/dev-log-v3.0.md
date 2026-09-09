@@ -58,8 +58,8 @@
 ## 다음 계획
 
 - Reading Canvas는 PR #3, Verse Selection은 PR #4로 `feature/v3.0` 통합 완료
-- 다음 작업은 Context Toolbar + Highlight + Copy 구현계획 작성 및 사용자 승인
-- 구현계획 승인 전에는 다음 기능 코드를 수정하지 않음
+- Context Toolbar + Highlight + Copy PR 생성 및 `feature/v3.0` 통합
+- 다음 Reflection Composer는 별도 구현계획 작성·승인 후 시작
 - Responsive 최종 확정은 핵심 Reading 흐름 연결 후 통합 회귀 단계에서 수행
 
 ### 2026-09-09
