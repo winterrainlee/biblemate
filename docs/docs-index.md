@@ -82,6 +82,7 @@
 
 ### Walkthroughs
 - [Walkthroughs](03-logs/walkthroughs/): 구현/검증 과정 기록
+  - [Walkthrough v3.0 Responsive Integration](03-logs/walkthroughs/walkthrough-v3.0-responsive-integration.md): 높이·scroll·safe-area·공용 우측 패널 통합과 폭별 검증 기록
   - [Walkthrough v3.0 Existing Notes Integration](03-logs/walkthroughs/walkthrough-v3.0-existing-notes.md): 기존 묵상 단일 목록 구현과 자동 검증 기록
   - [Walkthrough v3.0 Context Toolbar](03-logs/walkthroughs/walkthrough-v3.0-context-toolbar.md): Context Toolbar 구현·자동 검증·iPhone 실기기 승인 기록
   - [Walkthrough v3.0 Verse Selection](03-logs/walkthroughs/walkthrough-v3.0-verse-selection.md): Verse Selection 구현·자동 검증·iPhone 실기기 확인 기록

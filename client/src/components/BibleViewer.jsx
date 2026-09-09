@@ -589,6 +589,11 @@ const BibleViewer = ({
     };
 
     const openChapterNotes = () => {
+        if (toolbarActionRef.current) {
+            onToast?.('선택한 말씀 작업을 처리하고 있습니다.', 'error');
+            return;
+        }
+        closeVerseSelection(false);
         setNotesSurface(previous => ({ ...previous, open: true, selectedNoteId: null, returnVerse: null }));
     };
 

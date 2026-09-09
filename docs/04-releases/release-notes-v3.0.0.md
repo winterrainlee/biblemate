@@ -44,6 +44,14 @@
 - 빈 장에서도 진입점을 유지하고 조회 실패 시 재시도 경로를 제공합니다.
 - 장 전환 중 오래된 응답과 삭제 후 재조회 실패가 이미 확정된 화면 상태를 되돌리지 않도록 보호합니다.
 
+### Responsive 통합
+
+- iPhone, 1:1 분할 폭, 넓은 Workspace에서 Header·본문·고정 도구·묵상 화면의 높이와 스크롤 경계를 통일했습니다.
+- iPhone에서 7버튼 도구막대와 전체 화면 Composer가 safe-area 및 작은 viewport 높이에서도 저장 액션을 가리지 않습니다.
+- Workspace의 Composer와 기존 묵상 목록이 같은 300–420px 우측 작업면과 독립 스크롤을 사용합니다.
+- 641–720px에서는 축약 Header를 사용해 큰 글자에서도 가로 넘침을 방지합니다.
+- Login과 주변 화면이 전역 dynamic viewport 계약 안에서 자체 스크롤을 유지합니다.
+
 ## 호환성
 
 - 기존 데이터와 API 계약을 유지합니다.
@@ -61,5 +69,6 @@
 - Wave 1 결합 lint/build, Composer 모델 테스트 5/5, 격리 회귀 검사 8/8 통과
 - 리뷰 수정 후 Composer/navigation guard 테스트 9/9 및 통합 회귀 Harness 8/8 재통과
 - Existing Notes 모델/navigation guard 테스트 15/15, lint/build 및 격리 회귀 Harness 8/8 통과
+- Responsive 375·650·899/900·1280px 브라우저 검증, 최대 글자·Dark 4색 확인 및 전체 자동 회귀 재통과
 
 전체 v3.0 릴리즈 노트는 후속 기능 완료에 맞춰 계속 갱신합니다.

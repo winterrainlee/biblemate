@@ -2,13 +2,15 @@
     background-color: color-mix(in srgb, var(--pk-color-bg) 94%, transparent);
     border-bottom: 1px solid var(--pk-color-border-light);
     backdrop-filter: blur(12px);
-    height: 60px;
+    height: var(--pk-header-height);
     display: flex;
     align-items: center;
     position: sticky;
     top: 0;
     z-index: 50;
     width: 100%;
+    flex: 0 0 var(--pk-header-height);
+    min-width: 0;
 }
 
 .main-header.reading-active {
@@ -37,6 +39,7 @@
     max-width: 1400px;
     /* Match content max-width */
     margin: 0 auto;
+    min-width: 0;
     /* Center header content */
 }
 
@@ -47,7 +50,7 @@
 
 @media (max-width: 640px) {
     .main-header.reading-active {
-        height: 54px;
+        height: var(--pk-header-height);
     }
 
     .main-header.reading-active .header-container {
@@ -63,6 +66,7 @@
     display: flex;
     align-items: center;
     gap: 1.5rem;
+    min-width: 0;
 }
 
 .header-title {
@@ -79,6 +83,7 @@
 .header-tabs {
     display: flex;
     gap: 0;
+    min-width: 0;
 }
 
 .header-tab {
@@ -194,10 +199,43 @@
     }
 }
 
+/* Reading 폭 초입에서는 전체 라벨과 전역 글자 조절을 접어 Header overflow를 막는다. */
+@media (min-width: 641px) and (max-width: 720px) {
+    .header-container {
+        padding: 0 0.8rem;
+    }
+
+    .header-left {
+        gap: 0.75rem;
+    }
+
+    .header-title,
+    .full-label,
+    .desktop-only,
+    .action-label {
+        display: none !important;
+    }
+
+    .short-label {
+        display: inline;
+    }
+
+    .mobile-only-chart-btn {
+        display: flex !important;
+    }
+
+    .header-tab {
+        min-width: 44px;
+        min-height: 44px;
+        padding: 0.4rem 0.7rem;
+    }
+}
+
 .header-actions {
     display: flex;
     align-items: center;
     gap: 0.25rem;
+    flex: 0 0 auto;
 }
 
 .header-action-btn {

@@ -418,3 +418,22 @@ Bible Reading Mate 프로젝트를 진행하며 각 버전(v1.0 ~ v2.1)에서 �
 
 - **문제**: 빠른 장 이동이나 연속 refresh에서 늦게 도착한 이전 장 응답이 현재 장의 목록과 본문 표시를 덮을 수 있다.
 - **Lesson**: `book:chapter` context key와 단조 증가 request id가 모두 최신일 때만 응답을 적용하라. 화면에 표시할 파생 목록도 현재 context가 일치할 때만 노출한다.
+
+---
+
+## 25. Responsive 통합의 scroll owner와 stacking context `v3.0`
+
+### 📏 높이는 최상위 viewport부터 실제 scroll owner까지 연속해서 정의한다
+
+- **문제**: `100vh`, flex item의 기본 `min-height:auto`, 중첩 overflow가 섞이면 Safari 주소창·키보드 변화에서 본문과 하단 액션이 서로 다른 높이를 기준으로 배치된다.
+- **Lesson**: dynamic viewport와 safe-area를 root에서 정의하고 모든 중간 flex container에 `min-height: 0`을 전달한 뒤, 실제 콘텐츠 한 곳만 주 스크롤 영역으로 지정하라.
+
+### 🪟 `isolation`은 fixed overlay의 큰 z-index도 부모 안에 가둘 수 있다
+
+- **문제**: 읽기 container에 stacking context를 만들자 `z-index: 1300`인 전체 화면 Composer도 상위 앱 Header의 `z-index: 50` 아래에 표시됐다.
+- **Lesson**: overlay를 포함한 container에 `isolation`, transform, opacity 같은 stacking context 생성 속성을 추가할 때는 viewport 모서리의 `elementFromPoint`와 실제 screenshot으로 전역 Header 위 표시 여부를 확인하라.
+
+### 🔤 breakpoint는 기능 상태와 Header 수용 폭을 분리해 관리한다
+
+- **문제**: Reading 상태가 시작되는 600px 직후에 데스크톱 전체 라벨과 전역 글자 조절을 모두 유지하면 큰 글자에서 Header가 먼저 넘친다.
+- **Lesson**: 기능 breakpoint는 유지하되 Header는 실제 control 합산 폭에 따라 중간 축약 구간을 둘 수 있다. 기능 구조 변경과 단순 표기 축약을 같은 breakpoint로 강제하지 않는다.

@@ -172,3 +172,17 @@
 - 사용자 결정에 따라 iPhone Safari를 필수 승인 게이트로 유지하고 650px·1280px은 자동 구조 검증하되 모바일 무관 미세 문제는 hotfix 이관 가능
 - 자동 검증 완료 전 검수 서버를 열지 않고 최종 한 세션에서 Composer, Existing Notes, 주변 화면과 지속성을 함께 확인
 - 구현계획 문서 작성 완료, 코드 수정 전 사용자 승인 대기
+
+#### [Implementation & Verification] Responsive 통합
+
+- 사용자 계획 승인 후 `feature/v3.0-responsive-integration` 브랜치에서 viewport 높이, safe-area, scroll owner와 flex 최소 크기 계약을 통합
+- `html/body/#root → Layout → Dashboard → BibleViewer`의 높이·overflow 연결을 명시하고 실제 본문을 주 스크롤 영역으로 고정
+- Compact 본문 하단 여백과 scroll padding을 기본 읽기 bar/7버튼 Toolbar 높이에 맞추고 작은 높이에서도 Toolbar 자체 스크롤과 Composer 저장 액션을 유지
+- Composer와 Existing Notes가 Workspace에서 `300–420px` 공용 우측 작업면 폭, 전체 높이, 독립 스크롤을 공유하도록 정리
+- 641–720px Header는 축약 라벨과 모바일 읽기표 버튼을 사용해 전체 라벨·전역 글자 조절의 overflow를 방지
+- Login은 dynamic viewport 높이와 내부 세로 스크롤을 사용해 전역 root overflow 계약에서도 작은 화면 내용이 잘리지 않게 보강
+- 자동 브라우저 검수 중 `isolation`이 전체 화면 Composer를 앱 Header 아래 stacking context에 가두는 문제를 발견해 해당 격리를 제거하고 상단 제목·닫기 영역 복구 확인
+- 375×812, 375×500, 650×900, 899/900 경계, 1280×900에서 가로 overflow 0, modal/panel 전환, 공용 패널 300/420px, 최소 44px 7버튼, 빈 묵상 장을 확인
+- 최대 전역 글자 20px, Dark mode, 하이라이트 4색, 긴 묵상·다중 범위에서도 가로 overflow 없음 확인
+- 모델/navigation guard 테스트 15/15, ESLint, production build, 임시 DB 회귀 Harness 8/8과 원본 DB 보호 검사 통과
+- 자동 검사용 `127.0.0.1:5188` 서버와 synthetic fixture·브라우저 탭을 종료·삭제했으며 사용자용 5174/Tailscale 검수 서버는 열지 않음
