@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Check, MessageSquare, Copy, X, Send, Loader, ChevronLeft, ChevronRight, Trash2, Edit2, Eraser, BookOpen } from 'lucide-react';
+import { Check, MessageSquare, Copy, X, Send, Loader, ChevronLeft, ChevronRight, Trash2, Edit2, Eraser, MoreHorizontal } from 'lucide-react';
 import { getVerseNotesByChapter, saveVerseNote, deleteVerseNote } from '../services/journalApi';
 import { format } from 'date-fns';
 import './BibleViewer.css';
@@ -8,7 +8,8 @@ import './BibleViewer.css';
 const BibleViewer = ({
     verses = [],
     highlights = [],
-    onHighlight,
+    onApplyHighlights,
+    onRemoveHighlights,
     onComplete,
     isCompleted,
     isToday,
@@ -83,6 +84,8 @@ const BibleViewer = ({
         : [];
     const isSelectionMode = activeSelectedVerses.length > 0;
     const [copiedNoteId, setCopiedNoteId] = useState(null);
+    const [toolbarAction, setToolbarAction] = useState(null);
+    const [isToolbarMoreOpen, setIsToolbarMoreOpen] = useState(false);
     const [isMobileSelectorOpen, setIsMobileSelectorOpen] = useState(false);
     const [isChapterNotesOpen, setIsChapterNotesOpen] = useState(false);
     const [isReadingSettingsOpen, setIsReadingSettingsOpen] = useState(false);
@@ -104,6 +107,7 @@ const BibleViewer = ({
     });
     const popupRef = useRef(null);
     const copyTimeoutRef = useRef(null);
+    const toolbarActionRef = useRef(null);
     const lastSelectedVerseRef = useRef(null);
     const verseGestureRef = useRef({ moved: false, target: null, suppressTarget: null, suppressUntil: 0 });
     const touchStartRef = useRef(null);
@@ -114,6 +118,9 @@ const BibleViewer = ({
     };
 
     const closeVerseSelection = (restoreFocus = true) => {
+        toolbarActionRef.current = null;
+        setToolbarAction(null);
+        setIsToolbarMoreOpen(false);
         setSelectedVerses([]);
         if (restoreFocus) {
             window.requestAnimationFrame(() => lastSelectedVerseRef.current?.focus());
@@ -224,19 +231,21 @@ const BibleViewer = ({
     useEffect(() => {
         const handleKeyDown = (e) => {
             if (e.key === 'Escape') {
-                if (popup.visible || isMobileSelectorOpen || isChapterNotesOpen || isReadingSettingsOpen) {
+                if (isToolbarMoreOpen) {
+                    setIsToolbarMoreOpen(false);
+                } else if (popup.visible || isMobileSelectorOpen || isChapterNotesOpen || isReadingSettingsOpen) {
                     setPopup(prev => ({ ...prev, visible: false }));
                     setIsMobileSelectorOpen(false);
                     setIsChapterNotesOpen(false);
                     setIsReadingSettingsOpen(false);
-                } else if (isSelectionMode) {
+                } else if (isSelectionMode && !toolbarAction) {
                     closeVerseSelection();
                 }
             }
         };
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [isChapterNotesOpen, isMobileSelectorOpen, isReadingSettingsOpen, isSelectionMode, popup.visible]);
+    }, [isChapterNotesOpen, isMobileSelectorOpen, isReadingSettingsOpen, isSelectionMode, isToolbarMoreOpen, popup.visible, toolbarAction]);
 
     // Close popup when clicking outside
     useEffect(() => {
@@ -265,6 +274,9 @@ const BibleViewer = ({
 
     useEffect(() => {
         selectionContextRef.current = selectionContextKey;
+        toolbarActionRef.current = null;
+        setToolbarAction(null);
+        setIsToolbarMoreOpen(false);
         setSelectedVerses([]);
         touchStartRef.current = null;
         touchEndRef.current = null;
@@ -305,11 +317,6 @@ const BibleViewer = ({
             isSameSelectionContext ? prev : [],
             verse.verse
         ));
-    };
-
-    const handleCopyClick = () => {
-        onCopyCitation(popup.verseNum, popup.verseText);
-        setPopup(prev => ({ ...prev, visible: false }));
     };
 
     const copyTextToClipboard = async (text) => {
@@ -479,10 +486,6 @@ const BibleViewer = ({
         });
     };
 
-    const openMemoComposer = () => {
-        setPopup(prev => ({ ...prev, mode: 'memo', quoteEnabled: false }));
-    };
-
     const closeComposer = () => {
         if (popup.mode === 'memo' && popup.memoInput.trim()) {
             const shouldClose = window.confirm('작성 중인 묵상이 있습니다. 닫으시겠습니까?');
@@ -512,6 +515,114 @@ const BibleViewer = ({
         (selectedVerses.length > 1 ? formatVerseRange(selectedVerses) :
             (chapterNotes.find(n => n.verse === popup.verseNum)?.verse_range || popup.verseNum));
     const selectedVerseRange = formatVerseRange(activeSelectedVerses).replaceAll('-', '–');
+    const selectedVerseItems = activeSelectedVerses
+        .map(verseNumber => {
+            const verse = verses.find(item => Number(item.verse) === verseNumber);
+            if (!verse) return null;
+            return {
+                verse: verseNumber,
+                text: verse.text || verse.content || ''
+            };
+        })
+        .filter(Boolean);
+    const hasCompleteSelectionPayload = selectedVerseItems.length === activeSelectedVerses.length;
+    const selectionPayload = {
+        book: currentBook,
+        bookName,
+        chapter: currentChapter,
+        version: currentVersion,
+        versionLabel: currentVersionLabel,
+        verseNumbers: activeSelectedVerses,
+        verseItems: selectedVerseItems,
+        verseRange: selectedVerseRange
+    };
+    const selectedHighlightedVerses = activeSelectedVerses.filter(verseNumber =>
+        highlights.some(highlight => Number(highlight.verse) === verseNumber)
+    );
+
+    const runToolbarAction = async (action, operation, successMessage) => {
+        if (toolbarActionRef.current || !hasCompleteSelectionPayload) {
+            if (!hasCompleteSelectionPayload) {
+                onToast?.('선택한 말씀을 확인할 수 없습니다.', 'error');
+            }
+            return;
+        }
+
+        const actionContextKey = selectionContextKey;
+        toolbarActionRef.current = action;
+        setToolbarAction(action);
+        setIsToolbarMoreOpen(false);
+
+        try {
+            await operation(selectionPayload);
+            if (selectionContextRef.current !== actionContextKey) return;
+            onToast?.(successMessage, 'success');
+            closeVerseSelection();
+        } catch (error) {
+            console.error(`Failed to run toolbar action: ${action}`, error);
+            if (selectionContextRef.current === actionContextKey) {
+                onToast?.(
+                    action === 'copy' ? '말씀 복사에 실패했습니다.' : '하이라이트 변경에 실패했습니다.',
+                    'error'
+                );
+            }
+        } finally {
+            if (selectionContextRef.current === actionContextKey) {
+                toolbarActionRef.current = null;
+                setToolbarAction(null);
+            }
+        }
+    };
+
+    const handleApplySelectionHighlight = (color) => {
+        runToolbarAction(
+            'highlight',
+            payload => onApplyHighlights(payload, color),
+            '하이라이트를 적용했습니다.'
+        );
+    };
+
+    const handleRemoveSelectionHighlights = () => {
+        if (selectedHighlightedVerses.length === 0) return;
+        runToolbarAction(
+            'remove-highlight',
+            payload => onRemoveHighlights({
+                ...payload,
+                verseNumbers: selectedHighlightedVerses
+            }),
+            '하이라이트를 지웠습니다.'
+        );
+    };
+
+    const handleCopySelection = () => {
+        runToolbarAction('copy', onCopyCitation, '말씀을 복사했습니다.');
+    };
+
+    const openSelectionComposer = () => {
+        if (!hasCompleteSelectionPayload || selectedVerseItems.length === 0) {
+            onToast?.('선택한 말씀을 확인할 수 없습니다.', 'error');
+            return;
+        }
+
+        const primaryVerse = selectedVerseItems[0];
+        const quoteText = selectedVerseItems.length === 1
+            ? primaryVerse.text
+            : selectedVerseItems.map(item => `${item.verse} ${item.text}`).join('\n');
+        setIsToolbarMoreOpen(false);
+        setPopup({
+            visible: true,
+            x: Math.max(20, window.innerWidth / 2 - 210),
+            y: Math.max(20, window.innerHeight / 2 - 200),
+            verseNum: primaryVerse.verse,
+            verseRange: formatVerseRange(activeSelectedVerses),
+            verseText: primaryVerse.text,
+            mode: 'memo',
+            memoInput: '',
+            quoteEnabled: false,
+            quoteText,
+            editTargetDate: null
+        });
+    };
 
     // Helper to render note content with optional quote styling
     const renderNoteContent = (content) => {
@@ -595,7 +706,7 @@ const BibleViewer = ({
             </aside>
 
             {/* 중앙 본문 영역 */}
-            <main className="bible-main-content" style={{ '--bible-text-scale': bibleTextScale / 100 }}>
+            <main className={`bible-main-content${isSelectionMode ? ' selection-active' : ''}`} style={{ '--bible-text-scale': bibleTextScale / 100 }}>
                 <header className={`bible-nav-header${popup.visible ? ' selection-mode' : ''}`}>
                     <div className="mobile-context-row">
                         <button
@@ -943,97 +1054,6 @@ const BibleViewer = ({
                                     ))}
                                 </div>
                             </div>
-                        ) : popup.mode === 'menu' ? (
-                            <div className="popup-menu-v2">
-                                <div className="popup-header">
-                                    <span className="popup-title">
-                                        {selectedVerses.length > 1 ? `${selectedVerses.length}개 구절 선택됨` : `${bookName} ${chapter}:${popupVerseRef}`}
-                                    </span>
-                                    <button
-                                        onClick={() => {
-                                            closeVersePopup();
-                                        }}
-                                        className="popup-close-btn"
-                                        aria-label="닫기"
-                                    >
-                                        <X size={18} />
-                                    </button>
-                                </div>
-                                {popup.verseText && (
-                                    <div className="view-notes-verse-text">
-                                        &ldquo;{popup.verseText}&rdquo;
-                                    </div>
-                                )}
-                                <button className="action-btn primary-action" onClick={openMemoComposer}>
-                                    <MessageSquare size={16} /> 이 말씀 묵상하기
-                                </button>
-                                {getNotesForVerse(popup.verseNum).length > 0 && (
-                                    <button className="action-btn" onClick={() => setPopup(prev => ({ ...prev, mode: 'view-notes' }))}>
-                                        <BookOpen size={16} /> 묵상 보기 ({getNotesForVerse(popup.verseNum).length})
-                                    </button>
-                                )}
-                                <div className="highlight-palette">
-                                    {[
-                                        { key: 'yellow', color: 'var(--pk-highlight-yellow)' },
-                                        { key: 'green', color: 'var(--pk-highlight-green)' },
-                                        { key: 'blue', color: 'var(--pk-highlight-blue)' },
-                                        { key: 'red', color: 'var(--pk-highlight-red)' }
-                                    ].map(item => (
-                                        <div key={item.key} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
-                                            <button
-                                                className="palette-color-btn"
-                                                style={{ backgroundColor: item.color }}
-                                                onClick={() => {
-                                                    if (selectedVerses.length > 0) {
-                                                        selectedVerses.forEach(v => onHighlight(v, item.color));
-                                                    } else {
-                                                        onHighlight(popup.verseNum, item.color);
-                                                    }
-                                                    closeVersePopup();
-                                                }}
-                                                title={highlightLabels?.[item.key] || item.key}
-                                            />
-                                            <span style={{ fontSize: '0.7rem', color: 'var(--pk-color-text-tertiary)', maxWidth: '36px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                                {highlightLabels?.[item.key] || (
-                                                    item.key === 'yellow' ? '1' :
-                                                        item.key === 'green' ? '2' :
-                                                            item.key === 'blue' ? '3' : '4'
-                                                )}
-                                            </span>
-                                        </div>
-                                    ))}
-                                    {(selectedVerses.length > 0 ? selectedVerses.some(v => highlights.some(h => h.verse === v)) : highlights.find(h => h.verse === popup.verseNum)) && (
-                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
-                                            <button
-                                                className="palette-color-btn"
-                                                style={{
-                                                    backgroundColor: 'var(--pk-color-bg-secondary)',
-                                                    color: 'var(--pk-color-text-secondary)',
-                                                    border: '1px solid var(--pk-color-border)',
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    justifyContent: 'center'
-                                                }}
-                                                onClick={() => {
-                                                    const targets = selectedVerses.length > 0 ? selectedVerses : [popup.verseNum];
-                                                    targets.forEach(v => {
-                                                        const existing = highlights.find(h => h.verse === v);
-                                                        if (existing) {
-                                                            onHighlight(v, existing.style);
-                                                        }
-                                                    });
-                                                    closeVersePopup();
-                                                }}
-                                                title="하이라이트 지우기"
-                                            >
-                                                <Eraser size={24} />
-                                            </button>
-                                            <span style={{ fontSize: '0.7rem', color: 'var(--pk-color-text-tertiary)' }}>지우기</span>
-                                        </div>
-                                    )}
-                                </div>
-                                <button className="action-btn" onClick={handleCopyClick}><Copy size={16} /> 말씀 복사</button>
-                            </div>
                         ) : (
                             <div className="memo-composer">
                                 <div className="popup-header">
@@ -1107,23 +1127,104 @@ const BibleViewer = ({
                 )}
 
                 <div className="selection-live-status" role="status" aria-live="polite" aria-atomic="true">
-                    {isSelectionMode ? `${activeSelectedVerses.length}개 구절 선택됨, ${bookName} ${chapter}장 ${selectedVerseRange}절` : ''}
+                    {isSelectionMode ? (
+                        toolbarAction
+                            ? `${activeSelectedVerses.length}개 구절 작업 처리 중`
+                            : `${activeSelectedVerses.length}개 구절 선택됨, ${bookName} ${chapter}장 ${selectedVerseRange}절`
+                    ) : ''}
                 </div>
 
                 {isSelectionMode ? (
-                    <div className="verse-selection-bar" aria-label="선택한 구절" role="region">
-                        <div className="verse-selection-status">
-                            <strong>{activeSelectedVerses.length}개 구절 선택됨</strong>
-                            <span>{bookName} {chapter}:{selectedVerseRange}</span>
+                    <div
+                        className="verse-selection-bar"
+                        aria-label="선택한 구절 도구"
+                        aria-busy={Boolean(toolbarAction)}
+                        role="region"
+                    >
+                        <div className="verse-selection-header">
+                            <div className="verse-selection-status">
+                                <strong>{activeSelectedVerses.length}개 구절 선택됨</strong>
+                                <span title={`${bookName} ${chapter}:${selectedVerseRange} · ${currentVersionLabel}`}>
+                                    {bookName} {chapter}:{selectedVerseRange} · {currentVersionLabel}
+                                </span>
+                            </div>
+                            <div className="verse-selection-header-actions">
+                                <button
+                                    type="button"
+                                    className="verse-selection-more"
+                                    onClick={() => setIsToolbarMoreOpen(open => !open)}
+                                    aria-label="선택 도구 더보기"
+                                    aria-expanded={isToolbarMoreOpen}
+                                    disabled={Boolean(toolbarAction)}
+                                >
+                                    <MoreHorizontal size={20} />
+                                </button>
+                                <button
+                                    type="button"
+                                    className="verse-selection-close"
+                                    onClick={() => closeVerseSelection()}
+                                    aria-label="구절 선택 종료"
+                                    disabled={Boolean(toolbarAction)}
+                                >
+                                    <X size={20} />
+                                </button>
+                                {isToolbarMoreOpen && (
+                                    <div className="verse-selection-more-menu" role="menu">
+                                        <button
+                                            type="button"
+                                            role="menuitem"
+                                            onClick={handleRemoveSelectionHighlights}
+                                            disabled={selectedHighlightedVerses.length === 0 || Boolean(toolbarAction)}
+                                        >
+                                            <Eraser size={18} />
+                                            하이라이트 지우기
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
                         </div>
-                        <button
-                            type="button"
-                            className="verse-selection-close"
-                            onClick={() => closeVerseSelection()}
-                            aria-label="구절 선택 종료"
-                        >
-                            <X size={20} />
-                        </button>
+                        <div className="verse-selection-actions" aria-label="선택한 구절 작업">
+                            {[
+                                { key: 'yellow', color: 'var(--pk-highlight-yellow)', fallback: '1' },
+                                { key: 'green', color: 'var(--pk-highlight-green)', fallback: '2' },
+                                { key: 'blue', color: 'var(--pk-highlight-blue)', fallback: '3' },
+                                { key: 'red', color: 'var(--pk-highlight-red)', fallback: '4' }
+                            ].map(item => {
+                                const label = highlightLabels?.[item.key] || item.fallback;
+                                return (
+                                    <button
+                                        key={item.key}
+                                        type="button"
+                                        className="verse-selection-color-action"
+                                        onClick={() => handleApplySelectionHighlight(item.color)}
+                                        aria-label={`${label} 하이라이트 적용`}
+                                        title={`${label} 하이라이트`}
+                                        disabled={Boolean(toolbarAction) || !hasCompleteSelectionPayload}
+                                    >
+                                        <span className="verse-selection-color-swatch" style={{ backgroundColor: item.color }} aria-hidden="true" />
+                                        <span>{label}</span>
+                                    </button>
+                                );
+                            })}
+                            <button
+                                type="button"
+                                className="verse-selection-action"
+                                onClick={openSelectionComposer}
+                                disabled={Boolean(toolbarAction) || !hasCompleteSelectionPayload}
+                            >
+                                <MessageSquare size={19} />
+                                <span>묵상</span>
+                            </button>
+                            <button
+                                type="button"
+                                className="verse-selection-action"
+                                onClick={handleCopySelection}
+                                disabled={Boolean(toolbarAction) || !hasCompleteSelectionPayload}
+                            >
+                                {toolbarAction === 'copy' ? <Loader size={19} className="animate-spin" /> : <Copy size={19} />}
+                                <span>복사</span>
+                            </button>
+                        </div>
                     </div>
                 ) : (
                     <nav className={`mobile-reading-action-bar${popup.visible ? ' selection-hidden' : ''}`} aria-label="성경 읽기 작업">
