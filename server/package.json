@@ -6,7 +6,8 @@
     "type": "module",
     "scripts": {
         "dev": "node --watch --env-file=.env index.js",
-        "start": "node --env-file=.env index.js"
+        "start": "node --env-file=.env index.js",
+        "verify:v3-regression": "node scripts/verify-v3-regression.js"
     },
     "keywords": [
         "bible",
