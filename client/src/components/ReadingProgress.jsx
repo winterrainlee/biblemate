@@ -56,17 +56,17 @@ const ReadingProgress = ({ books = [], readingLogs = [] }) => {
 
     return (
         <div className="reading-progress">
-            <h3 className="panel-title">📊 말씀 여정</h3>
+            <h3 className="reading-progress-title">📊 말씀 여정</h3>
 
-            <div className="progress-tabs">
+            <div className="reading-progress-tabs">
                 <button
-                    className={`progress-tab ${activeRange === 'OT' ? 'active' : ''}`}
+                    className={`reading-progress-tab ${activeRange === 'OT' ? 'active' : ''}`}
                     onClick={() => setActiveRange('OT')}
                 >
                     구약
                 </button>
                 <button
-                    className={`progress-tab ${activeRange === 'NT' ? 'active' : ''}`}
+                    className={`reading-progress-tab ${activeRange === 'NT' ? 'active' : ''}`}
                     onClick={() => setActiveRange('NT')}
                 >
                     신약
@@ -74,31 +74,31 @@ const ReadingProgress = ({ books = [], readingLogs = [] }) => {
             </div>
 
             {/* Overall Progress Display */}
-            <div className="overall-progress-container">
-                <div className="overall-progress-info">
-                    <span className="overall-label">{activeRange === 'OT' ? '구약' : '신약'} 말씀 여정</span>
-                    <span className="overall-percent">{currentProgress}%</span>
+            <div className="reading-progress-overall">
+                <div className="reading-progress-overall-info">
+                    <span>{activeRange === 'OT' ? '구약' : '신약'} 말씀 여정</span>
+                    <span className="reading-progress-percent">{currentProgress}%</span>
                 </div>
-                <div className="overall-progress-bar-bg">
+                <div className="reading-progress-track">
                     <div
-                        className="overall-progress-bar-fill"
+                        className="reading-progress-fill"
                         style={{ width: `${currentProgress}%`, backgroundColor: activeRange === 'OT' ? 'var(--pk-color-primary)' : 'var(--pk-color-success)' }}
                     />
                 </div>
             </div>
 
-            <div className="book-progress-list">
+            <div className="reading-progress-list">
                 {currentBooks.map(book => {
                     const { readChapters, percent } = getProgress(book.id, book.chapters);
                     return (
-                        <div key={book.id} className="book-progress-item">
-                            <div className="book-info">
-                                <span className="book-name">{book.name}</span>
-                                <span className="book-stats">{readChapters}/{book.chapters}</span>
+                        <div key={book.id} className="reading-progress-item">
+                            <div className="reading-progress-book-info">
+                                <span className="reading-progress-book-name">{book.name}</span>
+                                <span className="reading-progress-book-stats">{readChapters}/{book.chapters}</span>
                             </div>
-                            <div className="progress-bar-bg">
+                            <div className="reading-progress-book-track">
                                 <div
-                                    className="progress-bar-fill"
+                                    className="reading-progress-book-fill"
                                     style={{ width: `${percent}%` }}
                                     title={`${percent}%`}
                                 />

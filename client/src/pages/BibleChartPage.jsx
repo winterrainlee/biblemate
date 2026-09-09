@@ -100,17 +100,17 @@ const BibleChartPage = () => {
 
     if (loading) {
         return (
-            <div className="chart-page-container" style={{ justifyContent: 'center', alignItems: 'center' }}>
-                <p>로딩 중...</p>
+            <div className="bible-chart-page bible-chart-page--loading">
+                <p className="bible-chart-loading">로딩 중...</p>
             </div>
         );
     }
 
     return (
-        <div className="chart-page-container">
+        <div className="bible-chart-page">
             {/* Header */}
             <div className="chart-header">
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                <div className="chart-heading">
                     <button onClick={() => navigate(-1)} className="chart-back-btn" title="뒤로가기">
                         <ArrowLeft size={24} />
                     </button>
@@ -118,21 +118,21 @@ const BibleChartPage = () => {
                 </div>
 
                 {/* Filter Buttons moved to Header Right */}
-                <div className="header-filters">
+                <div className="chart-filters" aria-label="성경 범위 필터">
                     <button
-                        className={`filter-btn ${filter === 'all' ? 'active' : ''}`}
+                        className={`chart-filter-btn ${filter === 'all' ? 'active' : ''}`}
                         onClick={() => setFilter('all')}
                     >
                         전체
                     </button>
                     <button
-                        className={`filter-btn ${filter === 'ot' ? 'active' : ''}`}
+                        className={`chart-filter-btn ${filter === 'ot' ? 'active' : ''}`}
                         onClick={() => setFilter('ot')}
                     >
                         구약
                     </button>
                     <button
-                        className={`filter-btn ${filter === 'nt' ? 'active' : ''}`}
+                        className={`chart-filter-btn ${filter === 'nt' ? 'active' : ''}`}
                         onClick={() => setFilter('nt')}
                     >
                         신약
@@ -143,17 +143,17 @@ const BibleChartPage = () => {
             {/* Content Area */}
             <div className="chart-content">
                 <div className="chart-summary">
-                    <div className="stat-row">
-                        <div className="stat-main">
-                            <div className="stat-box">
-                                <span className="stat-number">{displayRead}</span>
-                                <span className="stat-label">/ {displayTotal}장</span>
+                    <div className="chart-stat-row">
+                        <div className="chart-stat-main">
+                            <div className="chart-stat-box">
+                                <span className="chart-stat-number">{displayRead}</span>
+                                <span className="chart-stat-label">/ {displayTotal}장</span>
                             </div>
-                            <div className="progress-area">
-                                <div className="progress-bar">
-                                    <div className="progress-fill" style={{ width: `${displayProgress}%` }}></div>
+                            <div className="chart-progress-area">
+                                <div className="chart-progress-bar">
+                                    <div className="chart-progress-fill" style={{ width: `${displayProgress}%` }}></div>
                                 </div>
-                                <span className="progress-text">{displayProgress}%</span>
+                                <span className="chart-progress-text">{displayProgress}%</span>
                             </div>
                             {nextUnread && (
                                 <button className="next-unread-btn" onClick={() => navigateToBible(nextUnread.book, nextUnread.chapter)}>
@@ -164,15 +164,15 @@ const BibleChartPage = () => {
 
                         {filter === 'all' && (
                             <>
-                                <div className="stat-divider"></div>
-                                <div className="stat-details">
-                                    <div className="detail-item">
-                                        <span className="detail-label">구약</span>
-                                        <span className="detail-value">{otRead} / {otTotal}</span>
+                                <div className="chart-stat-divider"></div>
+                                <div className="chart-stat-details">
+                                    <div className="chart-detail-item">
+                                        <span className="chart-detail-label">구약</span>
+                                        <span className="chart-detail-value">{otRead} / {otTotal}</span>
                                     </div>
-                                    <div className="detail-item">
-                                        <span className="detail-label">신약</span>
-                                        <span className="detail-value">{ntRead} / {ntTotal}</span>
+                                    <div className="chart-detail-item">
+                                        <span className="chart-detail-label">신약</span>
+                                        <span className="chart-detail-value">{ntRead} / {ntTotal}</span>
                                     </div>
                                 </div>
                             </>
@@ -190,25 +190,25 @@ const BibleChartPage = () => {
                         return (
                             <button
                                 key={book.id}
-                                className={`book-row ${bookDone ? 'complete' : ''}`}
+                                className={`chart-book-row ${bookDone ? 'complete' : ''}`}
                                 onClick={() => {
                                     const nextInBook = findNextUnread([book]);
                                     navigateToBible(book.id, nextInBook?.chapter || 1);
                                 }}
                             >
-                                <span className="book-name" title={book.name}>
+                                <span className="chart-book-name" title={book.name}>
                                     {book.name}
                                 </span>
-                                <div className="chapter-grid">
+                                <div className="chart-chapter-grid">
                                     {chaptersArray.map(ch => (
                                         <div
                                             key={ch}
-                                            className={`chapter-cell ${readChapters.has(`${book.id}:${ch}`) ? 'read' : ''}`}
+                                            className={`chart-chapter-cell ${readChapters.has(`${book.id}:${ch}`) ? 'read' : ''}`}
                                             title={`${book.name} ${ch}장`}
                                         />
                                     ))}
                                 </div>
-                                <span className="book-progress">{readInBook}/{book.chapters}</span>
+                                <span className="chart-book-progress">{readInBook}/{book.chapters}</span>
                             </button>
                         );
                     })}

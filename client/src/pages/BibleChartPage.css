@@ -1,379 +1,194 @@
-/* BibleChartPage.css */
-
-.chart-page-container {
+.bible-chart-page {
     display: flex;
     flex-direction: column;
     height: 100%;
     min-height: 0;
+    overflow: hidden;
     background: var(--pk-color-bg);
     color: var(--pk-color-text);
-    overflow: hidden;
-    /* Prevent page itself from scrolling */
 }
 
-/* Page Header */
-.chart-header {
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    padding: 1rem 1.5rem;
-    background: color-mix(in srgb, var(--pk-color-bg) 94%, transparent);
-    border-bottom: 1px solid var(--pk-color-border-light);
-    backdrop-filter: blur(12px);
+.bible-chart-page--loading { align-items: center; justify-content: center; }
+.bible-chart-page .bible-chart-loading { color: var(--pk-color-text-secondary); }
+
+.bible-chart-page .chart-header {
     position: sticky;
     top: 0;
     z-index: 10;
-}
-
-.chart-back-btn {
-    border: none;
-    background: transparent;
-    color: var(--pk-color-text);
-    cursor: pointer;
-    padding: 0.5rem;
-    border-radius: 50%;
     display: flex;
+    flex-shrink: 0;
     align-items: center;
-    justify-content: center;
-    transition: background-color 0.2s;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.875rem 1.5rem;
+    border-bottom: 1px solid var(--pk-color-border-light);
+    background: color-mix(in srgb, var(--pk-color-bg) 96%, transparent);
+    backdrop-filter: blur(12px);
 }
 
-.chart-back-btn:hover {
-    background-color: var(--pk-color-bg-secondary);
-}
+.bible-chart-page .chart-heading,
+.bible-chart-page .chart-filters,
+.bible-chart-page .chart-progress-area,
+.bible-chart-page .chart-detail-item,
+.bible-chart-page .chart-stat-box { display: flex; align-items: center; }
+.bible-chart-page .chart-heading { gap: 0.75rem; min-width: 0; }
 
-.chart-title {
-    font-size: 1.25rem;
-    font-weight: 700;
-    margin: 0;
-    font-family: var(--pk-font-body);
-}
-
-/* Filter Buttons in Header */
-.header-filters {
-    display: flex;
-    gap: 0.5rem;
-}
-
-.filter-btn {
-    padding: 0.4rem 0.8rem;
-    border: 1px solid var(--pk-color-border);
-    border-radius: 999px;
-    background: var(--pk-color-bg);
+.bible-chart-page .chart-back-btn {
+    display: grid;
+    flex: 0 0 44px;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    place-items: center;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
     color: var(--pk-color-text-secondary);
-    font-size: 0.85rem;
-    font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s;
-    white-space: nowrap;
-    /* Prevent text wrap */
 }
 
-.filter-btn:hover {
+.bible-chart-page .chart-back-btn:hover,
+.bible-chart-page .chart-book-row:hover { background: var(--pk-color-bg-secondary); }
+
+.bible-chart-page .chart-title {
+    margin: 0;
+    overflow: hidden;
+    color: var(--pk-color-text);
+    font-family: var(--pk-font-body);
+    font-size: 1.2rem;
+    font-weight: 750;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.bible-chart-page .chart-filters {
+    gap: 0.25rem;
+    padding: 3px;
+    border: 1px solid var(--pk-color-border-light);
+    border-radius: 999px;
     background: var(--pk-color-bg-secondary);
 }
 
-.filter-btn.active {
-    background: var(--pk-color-primary-solid);
-    color: var(--pk-color-primary-contrast);
-    border-color: var(--pk-color-primary);
+.bible-chart-page .chart-filter-btn {
+    min-width: 48px;
+    min-height: 38px;
+    padding: 0 0.75rem;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--pk-color-text-secondary);
+    font: inherit;
+    font-size: 0.84rem;
+    font-weight: 700;
+    cursor: pointer;
 }
 
-/* Scrollable Content Area */
-.chart-content {
-    flex: 1;
-    overflow-y: auto;
-    padding: 1.5rem;
+.bible-chart-page .chart-filter-btn.active {
+    background: var(--pk-color-bg-elevated);
+    color: var(--pk-color-primary);
+    box-shadow: 0 1px 2px var(--pk-color-shadow);
 }
 
-/* Summary Section */
-.chart-summary {
-    margin-bottom: 2rem;
-}
+.bible-chart-page .chart-content { flex: 1; overflow-y: auto; padding: 1.5rem; }
+.bible-chart-page .chart-summary { margin-bottom: 1.75rem; }
 
-.stat-row {
+.bible-chart-page .chart-stat-row {
     display: flex;
     align-items: center;
     gap: 1.5rem;
-    padding: 1.5rem;
-    background: var(--pk-color-bg-elevated);
+    padding: 1.25rem 1.5rem;
     border: 1px solid var(--pk-color-border);
     border-radius: var(--pk-radius-lg);
-    box-shadow: 0 4px 16px var(--pk-color-shadow);
+    background: var(--pk-color-bg-elevated);
 }
 
-.stat-main {
+.bible-chart-page .chart-stat-main {
+    display: flex;
     flex: 2;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
     min-width: 0;
-    /* Prevent flex overflow */
-}
-
-.progress-area {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    width: 100%;
-}
-
-.stat-divider {
-    width: 1px;
-    height: 40px;
-    background: var(--pk-color-border);
-    flex-shrink: 0;
-}
-
-.stat-details {
-    flex: 1;
-    display: flex;
     flex-direction: column;
-    gap: 0.4rem;
-    min-width: 120px;
+    gap: 0.75rem;
 }
 
-.detail-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 0.95rem;
-}
+.bible-chart-page .chart-stat-box { gap: 0.4rem; align-items: baseline; }
+.bible-chart-page .chart-stat-number { color: var(--pk-color-primary); font-size: 2rem; font-weight: 800; line-height: 1; }
+.bible-chart-page .chart-stat-label,
+.bible-chart-page .chart-detail-label { color: var(--pk-color-text-secondary); }
+.bible-chart-page .chart-progress-area { width: 100%; gap: 0.75rem; }
 
-.detail-label {
-    color: var(--pk-color-text-secondary);
-    font-weight: 500;
-}
-
-.detail-value {
-    color: var(--pk-color-text);
-    font-weight: 600;
-}
-
-.stat-box {
-    display: flex;
-    align-items: baseline;
-    gap: 0.4rem;
-}
-
-.stat-number {
-    font-size: 2rem;
-    font-weight: 800;
-    color: var(--pk-color-primary);
-    line-height: 1;
-}
-
-.stat-label {
-    color: var(--pk-color-text-secondary);
-    font-size: 0.9rem;
-}
-
-.progress-bar {
+.bible-chart-page .chart-progress-bar {
     flex: 1;
-    height: 8px;
-    background: var(--pk-color-border);
-    border-radius: 4px;
+    height: 7px;
     overflow: hidden;
+    border-radius: 999px;
+    background: var(--pk-color-border);
 }
 
-.progress-fill {
-    height: 100%;
-    background: var(--pk-color-primary);
-    transition: width 0.3s ease;
-}
+.bible-chart-page .chart-progress-fill { height: 100%; border-radius: inherit; background: var(--pk-color-primary); transition: width 0.3s ease; }
+.bible-chart-page .chart-progress-text { min-width: 42px; color: var(--pk-color-primary); font-weight: 700; text-align: right; }
 
-.progress-text {
-    font-weight: 600;
-    color: var(--pk-color-primary);
-    min-width: 40px;
-    text-align: right;
-}
-
-.next-unread-btn {
+.bible-chart-page .next-unread-btn {
     align-self: flex-start;
     min-height: 44px;
     padding: 0 1rem;
-    border: none;
+    border: 0;
     border-radius: var(--pk-radius-md);
-    background-color: var(--pk-color-primary-solid);
+    background: var(--pk-color-primary-solid);
     color: var(--pk-color-primary-contrast);
     font: inherit;
-    font-size: 0.92rem;
+    font-size: 0.9rem;
     font-weight: 800;
     cursor: pointer;
 }
 
-/* Bible Chart Grid */
-.bible-chart-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
+.bible-chart-page .chart-stat-divider { width: 1px; height: 46px; flex-shrink: 0; background: var(--pk-color-border); }
+.bible-chart-page .chart-stat-details { display: flex; flex: 1; min-width: 120px; flex-direction: column; gap: 0.5rem; }
+.bible-chart-page .chart-detail-item { justify-content: space-between; gap: 1rem; font-size: 0.9rem; }
+.bible-chart-page .chart-detail-value { color: var(--pk-color-text); font-weight: 700; }
+.bible-chart-page .bible-chart-grid { display: flex; flex-direction: column; gap: 0.25rem; }
 
-.book-row {
+.bible-chart-page .chart-book-row {
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: 0.875rem;
     width: 100%;
-    padding: 0.25rem 0;
-    border: none;
+    min-height: 38px;
+    padding: 0.35rem 0.5rem;
+    border: 0;
+    border-radius: var(--pk-radius-sm);
     background: transparent;
     color: inherit;
     font: inherit;
     text-align: left;
     cursor: pointer;
-    border-radius: var(--pk-radius-sm);
 }
 
-.book-row.complete .book-name {
-    color: var(--pk-color-primary);
-}
+.bible-chart-page .chart-book-name { width: 76px; flex-shrink: 0; color: var(--pk-color-text-secondary); font-size: 0.86rem; font-weight: 600; text-align: right; }
+.bible-chart-page .chart-book-row.complete .chart-book-name { color: var(--pk-color-primary); }
+.bible-chart-page .chart-chapter-grid { display: flex; flex: 1; flex-wrap: wrap; gap: 3px; }
+.bible-chart-page .chart-chapter-cell { width: 13px; height: 13px; border-radius: 3px; background: var(--pk-color-border); }
+.bible-chart-page .chart-chapter-cell.read { background: var(--pk-color-primary); }
+.bible-chart-page .chart-book-progress { width: 42px; flex-shrink: 0; color: var(--pk-color-text-tertiary); font-size: 0.75rem; }
 
-.book-row:hover {
-    background-color: var(--pk-color-bg-secondary);
-}
-
-.book-name {
-    width: 80px;
-    font-size: 0.9rem;
-    text-align: right;
-    color: var(--pk-color-text-secondary);
-    flex-shrink: 0;
-    font-weight: 500;
-}
-
-.chapter-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 2px;
-    flex: 1;
-}
-
-.chapter-cell {
-    width: 14px;
-    height: 14px;
-    background: var(--pk-color-border);
-    border-radius: 2px;
-}
-
-.chapter-cell.read {
-    background: var(--pk-color-primary);
-}
-
-.book-progress {
-    width: 40px;
-    font-size: 0.75rem;
-    color: var(--pk-color-text-tertiary);
-    text-align: left;
-    flex-shrink: 0;
-}
-
-/* Mobile Responsiveness */
 @media (max-width: 768px) {
-    .chart-header {
-        padding: 0.75rem 1rem;
-        gap: 0.5rem;
-    }
-
-    .chart-title {
-        font-size: 1.1rem;
-    }
-
-    .filter-btn {
-        padding: 0.35rem 0.7rem;
-        font-size: 0.8rem;
-    }
-
-    .chart-content {
-        padding: 1rem;
-    }
-
-    .chart-summary {
-        margin-bottom: 1.5rem;
-    }
-
-    .stat-row {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 1.25rem;
-        padding: 1.25rem;
-    }
-
-    .stat-divider {
-        width: 100%;
-        height: 1px;
-        opacity: 0.5;
-    }
-
-    .stat-main {
-        width: 100%;
-        flex-direction: column;
-        justify-content: flex-start;
-        align-items: stretch;
-        flex-wrap: wrap;
-        gap: 0.75rem;
-    }
-
-    .next-unread-btn {
-        width: 100%;
-    }
-
-    .stat-box {
-        margin-bottom: 0;
-    }
-
-    .progress-area {
-        flex: 1;
-        min-width: 140px;
-        /* Ensure bar doesn't get too small */
-    }
-
-    .stat-details {
-        width: 100%;
-        flex-direction: row;
-        justify-content: space-between;
-    }
-
-    .book-name {
-        width: 60px;
-        font-size: 0.8rem;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-
-    .chapter-cell {
-        width: 11px;
-        height: 11px;
-    }
-
-    .book-row {
-        gap: 0.5rem;
-    }
+    .bible-chart-page .chart-header { gap: 0.35rem; padding: 0.5rem 0.75rem; }
+    .bible-chart-page .chart-heading { gap: 0.25rem; }
+    .bible-chart-page .chart-title { font-size: 1.02rem; }
+    .bible-chart-page .chart-filter-btn { min-width: 44px; min-height: 40px; padding: 0 0.55rem; font-size: 0.78rem; }
+    .bible-chart-page .chart-content { padding: 1rem 0.75rem; }
+    .bible-chart-page .chart-summary { margin-bottom: 1rem; }
+    .bible-chart-page .chart-stat-row { align-items: stretch; flex-direction: column; gap: 1rem; padding: 1rem; }
+    .bible-chart-page .chart-stat-divider { width: 100%; height: 1px; }
+    .bible-chart-page .chart-stat-details { width: 100%; flex-direction: row; justify-content: space-between; }
+    .bible-chart-page .chart-detail-item { flex: 1; }
+    .bible-chart-page .next-unread-btn { width: 100%; }
+    .bible-chart-page .chart-book-row { gap: 0.5rem; min-height: 36px; padding-inline: 0.25rem; }
+    .bible-chart-page .chart-book-name { width: 54px; overflow: hidden; font-size: 0.78rem; text-overflow: ellipsis; white-space: nowrap; }
+    .bible-chart-page .chart-chapter-cell { width: 10px; height: 10px; border-radius: 2px; }
 }
 
-/* Extra Small Screens (iPhone Mini ~375px) */
 @media (max-width: 380px) {
-    .chart-title {
-        font-size: 1rem;
-    }
-
-    .filter-btn {
-        padding: 0.3rem 0.6rem;
-        font-size: 0.75rem;
-    }
-
-    .header-filters {
-        gap: 0.25rem;
-    }
-
-    .stat-number {
-        font-size: 1.5rem;
-    }
-
-    .progress-text {
-        font-size: 0.9rem;
-    }
+    .bible-chart-page .chart-title { max-width: 4.5rem; }
+    .bible-chart-page .chart-filter-btn { min-width: 42px; padding-inline: 0.45rem; }
+    .bible-chart-page .chart-stat-number { font-size: 1.65rem; }
 }

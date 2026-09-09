@@ -219,207 +219,116 @@ const Settings = () => {
     };
 
     return (
-        <div className="page-settings container">
-            {/* v1.4.1: BibleChartPage 스타일 헤더 */}
-            <div className="settings-header" style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '1rem',
-                marginBottom: '2rem',
-                paddingBottom: '1rem',
-                borderBottom: '1px solid var(--pk-color-border)'
-            }}>
+        <div className="page-settings">
+            <header className="settings-header">
                 <button
                     onClick={() => navigate(-1)}
-                    style={{
-                        background: 'none',
-                        border: 'none',
-                        cursor: 'pointer',
-                        padding: '0.5rem',
-                        display: 'flex',
-                        alignItems: 'center',
-                        color: 'var(--pk-color-text)'
-                    }}
+                    className="settings-back-btn"
                     title="뒤로가기"
                 >
                     <ArrowLeft size={24} />
                 </button>
-                <h2 style={{ margin: 0 }}>설정</h2>
-            </div>
+                <div>
+                    <h2>설정</h2>
+                    <p>읽기 환경과 데이터를 관리합니다.</p>
+                </div>
+            </header>
 
             {/* Logout Section - Only show when auth is enabled */}
             {authInfo.authRequired && (
-                <div className="settings-section" style={{
-                    marginBottom: '2rem',
-                    padding: '1.5rem',
-                    backgroundColor: 'var(--pk-color-bg)',
-                    border: '1px solid var(--pk-color-border)',
-                    borderRadius: 'var(--pk-radius-lg)',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center'
-                }}>
+                <section className="settings-section settings-session-section">
                     <div>
-                        <h3 style={{ marginBottom: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1.1rem' }}>
+                        <h3 className="settings-section-title">
                             <LogOut size={18} /> 세션 관리
                         </h3>
-                        <p style={{ color: 'var(--pk-color-text-secondary)', fontSize: '0.85rem' }}>
+                        <p className="settings-description">
                             로그아웃하여 현재 세션을 즉시 종료합니다.
                         </p>
                     </div>
                     <button
                         onClick={handleLogout}
-                        style={{
-                            padding: '0.6rem 1.2rem',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.5rem',
-                            backgroundColor: 'var(--pk-color-danger)',
-                            color: 'var(--pk-color-primary-contrast)',
-                            border: 'none',
-                            borderRadius: 'var(--pk-radius-md)',
-                            cursor: 'pointer',
-                            fontWeight: '600',
-                            fontSize: '0.9rem'
-                        }}
+                        className="settings-action settings-action--danger"
                     >
                         <LogOut size={16} /> 로그아웃
                     </button>
-                </div>
+                </section>
             )}
 
             {/* Highlight Labels Section (Moved to 3rd position) */}
-            <div className="settings-section" style={{
-                marginBottom: '2rem',
-                padding: '1.5rem',
-                backgroundColor: 'var(--pk-color-bg)',
-                border: '1px solid var(--pk-color-border)',
-                borderRadius: 'var(--pk-radius-lg)'
-            }}>
-                <h3 style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <span style={{ fontSize: '1.2rem', display: 'flex' }}>🎨</span> 형광펜 설정
+            <section className="settings-section">
+                <h3 className="settings-section-title">
+                    <span className="settings-title-emoji">🎨</span> 형광펜 설정
                 </h3>
-                <p style={{ color: 'var(--pk-color-text-secondary)', marginBottom: '1rem', fontSize: '0.9rem' }}>
+                <p className="settings-description">
                     각 색상이 의미하는 속성 이름(예: 관찰, 적용, 질문 등)을 설정하세요. 최대 4글자까지 입력 가능합니다.
                 </p>
 
-                <div className="highlight-labels-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1rem' }}>
+                <div className="highlight-labels-grid">
                     {[
                         { key: 'yellow', color: 'var(--pk-highlight-yellow)', name: '노랑' },
                         { key: 'green', color: 'var(--pk-highlight-green)', name: '초록' },
                         { key: 'blue', color: 'var(--pk-highlight-blue)', name: '파랑' },
                         { key: 'red', color: 'var(--pk-highlight-red)', name: '빨강' }
                     ].map(item => (
-                        <div key={item.key} style={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            gap: '0.5rem',
-                            padding: '0.75rem',
-                            backgroundColor: 'var(--pk-color-bg-secondary)',
-                            borderRadius: 'var(--pk-radius-md)',
-                            border: '1px solid var(--pk-color-border)',
-                            alignItems: 'center'
-                        }}>
-                            <div style={{
-                                width: '32px',
-                                height: '32px',
-                                borderRadius: '50%',
-                                backgroundColor: item.color,
-                                border: '1px solid rgba(0,0,0,0.1)'
-                            }} />
+                        <label key={item.key} className="highlight-label-card">
+                            <span className="highlight-label-color" style={{ backgroundColor: item.color }} />
                             <input
                                 type="text"
                                 value={highlightLabels[item.key] || ''}
                                 onChange={(e) => handleLabelChange(item.key, e.target.value.slice(0, 4))}
                                 placeholder={item.name}
-                                style={{
-                                    width: '100%',
-                                    padding: '0.4rem',
-                                    textAlign: 'center',
-                                    border: '1px solid var(--pk-color-border)',
-                                    borderRadius: '4px',
-                                    fontSize: '0.9rem',
-                                    backgroundColor: 'var(--pk-color-bg)',
-                                    color: 'var(--pk-color-text)'
-                                }}
+                                aria-label={`${item.name} 형광펜 이름`}
                                 maxLength={4}
                             />
-                        </div>
+                        </label>
                     ))}
                 </div>
-            </div>
+            </section>
 
             {/* Display Settings removed as per request (Mobile calendar naturally hidden) */}
 
-            <div className="settings-section" style={{
-                marginBottom: '2rem',
-                padding: '1.5rem',
-                backgroundColor: 'var(--pk-color-bg)',
-                border: '1px solid var(--pk-color-border)',
-                borderRadius: 'var(--pk-radius-lg)'
-            }}>
-                <h3 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <section className="settings-section">
+                <h3 className="settings-section-title">
                     <Type size={20} /> 본문 글꼴 및 크기 설정
                 </h3>
 
                 {/* Font Family Selection */}
-                <div className="font-family-control" style={{ marginBottom: '2rem' }}>
-                    <p style={{ color: 'var(--pk-color-text-secondary)', marginBottom: '1rem', fontSize: '0.9rem' }}>
+                <div className="font-family-control">
+                    <p className="settings-description">
                         성경 본문을 읽기 편한 서체로 선택하세요. 버튼과 메뉴는 기존 고딕 UI를 유지합니다.
                     </p>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '1rem' }}>
+                    <div className="font-family-grid">
                         <button
                             onClick={() => handleFontChange('serif')}
-                            style={{
-                                flex: 1,
-                                padding: '1rem',
-                                borderRadius: 'var(--pk-radius-md)',
-                                border: fontFamily === 'serif' ? '2px solid var(--pk-color-primary)' : '1px solid var(--pk-color-border)',
-                                backgroundColor: fontFamily === 'serif' ? 'var(--pk-color-bg-elevated)' : 'var(--pk-color-bg)',
-                                cursor: 'pointer',
-                                transition: 'all 0.2s'
-                            }}
+                            className={`font-family-option${fontFamily === 'serif' ? ' active' : ''}`}
+                            aria-pressed={fontFamily === 'serif'}
                         >
-                            <div style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.25rem', fontFamily: 'var(--pk-font-serif)' }}>명조</div>
-                            <div style={{ fontSize: '0.8rem', color: 'var(--pk-color-text-secondary)' }}>기본, 차분한 본문용</div>
+                            <strong className="font-sample font-sample--serif">명조</strong>
+                            <span>기본, 차분한 본문용</span>
                         </button>
                         <button
                             onClick={() => handleFontChange('gowun')}
-                            style={{
-                                flex: 1,
-                                padding: '1rem',
-                                borderRadius: 'var(--pk-radius-md)',
-                                border: fontFamily === 'gowun' ? '2px solid var(--pk-color-primary)' : '1px solid var(--pk-color-border)',
-                                backgroundColor: fontFamily === 'gowun' ? 'var(--pk-color-bg-elevated)' : 'var(--pk-color-bg)',
-                                cursor: 'pointer',
-                                transition: 'all 0.2s'
-                            }}
+                            className={`font-family-option${fontFamily === 'gowun' ? ' active' : ''}`}
+                            aria-pressed={fontFamily === 'gowun'}
                         >
-                            <div style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.25rem', fontFamily: 'var(--pk-font-gowun)' }}>고운바탕</div>
-                            <div style={{ fontSize: '0.8rem', color: 'var(--pk-color-text-secondary)' }}>손글씨에 가까운 온기</div>
+                            <strong className="font-sample font-sample--gowun">고운바탕</strong>
+                            <span>손글씨에 가까운 온기</span>
                         </button>
                         <button
                             onClick={() => handleFontChange('sans')}
-                            style={{
-                                flex: 1,
-                                padding: '1rem',
-                                borderRadius: 'var(--pk-radius-md)',
-                                border: fontFamily === 'sans' ? '2px solid var(--pk-color-primary)' : '1px solid var(--pk-color-border)',
-                                backgroundColor: fontFamily === 'sans' ? 'var(--pk-color-bg-elevated)' : 'var(--pk-color-bg)',
-                                cursor: 'pointer',
-                                transition: 'all 0.2s'
-                            }}
+                            className={`font-family-option${fontFamily === 'sans' ? ' active' : ''}`}
+                            aria-pressed={fontFamily === 'sans'}
                         >
-                            <div style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.25rem', fontFamily: 'var(--pk-font-sans)' }}>고딕</div>
-                            <div style={{ fontSize: '0.8rem', color: 'var(--pk-color-text-secondary)' }}>선명하고 익숙한 화면 글꼴</div>
+                            <strong className="font-sample font-sample--sans">고딕</strong>
+                            <span>선명하고 익숙한 화면 글꼴</span>
                         </button>
                     </div>
                 </div>
 
                 <div className="font-size-control">
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', color: 'var(--pk-color-text-secondary)' }}>
-                        <span style={{ fontSize: '0.8rem' }}>작게</span>
-                        <span style={{ fontSize: '0.8rem' }}>크게</span>
+                    <div className="font-size-labels">
+                        <span>작게</span>
+                        <span>크게</span>
                     </div>
                     <input
                         type="range"
@@ -428,165 +337,103 @@ const Settings = () => {
                         step="1"
                         value={fontSize}
                         onChange={(e) => setFontSize(Number(e.target.value))}
-                        style={{ width: '100%', cursor: 'pointer', accentColor: 'var(--pk-color-primary)' }}
+                        className="font-size-slider"
+                        aria-label="본문 글자 크기"
                     />
-                    <div style={{ textAlign: 'center', marginTop: '1rem' }}>
+                    <div className="font-size-current">
                         현재 크기: <strong>{fontSize}px</strong>
                     </div>
 
-                    <div className="preview-box" style={{
-                        marginTop: '1.5rem',
-                        padding: '1.5rem',
-                        border: '1px dashed var(--pk-color-border)',
-                        borderRadius: 'var(--pk-radius-md)',
-                        backgroundColor: 'var(--pk-color-bg-elevated)',
-                        fontFamily: 'var(--pk-font-body)',
-                        lineHeight: 1.9
-                    }}>
-                        <p style={{ marginBottom: '0.5rem' }}>성경은 하나님의 감동으로 된 것으로 교훈과 책망과 바르게 함과 의로 교육하기에 유익하니 (딤후 3:16)</p>
-                        <p style={{ fontSize: '0.85em', opacity: 0.8 }}>All Scripture is God-breathed and is useful for teaching, rebuking, correcting and training in righteousness. (2 Tim 3:16)</p>
+                    <div className="preview-box">
+                        <p>성경은 하나님의 감동으로 된 것으로 교훈과 책망과 바르게 함과 의로 교육하기에 유익하니 (딤후 3:16)</p>
+                        <p className="preview-box-secondary">All Scripture is God-breathed and is useful for teaching, rebuking, correcting and training in righteousness. (2 Tim 3:16)</p>
                     </div>
                 </div>
-            </div>
+            </section>
 
             {/* Data Backup/Restore Section */}
-            <div className="settings-section" style={{
-                marginBottom: '2rem',
-                padding: '1.5rem',
-                backgroundColor: 'var(--pk-color-bg)',
-                border: '1px solid var(--pk-color-border)',
-                borderRadius: 'var(--pk-radius-lg)'
-            }}>
-                <h3 style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <section className="settings-section">
+                <h3 className="settings-section-title">
                     <Download size={20} /> 데이터 백업 및 복구
                 </h3>
-                <p style={{ color: 'var(--pk-color-text-secondary)', marginBottom: '1rem', fontSize: '0.9rem' }}>
+                <p className="settings-description">
                     노트, 하이라이트, 읽기 기록을 JSON 파일로 저장하거나 복구할 수 있습니다.
                 </p>
 
-                <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+                <div className="settings-data-actions">
                     <button
                         onClick={handleExport}
-                        style={{
-                            flex: '1 1 200px',
-                            padding: '0.75rem 1.5rem',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            gap: '0.5rem',
-                            backgroundColor: 'var(--pk-color-primary)',
-                            color: 'var(--pk-color-primary-contrast)',
-                            border: 'none',
-                            borderRadius: 'var(--pk-radius-md)',
-                            cursor: 'pointer',
-                            fontWeight: '600'
-                        }}
+                        className="settings-action settings-action--primary"
                     >
                         <Download size={18} /> 데이터 내보내기
                     </button>
 
-                    <label
-                        style={{
-                            flex: '1 1 200px',
-                            padding: '0.75rem 1.5rem',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            gap: '0.5rem',
-                            backgroundColor: 'var(--pk-color-bg-secondary)',
-                            color: 'var(--pk-color-text)',
-                            border: '2px solid var(--pk-color-border)',
-                            borderRadius: 'var(--pk-radius-md)',
-                            cursor: 'pointer',
-                            fontWeight: '600'
-                        }}
-                    >
+                    <label className="settings-action settings-action--secondary">
                         <Upload size={18} /> 데이터 가져오기
                         <input
                             type="file"
                             accept=".json"
                             onChange={handleImport}
-                            style={{ display: 'none' }}
+                            className="settings-file-input"
                         />
                     </label>
                 </div>
-            </div>
+            </section>
 
-            <div className="settings-section" style={{
-                marginTop: '2rem',
-                padding: '1.5rem',
-                backgroundColor: 'var(--pk-color-bg)',
-                border: '1px solid var(--pk-color-border)',
-                borderRadius: 'var(--pk-radius-lg)'
-            }}>
-                <h3 style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <span style={{ fontSize: '1.2rem' }}>ℹ️</span> 정보 및 라이선스
+            <section className="settings-section settings-license-section">
+                <h3 className="settings-section-title">
+                    <span className="settings-title-icon">ℹ️</span> 정보 및 라이선스
                 </h3>
 
-                <div className="license-info" style={{ fontSize: '0.9rem', color: 'var(--pk-color-text-secondary)', lineHeight: '1.6' }}>
-                    <p style={{ marginBottom: '0.5rem' }}><strong>BibleMate v2.3.3</strong></p>
-                    <p style={{ marginBottom: '1rem' }}>개인 묵상과 성경 읽기를 돕기 위해 만든 웹 애플리케이션입니다.</p>
+                <div className="license-info">
+                    <p className="license-version"><strong>BibleMate v2.3.3</strong></p>
+                    <p>개인 묵상과 성경 읽기를 돕기 위해 만든 웹 애플리케이션입니다.</p>
 
-                    <h4 style={{ fontSize: '0.95rem', color: 'var(--pk-color-text)', marginBottom: '0.5rem' }}>성경 데이터 저작권</h4>
-                    <ul style={{ paddingLeft: '1.2rem', marginBottom: '1rem' }}>
+                    <h4>성경 데이터 저작권</h4>
+                    <ul>
                         <li>
                             <strong>한국어: 『성경전서 개역한글판』 (KRV)</strong><br />
                             본 성경전서 개역한글판의 저작권은 재단법인 대한성서공회에 있으며, 본 앱은 해당 저작권을 준수하여 사용합니다. (본문 동일성 유지)
                         </li>
-                        <li style={{ marginTop: '0.5rem' }}>
+                        <li>
                             <strong>English: World English Bible (WEB)</strong><br />
                             The World English Bible is in the Public Domain (No Copyright).
                             "World English Bible" is a Trademark of eBible.org.
                             You may copy and share it freely.
                         </li>
-                        <li style={{ marginTop: '0.5rem' }}>
+                        <li>
                             <strong>English: Bible in Basic English (BBE)</strong><br />
                             Public Domain. Translated by S. H. Hooke using a 1,000-word limited vocabulary.
                         </li>
                     </ul>
 
-                    <p style={{ fontSize: '0.8rem', color: 'var(--pk-color-text-tertiary)' }}>
+                    <p className="license-footnote">
                         본 앱은 비영리 개인 학습/묵상용으로 제작되었습니다.
                     </p>
 
-                    <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--pk-color-border)' }}>
-                        <h4 style={{ fontSize: '0.95rem', color: 'var(--pk-color-text)', marginBottom: '0.5rem' }}>📬 문의</h4>
-                        <p style={{ fontSize: '0.85rem' }}>
+                    <div className="settings-contact">
+                        <h4>📬 문의</h4>
+                        <p>
                             버그 제보, 기능 제안:{' '}
-                            <a href="mailto:winterrain.lee@icloud.com" style={{ color: 'var(--pk-color-primary)' }}>
+                            <a href="mailto:winterrain.lee@icloud.com">
                                 winterrain.lee@icloud.com
                             </a>
                         </p>
                     </div>
                 </div>
-            </div>
+            </section>
 
             <Modal
                 isOpen={resultModal.isOpen}
                 onClose={() => setResultModal(prev => ({ ...prev, isOpen: false }))}
                 title={resultModal.title}
             >
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem', padding: '1rem 0' }}>
-                    <div style={{
-                        width: '64px',
-                        height: '64px',
-                        borderRadius: '50%',
-                        backgroundColor: resultModal.type === 'success' ? '#dcfce7' : '#fee2e2',
-                            color: resultModal.type === 'success' ? 'var(--pk-color-success)' : 'var(--pk-color-danger)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                    }}>
+                <div className="settings-result">
+                    <div className={`settings-result-icon settings-result-icon--${resultModal.type}`}>
                         {resultModal.type === 'success' ? <CheckCircle size={32} /> : <AlertCircle size={32} />}
                     </div>
 
-                    <p style={{
-                        textAlign: 'center',
-                        fontSize: '1.1rem',
-                        color: 'var(--pk-color-text)',
-                        whiteSpace: 'pre-line',
-                        lineHeight: '1.6'
-                    }}>
+                    <p className="settings-result-message">
                         {resultModal.message}
                     </p>
 
@@ -595,17 +442,7 @@ const Settings = () => {
                             setResultModal(prev => ({ ...prev, isOpen: false }));
                             if (resultModal.onConfirm) resultModal.onConfirm();
                         }}
-                        style={{
-                            padding: '0.75rem 2rem',
-                            backgroundColor: 'var(--pk-color-primary)',
-                            color: 'var(--pk-color-primary-contrast)',
-                            border: 'none',
-                            borderRadius: 'var(--pk-radius-md)',
-                            fontSize: '1rem',
-                            fontWeight: '600',
-                            cursor: 'pointer',
-                            minWidth: '120px'
-                        }}
+                        className="settings-action settings-action--primary settings-result-confirm"
                     >
                         확인
                     </button>
