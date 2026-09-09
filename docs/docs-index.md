@@ -64,6 +64,7 @@
 ### Pull Requests
 - [PR Drafts](03-logs/pr/): 버전별 PR 초안
   - [PR Draft v3.0 Context Toolbar](03-logs/pr/pr-v3.0-context-toolbar.md): v3.0 Context Toolbar + Highlight + Copy PR 초안
+  - [PR Draft v3.0 Responsive Integration](03-logs/pr/pr-v3.0-responsive-integration.md): Existing Notes + 반응형 통합 PR #9 기록
   - [PR Draft v3.0 Verse Selection](03-logs/pr/pr-v3.0-verse-selection.md): v3.0 Verse Selection PR 초안
   - [PR Draft v3.0 Reading Canvas](03-logs/pr/pr-v3.0-reading-canvas.md): v3.0 Reading Canvas PR 초안
   - [PR Draft v2.3.3 Auto Read from Verse Note](03-logs/pr/pr-v2.3.3-auto-read-from-verse-note.md): v2.3.3 구절 묵상 기반 읽음 자동 표시 PR 초안

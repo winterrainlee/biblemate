@@ -198,3 +198,5 @@
 - 실제 묵상 DB 복제본을 Tailscale 인터페이스에만 바인딩해 iPhone 재검수를 완료하고 사용자 승인 후 서비스·5174 포트·복제본을 제거
 - 원본 `server/data/bible.db` SHA-256이 검수 시작 전후 동일함을 확인
 - 사용자 승인 후 `feature/v3.0-responsive-integration`을 원격에 push하고 `feature/v3.0` 대상 PR #9 생성
+- PR #9를 merge commit 방식으로 `feature/v3.0`에 병합 (`9901f32`)
+- 로컬 통합 브랜치를 fast-forward하고 사용자 `server/data/bible.db` 변경이 그대로 유지됨을 확인
