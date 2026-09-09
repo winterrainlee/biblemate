@@ -9,7 +9,7 @@
 
 - `server/scripts/verify-v3-regression.js`를 추가했다.
 - 실행마다 `os.tmpdir()` 아래에 새 디렉터리와 fixture DB를 생성한다.
-- OS가 배정한 고유 포트를 예약한 뒤 `127.0.0.1`에만 격리 API 서버를 연다.
+- OS가 배정한 고유 포트를 예약한 뒤 `127.0.0.1`에만 격리 API 서버를 열고, 조기 종료나 포트 충돌 시 최대 3회 새 포트로 재시도한다.
 - 자식 서버에는 `DB_PATH=<temp>/fixture.db`를 명시하고, 종료·실패·signal 시 자식 프로세스와 temp 디렉터리를 정리한다.
 - 실행 전후 `server/data/bible.db`의 SHA-256, inode/size, Git porcelain 상태를 비교한다.
 - 개인 데이터 대신 `2099-*` 날짜와 고정된 비개인 fixture만 사용한다.
@@ -25,7 +25,7 @@
 6. free note, prayer, highlight label setting JSON round-trip
 7. backup schema v3 export/import
 8. v1.1 `notes`의 `free_notes` 호환 import
-9. 잘못된 payload 400 및 import transaction 실패 500 후 기존 count rollback
+9. 잘못된 payload 400 및 import transaction 실패 500 후 전체 사용자 데이터 snapshot rollback
 10. 구형 DB의 v2 tables/`verse_range`/settings migration과 기존 note 보존
 
 ## 검증 명령과 결과
@@ -78,5 +78,6 @@ cd client && npm run build
 - `SUPPORTED_SCHEMA_VERSIONS`가 import 차단에 사용되지 않는 현행 문제
 - backup export의 `APP_VERSION`이 `2.0.0`으로 고정된 문제
 - highlight 데이터가 역본을 구분하지 않는 현행 계약
+- 실패·signal·timeout cleanup 경로의 자동 fault-injection 검증
 
-위 항목은 현재 v2.x 계약을 변경하지 않기 위해 이번 브랜치에서는 수정하지 않았다.
+위 항목들은 production 계약 변경 또는 별도 fault-injection 설계가 필요해 후속 작업으로 분리했다.

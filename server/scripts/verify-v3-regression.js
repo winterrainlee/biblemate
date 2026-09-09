@@ -18,6 +18,7 @@ const schemaPath = path.join(serverDir, 'db', 'schema.sql');
 const originalDbPath = path.join(serverDir, 'data', 'bible.db');
 const requestTimeoutMs = 5_000;
 const startupTimeoutMs = 15_000;
+const startupAttemptLimit = 3;
 
 let child = null;
 let tempDir = null;
@@ -114,12 +115,15 @@ async function startServer(dbPath, port) {
     const baseUrl = `http://127.0.0.1:${port}`;
     const deadline = Date.now() + startupTimeoutMs;
     while (Date.now() < deadline) {
-        if (child.exitCode !== null) {
-            throw new Error(`격리 서버가 조기 종료되었습니다.\n${logs.join('\n')}`);
+        if (child.exitCode !== null || child.signalCode !== null) {
+            const error = new Error(`격리 서버가 조기 종료되었습니다.\n${logs.join('\n')}`);
+            error.code = 'SERVER_EXITED_EARLY';
+            throw error;
         }
         try {
             const response = await fetch(`${baseUrl}/api/health`, { signal: AbortSignal.timeout(500) });
-            if (response.ok) return { baseUrl, logs };
+            const serverReportedReady = logs.some(line => line.includes('Server running on'));
+            if (response.ok && serverReportedReady) return { baseUrl, logs };
         } catch {
             // 서버가 listen 상태가 될 때까지 짧게 재시도한다.
         }
@@ -128,8 +132,26 @@ async function startServer(dbPath, port) {
     throw new Error(`격리 서버 시작 시간 초과입니다.\n${logs.join('\n')}`);
 }
 
+async function startServerWithRetry(dbPath) {
+    let lastError = null;
+    for (let attempt = 1; attempt <= startupAttemptLimit; attempt += 1) {
+        const port = await reservePort();
+        try {
+            return await startServer(dbPath, port);
+        } catch (error) {
+            lastError = error;
+            const retryable = error.code === 'SERVER_EXITED_EARLY'
+                || /EADDRINUSE|address already in use/i.test(error.message);
+            await stopServer();
+            child = null;
+            if (!retryable || attempt === startupAttemptLimit) throw error;
+        }
+    }
+    throw lastError;
+}
+
 async function stopServer() {
-    if (!child || child.exitCode !== null) return;
+    if (!child || child.exitCode !== null || child.signalCode !== null) return;
     const runningChild = child;
     await new Promise(resolve => {
         const timer = setTimeout(() => {
@@ -295,25 +317,25 @@ async function testNotesPrayersAndSettings(baseUrl) {
     assert.deepEqual(settings.highlightLabels, settingValue);
 }
 
-function tableCounts(exportData) {
-    return Object.fromEntries(
-        ['reading_logs', 'highlights', 'verse_notes', 'free_notes', 'daily_prayers', 'user_settings']
-            .map(key => [key, exportData.data[key]?.length || 0])
-    );
+function backupDataSnapshot(exportData) {
+    return structuredClone(exportData.data);
 }
 
 async function testBackup(baseUrl) {
     const before = await expectStatus(baseUrl, '/api/backup/export', 200);
     assert.equal(before.schema_version, 3);
     assert.ok(before.exported_at);
-    const countsBeforeInvalid = tableCounts(before);
+    const dataBeforeInvalid = backupDataSnapshot(before);
 
     const invalid = await expectStatus(baseUrl, '/api/backup/import', 400, {
         method: 'POST',
         body: { schema_version: 3, data: { reading_logs: [{ date: 7 }] } }
     });
     assert.equal(invalid.error_code, 'INVALID_SCHEMA');
-    assert.deepEqual(tableCounts(await expectStatus(baseUrl, '/api/backup/export', 200)), countsBeforeInvalid);
+    assert.deepEqual(
+        backupDataSnapshot(await expectStatus(baseUrl, '/api/backup/export', 200)),
+        dataBeforeInvalid
+    );
 
     const rollbackPayload = structuredClone(before);
     const duplicate = {
@@ -330,7 +352,10 @@ async function testBackup(baseUrl) {
         method: 'POST', body: rollbackPayload
     });
     assert.equal(rollbackResult.error_code, 'IMPORT_FAILED');
-    assert.deepEqual(tableCounts(await expectStatus(baseUrl, '/api/backup/export', 200)), countsBeforeInvalid);
+    assert.deepEqual(
+        backupDataSnapshot(await expectStatus(baseUrl, '/api/backup/export', 200)),
+        dataBeforeInvalid
+    );
 
     const v3 = structuredClone(before);
     v3.data.free_notes = [{ id: 801, date: '2099-05-01', content: 'v3 백업 회귀 fixture' }];
@@ -396,8 +421,7 @@ async function main() {
         assert.notEqual(path.resolve(fixtureDbPath), path.resolve(originalDbPath));
 
         await createFixtureDatabase(fixtureDbPath);
-        const port = await reservePort();
-        const { baseUrl } = await startServer(fixtureDbPath, port);
+        const { baseUrl } = await startServerWithRetry(fixtureDbPath);
 
         suites.push(
             ['health/bible', testBible],

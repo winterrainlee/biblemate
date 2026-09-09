@@ -29,4 +29,4 @@
 - backup 지원 schema version 강제
 - backup export app version 동기화
 - highlight 역본 구분 계약 검토
-
+- 실패·signal·timeout cleanup 경로의 자동 fault-injection 검증
