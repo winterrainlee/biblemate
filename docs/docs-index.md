@@ -6,8 +6,12 @@
 
 ## 🚀 01. Planning (기획)
 - [Roadmap](01-planning/roadmap.md): 차기 버전 로드맵 및 기능 목록
+- [v3.0 Parallel Batch Plan](01-planning/parallel-batch-plan-v3.0.md): B안 병렬 구현, 파일 소유권, 단일 검수 서버 계획
 - [Visual Redesign Proposal](01-planning/proposal-visual-redesign.md): v2.3 시각 디자인 재구성 제안서
 - [Implementation Plans](01-planning/implementation-plans/): 버전별 구현 계획서
+  - [Implementation Plan v3.0 Reflection Composer](01-planning/implementation-plans/implementation-plan-v3.0-reflection-composer.md): 선택 snapshot 기반 묵상 작성·수정 상태 구현 계획
+  - [Implementation Plan v3.0 Visual Cleanup](01-planning/implementation-plans/implementation-plan-v3.0-visual-cleanup.md): 주변 화면 시각 정리와 병렬 파일 소유권 계획
+  - [Implementation Plan v3.0 Regression Harness](01-planning/implementation-plans/implementation-plan-v3.0-regression-harness.md): 임시 DB 기반 v2.x 데이터·API 회귀 검증 계획
   - [Implementation Plan v3.0 Verse Selection](01-planning/implementation-plans/implementation-plan-v3.0-verse-selection.md): 단일·비연속 다중 구절 선택 모델 구현 계획
   - [Implementation Plan v3.0 Context Toolbar](01-planning/implementation-plans/implementation-plan-v3.0-context-toolbar.md): 선택 구절 하이라이트·지우기·묵상·복사 도구 구현 계획
   - [Implementation Plan v3.0 Reading Canvas](01-planning/implementation-plans/implementation-plan-v3.0-reading-canvas.md): 장시간 읽기 중심 Reading Canvas 구현 계획

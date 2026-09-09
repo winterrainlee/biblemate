@@ -135,9 +135,11 @@ v3.0 성경 읽기 UX는 화면 페이지보다 상태를 중심으로 설계한
 Context Toolbar 기본 액션:
 
 1. 하이라이트 4색
-2. 묵상
-3. 복사
-4. 더보기
+2. 하이라이트 지우기
+3. 묵상
+4. 복사
+
+모바일에서는 위 7개 액션을 `더보기` 없이 직접 노출한다.
 
 ### 4.3 Composer
 
@@ -541,6 +543,16 @@ master
 - 375 / 650 / 1280px Desktop emulation, Desktop keyboard, Light / Dark 조합은 이 단계의 통합 차단 조건에서 제외한다.
 - 이후 Desktop 환경에서 문제가 확인되면 v3.0 개발 중 후속 보완 또는 별도 hotfix로 처리한다.
 - 이 예외는 Context Toolbar 단계에 한정하며, v3.0 전체 Responsive 통합 회귀 기준은 유지한다.
+
+### 병렬 구현 및 단일 검수 배치 (2026-09-09 승인)
+
+- B안에 따라 Reflection Composer, Surrounding Screens Visual Cleanup, 격리 회귀 Harness를 Wave 1에서 병렬 진행한다.
+- `BibleViewer*`를 함께 사용하는 Reflection Composer와 Existing Notes Integration은 같은 핵심 트랙에서 순차 진행한다.
+- Header/Layout/공유 폭 정리는 선행 트랙 통합 후 Responsive 통합 단계에서 한 번 수행한다.
+- 각 기능의 Implementation Plan, Walkthrough, PR 승인 게이트는 유지한다.
+- 중간 검증은 lint/build와 임시 DB 기반 자동 검증으로 수행하고, 사용자 검수 서버는 최종 통합 후 한 번만 연다.
+- 자동 CRUD, backup/restore, 최종 검수 서버는 원본 `server/data/bible.db`가 아닌 임시 DB를 사용한다.
+- 세부 실행·파일 소유권은 `docs/01-planning/parallel-batch-plan-v3.0.md`를 따른다.
 
 ---
 

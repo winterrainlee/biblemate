@@ -114,3 +114,13 @@
 - 병합 커밋: `32e1e73`
 - 검수용 5174 macOS 임시 서비스를 제거하고 포트 종료 확인
 - 다음 작업 착수 전 Reflection Composer, Existing Notes, Visual Cleanup, 회귀 검증의 병렬 가능 범위를 의존성 기준으로 재검토
+
+#### [Planning] B안 병렬 구현 및 단일 검수 배치
+
+- 사용자 승인에 따라 Reflection Composer, Surrounding Screens Visual Cleanup, 격리 회귀 Harness를 Wave 1 병렬 트랙으로 구성
+- `BibleViewer*` 상태 계약을 공유하는 Reflection Composer → Existing Notes는 핵심 트랙 내부에서 순차 진행
+- Header/Layout/공유 CSS는 선행 기능 통합 후 Responsive 통합 단계에서만 수정하도록 파일 소유권 고정
+- 각 트랙 세부 Implementation Plan을 작성하고 코드 구현 전 승인 게이트로 설정
+- 중간에는 검수 서버를 열지 않고 lint/build와 임시 DB 검증을 수행하며, 최종 통합 후 한 번의 실기기 검수 세션으로 묶기로 결정
+- 원본 `server/data/bible.db`는 사용자 검수 데이터로 보존하고 모든 자동 CRUD·backup/restore에서 제외
+- 사용자 Wave 1 세부 계획 승인 후 세 트랙을 각각 독립 브랜치·worktree에서 병렬 착수
