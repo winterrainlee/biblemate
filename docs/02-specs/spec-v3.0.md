@@ -535,6 +535,13 @@ master
 - 이후 Desktop 환경에서 문제가 확인되면 v3.0 개발 중 후속 보완 또는 별도 hotfix로 처리한다.
 - 이 예외는 Verse Selection 단계에만 적용하며, v3.0 전체 Responsive 통합 회귀 기준을 제거하지 않는다.
 
+### Context Toolbar 검증 예외 (2026-09-09 승인)
+
+- Context Toolbar + Highlight + Copy 단계도 iPhone Safari 실기기 정상 확인을 통합 완료 조건으로 사용한다.
+- 375 / 650 / 1280px Desktop emulation, Desktop keyboard, Light / Dark 조합은 이 단계의 통합 차단 조건에서 제외한다.
+- 이후 Desktop 환경에서 문제가 확인되면 v3.0 개발 중 후속 보완 또는 별도 hotfix로 처리한다.
+- 이 예외는 Context Toolbar 단계에 한정하며, v3.0 전체 Responsive 통합 회귀 기준은 유지한다.
+
 ---
 
 ## 17. Prototype 승인 게이트

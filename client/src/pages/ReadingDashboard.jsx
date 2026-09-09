@@ -24,6 +24,8 @@ const ReadingDashboard = () => {
     const [currentNote, setCurrentNote] = useState(null);
     const [verses, setVerses] = useState([]);
     const [highlights, setHighlights] = useState([]);
+    const highlightContextRef = useRef(`${currentBook}:${currentChapter}`);
+    highlightContextRef.current = `${currentBook}:${currentChapter}`;
 
     // UI State
     const [completionStatus, setCompletionStatus] = useState('idle'); // idle, loading, success, error
@@ -206,11 +208,18 @@ const ReadingDashboard = () => {
     }, [currentBook, currentChapter, currentVersion]);
 
     const loadHighlights = useCallback(async () => {
+        const requestedContext = `${currentBook}:${currentChapter}`;
         try {
             const all = await api.getHighlights();
             const filtered = all.filter(h => h.book === currentBook && h.chapter === currentChapter && h.style);
-            setHighlights(filtered);
-        } catch (e) { console.error(e); }
+            if (highlightContextRef.current === requestedContext) {
+                setHighlights(filtered);
+            }
+            return true;
+        } catch (e) {
+            console.error(e);
+            return false;
+        }
     }, [currentBook, currentChapter]);
 
     const handleChapterComplete = async () => {
@@ -292,54 +301,67 @@ const ReadingDashboard = () => {
         }
     }, [currentBook, currentChapter, loadChapter, loadHighlights]);
 
-    const handleHighlight = async (verseNum, color = '#fef08a') => {
-        const existing = highlights.find(h => h.book === currentBook && h.verse === verseNum);
+    const handleApplyHighlights = async (selection, color) => {
+        const existingByVerse = new Map(
+            highlights.map(highlight => [Number(highlight.verse), highlight])
+        );
+        const requests = selection.verseNumbers
+            .filter(verseNumber => existingByVerse.get(verseNumber)?.style !== color)
+            .map(verseNumber => api.addHighlight({
+                book: selection.book,
+                chapter: selection.chapter,
+                verse: verseNumber,
+                style: color
+            }));
+        const results = await Promise.allSettled(requests);
+        const synced = await loadHighlights();
 
-        if (existing) {
-            if (existing.style === color) {
-                // Toggle off if same color
-                await api.removeHighlight(existing.id);
-                setHighlights(prev => prev.filter(h => h.id !== existing.id));
-            } else {
-                // Update color if different (Server uses INSERT OR REPLACE)
-                const updatedHl = { book: currentBook, chapter: currentChapter, verse: verseNum, style: color };
-                await api.addHighlight(updatedHl);
-                loadHighlights();
-            }
-        } else {
-            // New highlight
-            const newHl = { book: currentBook, chapter: currentChapter, verse: verseNum, style: color };
-            await api.addHighlight(newHl);
-            loadHighlights();
+        if (!synced || results.some(result => result.status === 'rejected')) {
+            throw new Error('Failed to apply all highlights');
         }
     };
 
-    const handleCopyCitation = (verseNum, verseText) => {
-        const citation = `[${currentBookName} ${currentChapter}:${verseNum}] ${verseText}`;
-        const copyText = async () => {
-            if (navigator.clipboard && window.isSecureContext) {
-                await navigator.clipboard.writeText(citation);
-                return;
-            }
+    const handleRemoveHighlights = async (selection) => {
+        const selectedNumbers = new Set(selection.verseNumbers.map(Number));
+        const targets = highlights.filter(highlight => selectedNumbers.has(Number(highlight.verse)));
+        const results = await Promise.allSettled(
+            targets.map(highlight => api.removeHighlight(highlight.id))
+        );
+        const synced = await loadHighlights();
 
-            const textarea = document.createElement('textarea');
-            textarea.value = citation;
-            textarea.style.position = 'fixed';
-            textarea.style.left = '-9999px';
-            textarea.style.top = '-9999px';
-            document.body.appendChild(textarea);
+        if (!synced || results.some(result => result.status === 'rejected')) {
+            throw new Error('Failed to remove all highlights');
+        }
+    };
+
+    const handleCopyCitation = async (selection) => {
+        const citation = formatSelectionCitation(selection);
+        if (!citation) {
+            throw new Error('Invalid verse selection');
+        }
+
+        if (navigator.clipboard && window.isSecureContext) {
+            await navigator.clipboard.writeText(citation);
+            return;
+        }
+
+        const textarea = document.createElement('textarea');
+        textarea.value = citation;
+        textarea.style.position = 'fixed';
+        textarea.style.left = '-9999px';
+        textarea.style.top = '-9999px';
+        document.body.appendChild(textarea);
+        let didCopy = false;
+        try {
             textarea.focus();
             textarea.select();
-            document.execCommand('copy');
+            didCopy = document.execCommand('copy');
+        } finally {
             document.body.removeChild(textarea);
-        };
-
-        copyText()
-            .then(() => showToast('말씀을 복사했습니다.', 'success'))
-            .catch((error) => {
-                console.error('Failed to copy verse:', error);
-                showToast('복사에 실패했습니다.', 'error');
-            });
+        }
+        if (!didCopy) {
+            throw new Error('Clipboard fallback failed');
+        }
     };
 
     const handleNotePreviewClick = () => {
@@ -421,7 +443,8 @@ const ReadingDashboard = () => {
                         <BibleViewer
                             verses={verses}
                             highlights={highlights}
-                            onHighlight={handleHighlight}
+                            onApplyHighlights={handleApplyHighlights}
+                            onRemoveHighlights={handleRemoveHighlights}
                             onCopyCitation={handleCopyCitation}
                             onToast={showToast}
                             onComplete={handleChapterComplete}
@@ -458,7 +481,7 @@ const ReadingDashboard = () => {
 
             {/* Global Toast */}
             {toast.visible && (
-                <div style={{
+                <div role="status" aria-live="polite" aria-atomic="true" style={{
                     position: 'fixed',
                     bottom: 'calc(24px + var(--pk-safe-area-bottom))',
                     left: '50%',
@@ -481,6 +504,20 @@ const ReadingDashboard = () => {
             )}
         </div>
     );
+};
+
+const formatSelectionCitation = (selection) => {
+    const { bookName, chapter, versionLabel, verseRange, verseItems = [] } = selection || {};
+    if (!bookName || !chapter || !versionLabel || !verseRange || verseItems.length === 0) {
+        return '';
+    }
+
+    const reference = `[${bookName} ${chapter}:${verseRange} · ${versionLabel}]`;
+    const body = verseItems.length === 1
+        ? verseItems[0].text
+        : verseItems.map(item => `${item.verse} ${item.text}`).join('\n');
+
+    return `${reference}\n${body}`;
 };
 
 export default ReadingDashboard;

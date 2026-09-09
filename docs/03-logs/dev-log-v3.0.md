@@ -6,7 +6,7 @@
 - **기간**: 2026-09-08 ~ 진행 중
 - **목표**: 성경 읽기와 묵상 기록의 핵심 경험을 실제 사용 흐름 중심으로 재구성
 - **통합 브랜치**: `feature/v3.0`
-- **현재 작업 브랜치**: `feature/v3.0`
+- **현재 작업 브랜치**: `feature/v3.0-context-toolbar`
 
 ## 변경 내역
 
@@ -58,8 +58,8 @@
 ## 다음 계획
 
 - Reading Canvas는 PR #3, Verse Selection은 PR #4로 `feature/v3.0` 통합 완료
-- 다음 작업은 Context Toolbar + Highlight + Copy 구현계획 작성 및 사용자 승인
-- 구현계획 승인 전에는 다음 기능 코드를 수정하지 않음
+- Context Toolbar + Highlight + Copy PR 생성 및 `feature/v3.0` 통합
+- 다음 Reflection Composer는 별도 구현계획 작성·승인 후 시작
 - Responsive 최종 확정은 핵심 Reading 흐름 연결 후 통합 회귀 단계에서 수행
 
 ### 2026-09-09
@@ -87,3 +87,23 @@
 - 병합 커밋: `f19cd764`
 - 모바일 우선 완료 범위와 Desktop 후속 hotfix 후보 기록을 그대로 유지
 - 통합 브랜치로 복귀했으며 다음 기능은 별도 구현계획 승인 후 시작
+
+#### [Feature] Context Toolbar + Highlight + Copy — 구현 및 자동 검증
+
+- 사용자 B안 승인에 따라 iPhone 모바일 승인을 통합 게이트로 확정하고 Desktop 조합은 후속 hotfix 후보로 기록
+- 기존 최소 선택 bar를 선택 상태 행과 하이라이트 4색·묵상·복사 액션 행을 가진 Context Toolbar로 확장
+- 선택 번호·본문·범위·역본을 하나의 파생 payload로 구성해 모든 액션이 같은 대상을 사용하도록 정리
+- 같은 색 재선택이 삭제로 동작하지 않도록 다중 명시 적용과 별도 하이라이트 지우기 흐름으로 분리
+- 다중 API 완료 후 하이라이트를 한 번 재조회하며 부분 실패 시 선택을 유지하고 서버 상태를 재동기화
+- 단일·연속·비연속 범위와 현재 역본을 포함하는 복사 포맷 및 HTTP textarea fallback 연결
+- 선택 범위와 결합 인용문을 기존 묵상 작성 popup으로 전달하되 Composer 재설계는 다음 단계로 유지
+- `npm run lint`, `npm run build`, working tree `git diff --check` 통과
+- 사용자 요청 전까지 검수 서버는 실행하지 않고 iPhone 실기기 검수 대기
+- 1차 모바일 확인 후 사용자 승인으로 단일 항목뿐인 `더보기`를 제거하고 지우개를 포함한 7개 직접 버튼으로 조정
+
+#### [Verification] Context Toolbar iPhone 실기기 승인
+
+- Tailscale HTTP 환경에서 하이라이트 적용·지우기, 복사 범위·역본, 묵상 전달, safe-area와 읽기 복귀 확인
+- 사용자 1차 확인 후 7개 직접 버튼으로 수정하고 동일 검수 서버에서 재확인
+- 사용자 최종 승인 완료
+- Desktop 3폭·키보드·Light/Dark 조합은 승인된 B안에 따라 후속 hotfix 후보로 유지

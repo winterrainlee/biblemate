@@ -1,6 +1,6 @@
 # 📚 Documentation Index
 
-> BibleMate 프로젝트 문서 목차입니다. (최초 생성일: 2026-01-05 | 최신 수정일: 2026-09-08)
+> BibleMate 프로젝트 문서 목차입니다. (최초 생성일: 2026-01-05 | 최신 수정일: 2026-09-09)
 
 ---
 
@@ -9,6 +9,7 @@
 - [Visual Redesign Proposal](01-planning/proposal-visual-redesign.md): v2.3 시각 디자인 재구성 제안서
 - [Implementation Plans](01-planning/implementation-plans/): 버전별 구현 계획서
   - [Implementation Plan v3.0 Verse Selection](01-planning/implementation-plans/implementation-plan-v3.0-verse-selection.md): 단일·비연속 다중 구절 선택 모델 구현 계획
+  - [Implementation Plan v3.0 Context Toolbar](01-planning/implementation-plans/implementation-plan-v3.0-context-toolbar.md): 선택 구절 하이라이트·지우기·묵상·복사 도구 구현 계획
   - [Implementation Plan v3.0 Reading Canvas](01-planning/implementation-plans/implementation-plan-v3.0-reading-canvas.md): 장시간 읽기 중심 Reading Canvas 구현 계획
   - [Implementation Plan v2.3.3 Auto Read from Verse Note](01-planning/implementation-plans/implementation-plan-v2.3.3-auto-read-from-verse-note.md): 구절 묵상 기반 읽음 자동 표시 구현 계획
   - [Implementation Plan v2.3.2 Mobile Verse Selection Hotfix](01-planning/implementation-plans/implementation-plan-v2.3.2-mobile-verse-selection-hotfix.md): 모바일 구절 선택 화면 및 로그인 문구 핫픽스 구현 계획
@@ -56,6 +57,7 @@
 
 ### Pull Requests
 - [PR Drafts](03-logs/pr/): 버전별 PR 초안
+  - [PR Draft v3.0 Context Toolbar](03-logs/pr/pr-v3.0-context-toolbar.md): v3.0 Context Toolbar + Highlight + Copy PR 초안
   - [PR Draft v3.0 Verse Selection](03-logs/pr/pr-v3.0-verse-selection.md): v3.0 Verse Selection PR 초안
   - [PR Draft v3.0 Reading Canvas](03-logs/pr/pr-v3.0-reading-canvas.md): v3.0 Reading Canvas PR 초안
   - [PR Draft v2.3.3 Auto Read from Verse Note](03-logs/pr/pr-v2.3.3-auto-read-from-verse-note.md): v2.3.3 구절 묵상 기반 읽음 자동 표시 PR 초안
@@ -74,6 +76,7 @@
 
 ### Walkthroughs
 - [Walkthroughs](03-logs/walkthroughs/): 구현/검증 과정 기록
+  - [Walkthrough v3.0 Context Toolbar](03-logs/walkthroughs/walkthrough-v3.0-context-toolbar.md): Context Toolbar 구현·자동 검증·iPhone 실기기 승인 기록
   - [Walkthrough v3.0 Verse Selection](03-logs/walkthroughs/walkthrough-v3.0-verse-selection.md): Verse Selection 구현·자동 검증·iPhone 실기기 확인 기록
   - [Walkthrough v3.0 Reading Canvas](03-logs/walkthroughs/walkthrough-v3.0-reading-canvas.md): Reading Canvas 구현·반응형·실기기 검증 기록
   - [Walkthrough v2.3.3 Auto Read from Verse Note](03-logs/walkthroughs/walkthrough-v2.3.3-auto-read-from-verse-note.md): v2.3.3 구절 묵상 기반 읽음 자동 표시 구현/검증 기록
