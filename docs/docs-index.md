@@ -81,6 +81,7 @@
 
 ### Walkthroughs
 - [Walkthroughs](03-logs/walkthroughs/): 구현/검증 과정 기록
+  - [Walkthrough v3.0 Existing Notes Integration](03-logs/walkthroughs/walkthrough-v3.0-existing-notes.md): 기존 묵상 단일 목록 구현과 자동 검증 기록
   - [Walkthrough v3.0 Context Toolbar](03-logs/walkthroughs/walkthrough-v3.0-context-toolbar.md): Context Toolbar 구현·자동 검증·iPhone 실기기 승인 기록
   - [Walkthrough v3.0 Verse Selection](03-logs/walkthroughs/walkthrough-v3.0-verse-selection.md): Verse Selection 구현·자동 검증·iPhone 실기기 확인 기록
   - [Walkthrough v3.0 Reading Canvas](03-logs/walkthroughs/walkthrough-v3.0-reading-canvas.md): Reading Canvas 구현·반응형·실기기 검증 기록

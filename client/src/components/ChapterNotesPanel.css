@@ -1,0 +1,275 @@
+.chapter-notes-panel-layer {
+    position: fixed;
+    inset: 0;
+    z-index: 1250;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+}
+
+.chapter-notes-panel-backdrop {
+    position: absolute;
+    inset: 0;
+    background: var(--pk-color-overlay);
+}
+
+.chapter-notes-panel {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: min(38rem, 100%);
+    max-height: min(44rem, calc(var(--pk-viewport-height) - 3rem));
+    overflow: hidden;
+    border: 1px solid var(--pk-color-border);
+    border-radius: var(--pk-radius-lg);
+    background: var(--pk-color-bg);
+    box-shadow: 0 18px 54px var(--pk-color-shadow);
+}
+
+.chapter-notes-panel__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.1rem;
+    border-bottom: 1px solid var(--pk-color-border-light);
+}
+
+.chapter-notes-panel__eyebrow {
+    color: var(--pk-color-primary);
+    font-size: 0.76rem;
+    font-weight: 800;
+}
+
+.chapter-notes-panel__header h2 {
+    margin: 0.15rem 0 0;
+    color: var(--pk-color-text);
+    font-family: var(--pk-font-body);
+    font-size: 1.12rem;
+}
+
+.chapter-notes-panel__header p {
+    margin: 0.2rem 0 0;
+    color: var(--pk-color-text-tertiary);
+    font-size: 0.8rem;
+}
+
+.chapter-notes-panel__close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 44px;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 0;
+    border-radius: 999px;
+    background: var(--pk-color-bg-secondary);
+    color: var(--pk-color-text-secondary);
+}
+
+.chapter-notes-panel__body {
+    flex: 1;
+    min-height: 0;
+    padding: 0.85rem 1rem 1rem;
+    overflow-y: auto;
+}
+
+.chapter-notes-panel__list {
+    display: grid;
+    gap: 0;
+}
+
+.chapter-notes-panel__item {
+    padding: 1rem 0.15rem;
+    border-bottom: 1px solid var(--pk-color-border-light);
+    outline: none;
+}
+
+.chapter-notes-panel__item:last-child {
+    border-bottom: 0;
+}
+
+.chapter-notes-panel__item.is-selected {
+    box-shadow: inset 3px 0 0 var(--pk-color-primary);
+    padding-left: 0.8rem;
+}
+
+.chapter-notes-panel__item:focus-visible {
+    outline: 2px solid var(--pk-color-primary);
+    outline-offset: -2px;
+    border-radius: var(--pk-radius-sm);
+}
+
+.chapter-notes-panel__item-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 0.65rem;
+}
+
+.chapter-notes-panel__reference {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--pk-color-primary);
+    font: inherit;
+    font-size: 0.88rem;
+    font-weight: 800;
+    text-align: left;
+}
+
+.chapter-notes-panel__item time {
+    flex: 0 0 auto;
+    color: var(--pk-color-text-tertiary);
+    font-size: 0.76rem;
+}
+
+.chapter-notes-panel__content blockquote {
+    margin: 0 0 0.65rem;
+    padding: 0.65rem 0.8rem;
+    border-left: 2px solid var(--pk-color-border);
+    background: var(--pk-color-bg-elevated);
+    color: var(--pk-color-text-secondary);
+    font-family: var(--pk-font-body);
+    font-size: 0.9rem;
+    line-height: 1.65;
+    white-space: pre-wrap;
+}
+
+.chapter-notes-panel__memo {
+    margin: 0;
+    overflow-wrap: anywhere;
+    color: var(--pk-color-text);
+    font-family: var(--pk-font-body);
+    font-size: 0.96rem;
+    line-height: 1.75;
+    white-space: pre-wrap;
+}
+
+.chapter-notes-panel__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.25rem;
+    margin-top: 0.75rem;
+}
+
+.chapter-notes-panel__actions button,
+.chapter-notes-panel__error button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.3rem;
+    min-height: 40px;
+    padding: 0.45rem 0.65rem;
+    border: 0;
+    border-radius: var(--pk-radius-sm);
+    background: transparent;
+    color: var(--pk-color-text-secondary);
+    font: inherit;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.chapter-notes-panel__actions button:hover,
+.chapter-notes-panel__error button:hover {
+    background: var(--pk-color-bg-secondary);
+    color: var(--pk-color-text);
+}
+
+.chapter-notes-panel__actions .is-danger {
+    color: var(--pk-color-danger);
+}
+
+.chapter-notes-panel__actions button:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+}
+
+.chapter-notes-panel__error,
+.chapter-notes-panel__state,
+.chapter-notes-panel__empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.65rem;
+    min-height: 8rem;
+    color: var(--pk-color-text-secondary);
+    text-align: center;
+}
+
+.chapter-notes-panel__error {
+    min-height: auto;
+    margin-bottom: 0.75rem;
+    padding: 0.65rem 0.75rem;
+    border-radius: var(--pk-radius-sm);
+    background: color-mix(in srgb, var(--pk-color-danger) 9%, var(--pk-color-bg));
+    color: var(--pk-color-danger);
+}
+
+.chapter-notes-panel__empty {
+    flex-direction: column;
+}
+
+.chapter-notes-panel__empty strong {
+    color: var(--pk-color-text);
+    font-family: var(--pk-font-body);
+}
+
+.chapter-notes-panel__empty span {
+    max-width: 24rem;
+    font-size: 0.85rem;
+    line-height: 1.6;
+}
+
+@media (max-width: 599px) {
+    .chapter-notes-panel-layer {
+        align-items: flex-end;
+        padding: 0;
+    }
+
+    .chapter-notes-panel {
+        width: 100%;
+        max-height: calc(var(--pk-viewport-height) - var(--pk-safe-area-top) - 2rem);
+        border-right: 0;
+        border-bottom: 0;
+        border-left: 0;
+        border-radius: 18px 18px 0 0;
+        padding-bottom: var(--pk-safe-area-bottom);
+        box-shadow: 0 -16px 40px var(--pk-color-shadow);
+    }
+
+    .chapter-notes-panel__actions button {
+        min-width: 44px;
+        min-height: 44px;
+    }
+}
+
+@media (min-width: 900px) {
+    .chapter-notes-panel-layer.is-workspace {
+        position: relative;
+        inset: auto;
+        z-index: 30;
+        flex: 0 0 33.333%;
+        align-items: stretch;
+        padding: 0;
+        border-left: 1px solid var(--pk-color-border-light);
+    }
+
+    .chapter-notes-panel-layer.is-workspace .chapter-notes-panel {
+        width: 100%;
+        max-height: none;
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .chapter-notes-panel {
+        animation: none;
+    }
+}
+

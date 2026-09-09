@@ -152,3 +152,14 @@
 - DB/API schema 변경 없이 기존 `verse_notes`와 격리 Regression Harness를 재사용
 - 구현계획 문서 작성 완료, 애플리케이션 코드 수정 전 사용자 승인 대기
 - 사용자 구현계획 승인 후 `feature/v3.0-existing-notes` 독립 브랜치 착수
+
+#### [Implementation] Existing Notes Integration
+
+- 사용자 계획 승인에 따라 `feature/v3.0-existing-notes` 독립 브랜치에서 구현
+- Compact 하단 시트, Reading modal dialog, Workspace 우측 1/3 패널이 같은 `ChapterNotesPanel`과 목록 상태를 사용하도록 통합
+- 묵상 0개 진입, 마진 표시에서 대상 카드 선택, 본문 절 이동, 복사·Reflection Composer 수정·삭제를 한 흐름으로 연결
+- 장 context와 최신 request가 일치하는 조회만 적용하고, 삭제 성공 시 항목·마진 표시를 먼저 제거한 뒤 백그라운드 재조회 실패와 삭제 실패를 분리
+- 조회 오류는 기존 목록을 보존하며 최초 실패는 거짓 빈 상태 대신 재시도 화면을 표시
+- 모델/navigation guard 테스트 15/15, ESLint, production build, 임시 DB 회귀 Harness 8/8 통과
+- 사용자 검수 서버는 열지 않았고 원본 `server/data/bible.db` 보호 검사 통과
+- Responsive 통합 이후 Composer·7버튼 Toolbar·Journal 결과와 함께 한 번의 실기기 검수 세션에서 확인 예정

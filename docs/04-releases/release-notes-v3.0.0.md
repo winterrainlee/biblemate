@@ -37,6 +37,13 @@
 - Chart, Login, Settings와 Journal 보조 화면을 Reading 중심 제품 언어로 정리했습니다.
 - 원본 사용자 DB를 사용하지 않는 임시 DB 기반 회귀 Harness를 추가했습니다.
 
+### Existing Notes Integration
+
+- `이 장의 묵상`에서 현재 장의 기존 기록을 화면 폭에 맞는 시트·dialog·우측 패널로 확인할 수 있습니다.
+- 본문 왼쪽의 묵상 표시를 누르면 해당 기록으로 바로 이동하며, 목록에서 본문 절 이동·복사·수정·삭제를 처리합니다.
+- 빈 장에서도 진입점을 유지하고 조회 실패 시 재시도 경로를 제공합니다.
+- 장 전환 중 오래된 응답과 삭제 후 재조회 실패가 이미 확정된 화면 상태를 되돌리지 않도록 보호합니다.
+
 ## 호환성
 
 - 기존 데이터와 API 계약을 유지합니다.
@@ -53,5 +60,6 @@
 - Context Toolbar lint/build 및 iPhone Safari 7버튼 실기기 검수·사용자 승인
 - Wave 1 결합 lint/build, Composer 모델 테스트 5/5, 격리 회귀 검사 8/8 통과
 - 리뷰 수정 후 Composer/navigation guard 테스트 9/9 및 통합 회귀 Harness 8/8 재통과
+- Existing Notes 모델/navigation guard 테스트 15/15, lint/build 및 격리 회귀 Harness 8/8 통과
 
 전체 v3.0 릴리즈 노트는 후속 기능 완료에 맞춰 계속 갱신합니다.
